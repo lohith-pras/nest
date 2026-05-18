@@ -112,30 +112,31 @@ export function AuthProvider({ children }) {
       if (dbProfile) {
         // Profile exists, but unit_id needs updating
         if (unitId && unitId !== dbProfile.unit_id) {
-          const { data: updatedProfile, error: pErr } = await supabase
+          const { error: pErr } = await supabase
             .from('profiles')
             .update({ unit_id: unitId })
             .eq('id', userId)
-            .select()
-            .single()
           
-          if (!pErr && updatedProfile) {
-            setProfile(updatedProfile)
+          if (!pErr) {
+            console.log("Self-healing: Updated profile unit_id to:", unitId)
+            setProfile({ ...dbProfile, unit_id: unitId })
             return
+          } else {
+            console.error("Self-healing error updating profile unit_id:", pErr)
           }
         }
         setProfile(dbProfile)
       } else {
         // Profile doesn't exist, create it
-        const { data: newProfile, error: pErr } = await supabase
+        const { error: pErr } = await supabase
           .from('profiles')
           .insert(profileData)
-          .select()
-          .single()
         
-        if (!pErr && newProfile) {
-          setProfile(newProfile)
+        if (!pErr) {
+          console.log("Self-healing: Created profile successfully:", profileData)
+          setProfile(profileData)
         } else {
+          console.error("Self-healing error creating profile:", pErr)
           // If inserting failed (e.g. race condition created it in parallel), try selecting again
           const { data: reFetchedProfile } = await supabase
             .from('profiles')
