@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import TopNavBar from './TopNavBar'
 
 const mobileNav = [
   {
@@ -27,11 +28,14 @@ export default function Layout() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', position: 'relative' }}>
       
+      {/* ── Sticky Top Navbar ──────────────────────────────────── */}
+      <TopNavBar />
+
       {/* ── Main Content Area ──────────────────────────────────── */}
       <main style={{
         flex: 1,
         padding: '24px',
-        paddingTop: 'max(24px, env(safe-area-inset-top))',
+        paddingTop: '24px',
         paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
         overflowY: 'auto',
         overflowX: 'hidden'
@@ -39,16 +43,21 @@ export default function Layout() {
         <Outlet />
       </main>
 
-      {/* ── Bottom Nav (Always Visible on Mobile Container) ────── */}
+      {/* ── Bottom Nav (Fixed, Always Visible) ───────────────── */}
       <nav className="bottom-nav" style={{
-        position: 'absolute', /* Absolute to the #root container */
-        bottom: 0, left: 0, right: 0,
+        position: 'fixed',
+        bottom: 0,
+        left: 0,
+        right: 0,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-around',
         padding: '12px 8px',
         paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
         zIndex: 50,
+        backgroundColor: 'var(--nav-bg)',
+        borderTop: '1px solid var(--border)',
+        backdropFilter: 'blur(12px)',
       }}>
         {mobileNav.map(item => (
           <NavLink
