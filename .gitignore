@@ -1,0 +1,24 @@
+# ============================================================
+# Root-level gitignore for the Nest monorepo
+# ============================================================
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+
+# Editor files
+.vscode/*
+!.vscode/extensions.json
+.idea
+
+# Secrets — NEVER commit
+.env
+.env.local
+.env.*.local
+
+# Agent / AI tool artifacts (non-code)
+.agents/
+skills-lock.json
+plans/
