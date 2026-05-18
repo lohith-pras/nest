@@ -277,7 +277,6 @@ input, textarea, select {
   justify-content: center;
   z-index: 1000;
   padding: 0;
-  animation: fadeIn 200ms var(--ease-out);
 }
 
 @media (min-width: 768px) {
@@ -295,7 +294,7 @@ input, textarea, select {
   max-width: 520px;
   box-shadow: 0 20px 60px -10px oklch(24% 0.038 145 / 0.12);
   border: 1px solid var(--border);
-  animation: slideUp 250ms var(--ease-out);
+  will-change: transform, opacity;
 }
 
 @media (min-width: 768px) {
@@ -305,24 +304,19 @@ input, textarea, select {
   }
 }
 
+/* ─── Mobile Performance Optimizations ──────────────────────── */
+@media (max-width: 767px) {
+  .glass, .sidebar, .bottom-nav, .modal-overlay {
+    backdrop-filter: blur(4px) !important;
+    -webkit-backdrop-filter: blur(4px) !important;
+  }
+  
+  .glass-card {
+    transition: none !important; /* Disable heavy transitions on mobile */
+  }
+}
+
 /* ─── Animations ────────────────────────────────────────────── */
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  /* Animating from scale(0.95) with opacity instead of scale(0) */
-  from {
-    transform: translateY(30px) scale(0.96);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-}
-
 @keyframes spin {
   to { transform: rotate(360deg); }
 }

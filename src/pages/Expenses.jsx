@@ -142,28 +142,45 @@ export default function Expenses() {
   }, { scope: containerRef, dependencies: [loading] })
 
   async function load() {
-    setLoading(true)
-    const [expRes, profRes] = await Promise.all([
-      supabase.from('expenses').select('*').order('created_at', { ascending: false }),
-      supabase.from('profiles').select('id, full_name'),
-    ])
-    setExpenses(expRes.data || [])
-    const map = {}
-    ;(profRes.data || []).forEach(p => { map[p.id] = p.full_name })
-    setProfiles(map)
-    setLoading(false)
+    try {
+      setLoading(true)
+      const [expRes, profRes] = await Promise.all([
+        supabase.from('expenses').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('id, full_name'),
+      ])
+      
+      if (expRes.error) throw expRes.error
+      if (profRes.error) throw profRes.error
+
+      setExpenses(expRes.data || [])
+      const map = {}
+      ;(profRes.data || []).forEach(p => { map[p.id] = p.full_name })
+      setProfiles(map)
+    } catch (err) {
+      console.error('Error loading expenses:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function saveExpense(data, id, handleClose) {
-    setSaving(true)
-    if (id) {
-      const { error } = await supabase.from('expenses').update(data).eq('id', id)
-      if (!error) { handleClose(); load() } else { console.error(error); alert(error.message) }
-    } else {
-      const { error } = await supabase.from('expenses').insert({ ...data, unit_id: profile?.unit_id || null })
-      if (!error) { handleClose(); load() } else { console.error(error); alert(error.message) }
+    try {
+      setSaving(true)
+      if (id) {
+        const { error } = await supabase.from('expenses').update(data).eq('id', id)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from('expenses').insert({ ...data, unit_id: profile?.unit_id || null })
+        if (error) throw error
+      }
+      handleClose()
+      load()
+    } catch (err) {
+      console.error('Error saving expense:', err)
+      alert(`Failed to save: ${err.message}`)
+    } finally {
+      setSaving(false)
     }
-    setSaving(false)
   }
 
   async function markPaid(id) {

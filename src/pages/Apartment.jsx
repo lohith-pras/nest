@@ -140,9 +140,17 @@ function NoUnitView({ profile }) {
       if (mode === 'create') {
         if (!name.trim()) throw new Error('Apartment name required')
         const invite = generateInviteCode()
-        const { data: newUnit, error: uErr } = await supabase.from('units').insert({ name: name.trim(), invite_code: invite }).select().single()
+        const newUnitId = typeof crypto !== 'undefined' && crypto.randomUUID 
+          ? crypto.randomUUID() 
+          : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+              const r = Math.random() * 16 | 0
+              const v = c === 'x' ? r : (r & 0x3 | 0x8)
+              return v.toString(16)
+            })
+
+        const { error: uErr } = await supabase.from('units').insert({ id: newUnitId, name: name.trim(), invite_code: invite })
         if (uErr) throw uErr
-        finalUnitId = newUnit.id
+        finalUnitId = newUnitId
       } else {
         if (!code.trim()) throw new Error('Invite code required')
         const { data: existingUnit, error: uErr } = await supabase.rpc('get_unit_by_invite_code', { code: code.trim().toUpperCase() }).single()

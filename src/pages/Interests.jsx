@@ -91,27 +91,44 @@ export default function Interests() {
   }, { scope: containerRef, dependencies: [loading, tab] })
 
   async function load() {
-    const [intRes, profRes] = await Promise.all([
-      supabase.from('interests').select('*').order('created_at', { ascending: false }),
-      supabase.from('profiles').select('id, full_name'),
-    ])
-    setItems(intRes.data || [])
-    const map = {}
-    ;(profRes.data || []).forEach(p => { map[p.id] = p.full_name })
-    setProfiles(map)
-    setLoading(false)
+    try {
+      setLoading(true)
+      const [intRes, profRes] = await Promise.all([
+        supabase.from('interests').select('*').order('created_at', { ascending: false }),
+        supabase.from('profiles').select('id, full_name'),
+      ])
+      if (intRes.error) throw intRes.error
+      if (profRes.error) throw profRes.error
+
+      setItems(intRes.data || [])
+      const map = {}
+      ;(profRes.data || []).forEach(p => { map[p.id] = p.full_name })
+      setProfiles(map)
+    } catch (err) {
+      console.error('Error loading interests:', err)
+    } finally {
+      setLoading(false)
+    }
   }
 
   async function saveItem(data, id, handleClose) {
-    setAdding(true)
-    if (id) {
-      await supabase.from('interests').update(data).eq('id', id)
-    } else {
-      await supabase.from('interests').insert({ ...data, added_by: session.user.id, unit_id: profile?.unit_id || null })
+    try {
+      setAdding(true)
+      if (id) {
+        const { error } = await supabase.from('interests').update(data).eq('id', id)
+        if (error) throw error
+      } else {
+        const { error } = await supabase.from('interests').insert({ ...data, added_by: session.user.id, unit_id: profile?.unit_id || null })
+        if (error) throw error
+      }
+      handleClose()
+      load()
+    } catch (err) {
+      console.error('Error saving interest:', err)
+      alert(`Failed to save: ${err.message}`)
+    } finally {
+      setAdding(false)
     }
-    handleClose()
-    load()
-    setAdding(false)
   }
 
   async function deleteItem(id) {
