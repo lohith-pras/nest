@@ -125,10 +125,10 @@ export default function Dashboard() {
           <div className="animate-spin" style={{ width: 36, height: 36, border: '3px solid var(--secondary)', borderTopColor: 'var(--primary)', borderRadius: '50%' }} />
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
 
           {/* Finance Snapshot */}
-          <section style={{ gridColumn: 'span 2' }}>
+          <section>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <h2 className="section-title">Financial Snapshot</h2>
               <Link to="/expenses" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>View all →</Link>
@@ -189,7 +189,7 @@ export default function Dashboard() {
 
           {/* Watchlist preview */}
           {recentInterests.length > 0 && (
-            <section style={{ gridColumn: 'span 2' }}>
+            <section>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
                 <h2 className="section-title">Watchlist</h2>
                 <Link to="/interests" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>See all →</Link>
