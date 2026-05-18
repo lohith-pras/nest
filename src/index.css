@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import './styles/responsive.css';
 
 /* ─── Premium OKLCH Design Tokens ───────────────────────────── */
 :root {
@@ -23,6 +24,16 @@
   
   --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-body: 'Outfit', system-ui, sans-serif;
+
+  /* Responsive Spacing & Typography (Mobile-First) */
+  --spacing-h: 24px;     /* Horizontal padding */
+  --spacing-v: 24px;     /* Vertical padding */
+  --spacing-gap: 16px;   /* Gap between components */
+  
+  --font-h1: 28px;
+  --font-h2: 22px;
+  --font-h3: 18px;
+  --font-body-font: 14px;
 
   --radius-sm: 12px;
   --radius-md: 16px;
@@ -97,7 +108,6 @@ body {
 
 #root {
   width: 100%;
-  max-width: 430px; /* iPhone 16 Pro Max width */
   min-height: 100vh;
   background-color: var(--bg);
   background-image:
