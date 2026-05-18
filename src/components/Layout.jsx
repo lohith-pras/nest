@@ -36,6 +36,7 @@ export default function Layout() {
         flex: 1,
         padding: '24px',
         paddingTop: '24px',
+        paddingTop: 'max(24px, env(safe-area-inset-top))',
         paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
         overflowY: 'auto',
         overflowX: 'hidden'
@@ -49,6 +50,10 @@ export default function Layout() {
         bottom: 0,
         left: 0,
         right: 0,
+      {/* ── Bottom Nav (Always Visible on Mobile Container) ────── */}
+      <nav className="bottom-nav" style={{
+        position: 'absolute', /* Absolute to the #root container */
+        bottom: 0, left: 0, right: 0,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-around',
