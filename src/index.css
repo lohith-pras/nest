@@ -424,3 +424,55 @@ input, textarea, select {
   font-weight: 700;
   color: var(--fg);
 }
+
+/* ─── Responsive Typography & Spacing ──────────────────────── */
+
+/* Tablet (481px+) */
+@media (min-width: 481px) {
+  :root {
+    --spacing-h: 32px;
+    --font-h1: 32px;
+    --font-h2: 24px;
+    --font-h3: 20px;
+    --font-body-font: 15px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Desktop (769px+) */
+@media (min-width: 769px) {
+  :root {
+    --spacing-h: 48px;
+    --font-h1: 36px;
+    --font-h2: 28px;
+    --font-h3: 22px;
+    --font-body-font: 16px;
+    --max-content-width: 900px;
+  }
+
+  #root {
+    margin: 0 auto;
+    max-width: var(--max-content-width, 100%);
+  }
+
+  .section-title {
+    font-size: 1.35rem;
+  }
+}
+
+/* Large Desktop (1024px+) */
+@media (min-width: 1024px) {
+  :root {
+    --font-h1: 40px;
+    --font-h2: 32px;
+    --font-h3: 24px;
+    --font-body-font: 17px;
+  }
+
+  .section-title {
+    font-size: 1.45rem;
+  }
+}
