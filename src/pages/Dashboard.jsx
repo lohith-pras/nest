@@ -133,17 +133,10 @@ export default function Dashboard() {
               <h2 className="section-title">Financial Snapshot</h2>
               <Link to="/expenses" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>View all →</Link>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-              <div className="glass-card" style={{ padding: 28 }}>
-                <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>You are owed</p>
-                <h3 ref={owedRef} className="font-display" style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 8 }}>$0.00</h3>
-                <span className="badge badge-green">Pending settlement</span>
-              </div>
-              <div className="glass-card" style={{ padding: 28 }}>
-                <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Total Pending</p>
-                <h3 ref={spendRef} className="font-display" style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 8 }}>$0.00</h3>
-                <span className="badge badge-orange">{stats.uncheckedGroceries} grocery items left</span>
-              </div>
+            <div className="glass-card" style={{ padding: 28 }}>
+              <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>You are owed</p>
+              <h3 ref={owedRef} className="font-display" style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 8 }}>$0.00</h3>
+              <span className="badge badge-green">Pending settlement</span>
             </div>
           </section>
 
@@ -177,7 +170,6 @@ export default function Dashboard() {
                   <ul style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {groceries.map(g => (
                       <li key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div style={{ width: 20, height: 20, borderRadius: 6, border: '2px solid var(--border)', flexShrink: 0 }} />
                         <span style={{ fontWeight: 500 }}>{g.item_name}</span>
                       </li>
                     ))}

@@ -46,16 +46,27 @@ html {
 
 body {
   font-family: var(--font-body);
-  background-color: var(--bg);
+  background-color: oklch(15% 0.02 145); /* Darker backdrop for outside the app container */
   color: var(--fg);
   min-height: 100%;
+  -webkit-font-smoothing: antialiased;
+  display: flex;
+  justify-content: center;
+}
+
+#root {
+  width: 100%;
+  max-width: 430px; /* iPhone 16 Pro Max width */
+  min-height: 100vh;
+  background-color: var(--bg);
   background-image:
     radial-gradient(at 0% 0%, color-mix(in oklch, var(--tertiary), transparent 96%) 0px, transparent 50%),
     radial-gradient(at 100% 0%, color-mix(in oklch, var(--secondary), transparent 94%) 0px, transparent 50%),
     radial-gradient(at 100% 100%, color-mix(in oklch, var(--tertiary), transparent 96%) 0px, transparent 50%),
     radial-gradient(at 0% 100%, color-mix(in oklch, var(--secondary), transparent 94%) 0px, transparent 50%);
   background-attachment: fixed;
-  -webkit-font-smoothing: antialiased;
+  position: relative;
+  box-shadow: 0 0 40px rgba(0,0,0,0.1);
 }
 
 h1, h2, h3, h4, h5, h6, label, .font-display {
@@ -267,7 +278,7 @@ input, textarea, select {
 
 /* ─── Modal ─────────────────────────────────────────────────── */
 .modal-overlay {
-  position: fixed;
+  position: absolute;
   inset: 0;
   background: oklch(24% 0.038 145 / 0.15);
   backdrop-filter: blur(8px);
@@ -279,13 +290,6 @@ input, textarea, select {
   padding: 0;
 }
 
-@media (min-width: 768px) {
-  .modal-overlay {
-    align-items: center;
-    padding: 24px;
-  }
-}
-
 .modal {
   background: var(--bg);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
@@ -295,13 +299,6 @@ input, textarea, select {
   box-shadow: 0 20px 60px -10px oklch(24% 0.038 145 / 0.12);
   border: 1px solid var(--border);
   will-change: transform, opacity;
-}
-
-@media (min-width: 768px) {
-  .modal {
-    border-radius: var(--radius-xl);
-    padding: 40px;
-  }
 }
 
 /* ─── Mobile Performance Optimizations ──────────────────────── */

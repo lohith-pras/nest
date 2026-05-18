@@ -9,6 +9,7 @@ import Calendar from './pages/Calendar'
 import Interests from './pages/Interests'
 import Apartment from './pages/Apartment'
 import Settings from './pages/Settings'
+import More from './pages/More'
 
 function ProtectedRoute({ children }) {
   const { session, loading } = useAuth()
@@ -39,6 +40,7 @@ export default function App() {
         <Route path="interests" element={<Interests />} />
         <Route path="apartment" element={<Apartment />} />
         <Route path="settings" element={<Settings />} />
+        <Route path="more" element={<More />} />
       </Route>
     </Routes>
   )
