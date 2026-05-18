@@ -65,17 +65,23 @@ export function AuthProvider({ children }) {
           if (meta.signup_type === 'create' && meta.unit_name) {
             // Generate a secure, clean 6-character uppercase invite code
             const code = Math.random().toString(36).substring(2, 8).toUpperCase()
-            const { data: newUnit, error: uErr } = await supabase
+            const newUnitId = typeof crypto !== 'undefined' && crypto.randomUUID 
+              ? crypto.randomUUID() 
+              : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                  const r = Math.random() * 16 | 0
+                  const v = c === 'x' ? r : (r & 0x3 | 0x8)
+                  return v.toString(16)
+                })
+
+            const { error: uErr } = await supabase
               .from('units')
-              .insert({ name: meta.unit_name.trim(), invite_code: code })
-              .select()
-              .single()
+              .insert({ id: newUnitId, name: meta.unit_name.trim(), invite_code: code })
             
             if (uErr) {
               console.error("Self-healing error creating unit:", uErr)
-            } else if (newUnit) {
-              unitId = newUnit.id
-              console.log("Self-healing: Created unit successfully:", newUnit)
+            } else {
+              unitId = newUnitId
+              console.log("Self-healing: Created unit successfully with ID:", newUnitId)
             }
           } else if (meta.signup_type === 'join' && meta.invite_code) {
             // Look up the existing unit by code
