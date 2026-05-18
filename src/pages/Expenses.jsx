@@ -140,7 +140,7 @@ export default function Expenses() {
       ease: 'expo.out',
       delay: 0.05
     })
-    gsap.from('.glass-card', {
+    gsap.from('.glass-card:not(.summary-grid .glass-card)', {
       autoAlpha: 0,
       y: 8,
       stagger: 0.02,

@@ -9,14 +9,13 @@ export default function Settings() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
-  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'))
 
   useEffect(() => {
     if (profile) {
       setFullName(profile.full_name || '')
       setAvatarUrl(profile.avatar_url || '')
     }
-    setIsDarkMode(document.documentElement.classList.contains('dark'))
   }, [profile])
 
   function toggleDarkMode() {
