@@ -18,10 +18,6 @@ export default function Login() {
 
   if (session) return <Navigate to="/" replace />
 
-  function generateInviteCode() {
-    return Math.random().toString(36).substring(2, 8).toUpperCase()
-  }
-
   async function handleSubmit(e) {
     e.preventDefault()
     setError(null)
@@ -29,48 +25,41 @@ export default function Login() {
     setLoading(true)
     try {
       if (mode === 'signup') {
-        let finalUnitId = null;
-
+        // If joining, verify that the invite code is valid first before signing up the user.
+        // This is secure definer RPC, so it bypasses RLS and can run before authentication.
         if (signupType === 'join') {
-          // Verify invite code first without auth (since units table must be publicly readable or readable with anon key... wait, units is readable by authenticated only! If they are signing up, they are NOT authenticated yet. This is a chicken-egg problem if units requires auth to read. Wait! We can verify after signup or use a proxy. Let's just create the account first, then check/link the unit.)
+          if (!inviteCode.trim()) throw new Error('Invite code is required')
+          const { data: existingUnit, error: unitErr } = await supabase
+            .rpc('get_unit_by_invite_code', { code: inviteCode.toUpperCase().trim() })
+          
+          if (unitErr || !existingUnit || existingUnit.length === 0) {
+            throw new Error('Invalid invite code. Please check the code and try again.')
+          }
+        } else {
+          if (!unitName.trim()) throw new Error('Apartment name is required')
         }
 
+        // Sign up and embed onboarding intent directly in user_metadata
         const { data, error } = await supabase.auth.signUp({ 
           email, 
           password,
           options: {
             data: {
               full_name: name,
+              signup_type: signupType,
+              unit_name: signupType === 'create' ? unitName.trim() : null,
+              invite_code: signupType === 'join' ? inviteCode.toUpperCase().trim() : null
             }
           }
         })
         if (error) throw error
         
-        if (data.user && data.session) {
-          // Now they are authenticated, they can read/write units
-          if (signupType === 'create') {
-            const code = generateInviteCode();
-            const { data: newUnit, error: unitErr } = await supabase.from('units').insert({
-              name: unitName,
-              invite_code: code
-            }).select().single()
-            if (unitErr) throw unitErr
-            finalUnitId = newUnit.id
-          } else {
-            const { data: existingUnit, error: unitErr } = await supabase.rpc('get_unit_by_invite_code', { code: inviteCode.toUpperCase() }).single()
-            if (unitErr || !existingUnit) {
-              throw new Error('Invalid invite code.')
-            }
-            finalUnitId = existingUnit.id
-          }
-
-          await supabase.from('profiles').insert({
-            id: data.user.id,
-            full_name: name,
-            unit_id: finalUnitId,
-          }).select()
+        // Show proper feedback depending on whether email confirmation is enabled or not
+        if (data.session) {
+          setMessage('Signed up successfully!')
+        } else {
+          setMessage('Account created! Please check your email to confirm your account and log in.')
         }
-        setMessage('Check your email to confirm your account!')
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error

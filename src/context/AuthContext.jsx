@@ -16,7 +16,7 @@ export function AuthProvider({ children }) {
     supabase.auth.getSession().then(({ data: { session } }) => {
       clearTimeout(timeout)
       setSession(session)
-      if (session) fetchProfile(session.user.id)
+      if (session) fetchProfile(session.user.id, session)
     }).catch(() => {
       clearTimeout(timeout)
       setSession(null)
@@ -24,38 +24,134 @@ export function AuthProvider({ children }) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session)
-      if (session) fetchProfile(session.user.id)
+      if (session) fetchProfile(session.user.id, session)
       else setProfile(null)
     })
 
     return () => { subscription.unsubscribe(); clearTimeout(timeout) }
   }, [])
 
-  async function fetchProfile(userId) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
+  async function fetchProfile(userId, currentSession = null) {
+    try {
+      // 1. Fetch existing profile from database
+      const { data: dbProfile } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
       
-    if (data) {
-      setProfile(data)
-    } else {
-      // Get from auth metadata if available (this covers the gap!)
-      const { data: { user } } = await supabase.auth.getUser()
-      const meta = user?.user_metadata || {}
-      
-      const fallback = { 
-        id: userId, 
-        full_name: meta.full_name || 'Roommate'
+      // 2. Fetch session details if not provided to get user metadata
+      let sessionObj = currentSession
+      if (!sessionObj) {
+        const { data: { session: fetchedSession } } = await supabase.auth.getSession()
+        sessionObj = fetchedSession
       }
-      setProfile(fallback)
-      // Attempt to self-heal by inserting
-      supabase.from('profiles').insert(fallback).then()
+      
+      const user = sessionObj?.user
+      const meta = user?.user_metadata || {}
+
+      // If the profile already exists and has a unit_id, we are ready
+      if (dbProfile && dbProfile.unit_id) {
+        setProfile(dbProfile)
+        return
+      }
+
+      // Profile does not exist or lacks unit_id. Check if we have signup intent in user_metadata
+      let unitId = dbProfile?.unit_id || null
+      
+      if (!unitId && (meta.signup_type || meta.unit_name || meta.invite_code)) {
+        console.log("Self-healing: Found signup intent in user_metadata", meta)
+        try {
+          if (meta.signup_type === 'create' && meta.unit_name) {
+            // Generate a secure, clean 6-character uppercase invite code
+            const code = Math.random().toString(36).substring(2, 8).toUpperCase()
+            const { data: newUnit, error: uErr } = await supabase
+              .from('units')
+              .insert({ name: meta.unit_name.trim(), invite_code: code })
+              .select()
+              .single()
+            
+            if (uErr) {
+              console.error("Self-healing error creating unit:", uErr)
+            } else if (newUnit) {
+              unitId = newUnit.id
+              console.log("Self-healing: Created unit successfully:", newUnit)
+            }
+          } else if (meta.signup_type === 'join' && meta.invite_code) {
+            // Look up the existing unit by code
+            const { data: existingUnit, error: uErr } = await supabase
+              .rpc('get_unit_by_invite_code', { code: meta.invite_code.toUpperCase().trim() })
+              .single()
+            
+            if (uErr || !existingUnit) {
+              console.error("Self-healing error joining unit by code:", uErr || "Unit not found")
+            } else {
+              unitId = existingUnit.id
+              console.log("Self-healing: Joined unit successfully:", existingUnit)
+            }
+          }
+        } catch (e) {
+          console.error("Self-healing unit association failed:", e)
+        }
+      }
+
+      // Construct profile data
+      const profileData = {
+        id: userId,
+        full_name: dbProfile?.full_name || meta.full_name || 'Roommate',
+        avatar_url: dbProfile?.avatar_url || null,
+        unit_id: unitId
+      }
+
+      if (dbProfile) {
+        // Profile exists, but unit_id needs updating
+        if (unitId && unitId !== dbProfile.unit_id) {
+          const { data: updatedProfile, error: pErr } = await supabase
+            .from('profiles')
+            .update({ unit_id: unitId })
+            .eq('id', userId)
+            .select()
+            .single()
+          
+          if (!pErr && updatedProfile) {
+            setProfile(updatedProfile)
+            return
+          }
+        }
+        setProfile(dbProfile)
+      } else {
+        // Profile doesn't exist, create it
+        const { data: newProfile, error: pErr } = await supabase
+          .from('profiles')
+          .insert(profileData)
+          .select()
+          .single()
+        
+        if (!pErr && newProfile) {
+          setProfile(newProfile)
+        } else {
+          // If inserting failed (e.g. race condition created it in parallel), try selecting again
+          const { data: reFetchedProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single()
+          
+          setProfile(reFetchedProfile || profileData)
+        }
+      }
+    } catch (err) {
+      console.error("Error in fetchProfile self-healing flow:", err)
+      // Fallback state if database has transient errors
+      setProfile({
+        id: userId,
+        full_name: 'Roommate',
+        unit_id: null
+      })
     }
   }
 
-  const value = { session, profile, loading: session === undefined, refreshProfile: () => { if (session?.user?.id) fetchProfile(session.user.id) } }
+  const value = { session, profile, loading: session === undefined, refreshProfile: () => { if (session?.user?.id) fetchProfile(session.user.id, session) } }
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }
 
