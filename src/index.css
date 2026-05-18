@@ -108,7 +108,6 @@ body {
 
 #root {
   width: 100%;
-  max-width: 430px; /* iPhone 16 Pro Max width */
   min-height: 100vh;
   background-color: var(--bg);
   background-image:
