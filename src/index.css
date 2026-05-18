@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
+@import './styles/responsive.css';
 
 /* ─── Premium OKLCH Design Tokens ───────────────────────────── */
 :root {
@@ -23,6 +24,16 @@
   
   --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-body: 'Outfit', system-ui, sans-serif;
+
+  /* Responsive Spacing & Typography (Mobile-First) */
+  --spacing-h: 24px;     /* Horizontal padding */
+  --spacing-v: 24px;     /* Vertical padding */
+  --spacing-gap: 16px;   /* Gap between components */
+  
+  --font-h1: 28px;
+  --font-h2: 22px;
+  --font-h3: 18px;
+  --font-body-font: 14px;
 
   --radius-sm: 12px;
   --radius-md: 16px;
@@ -97,7 +108,6 @@ body {
 
 #root {
   width: 100%;
-  max-width: 430px; /* iPhone 16 Pro Max width */
   min-height: 100vh;
   background-color: var(--bg);
   background-image:
@@ -413,4 +423,56 @@ input, textarea, select {
   font-size: 1.15rem;
   font-weight: 700;
   color: var(--fg);
+}
+
+/* ─── Responsive Typography & Spacing ──────────────────────── */
+
+/* Tablet (481px+) */
+@media (min-width: 481px) {
+  :root {
+    --spacing-h: 32px;
+    --font-h1: 32px;
+    --font-h2: 24px;
+    --font-h3: 20px;
+    --font-body-font: 15px;
+  }
+
+  .section-title {
+    font-size: 1.25rem;
+  }
+}
+
+/* Desktop (769px+) */
+@media (min-width: 769px) {
+  :root {
+    --spacing-h: 48px;
+    --font-h1: 36px;
+    --font-h2: 28px;
+    --font-h3: 22px;
+    --font-body-font: 16px;
+    --max-content-width: 900px;
+  }
+
+  #root {
+    margin: 0 auto;
+    max-width: var(--max-content-width, 100%);
+  }
+
+  .section-title {
+    font-size: 1.35rem;
+  }
+}
+
+/* Large Desktop (1024px+) */
+@media (min-width: 1024px) {
+  :root {
+    --font-h1: 40px;
+    --font-h2: 32px;
+    --font-h3: 24px;
+    --font-body-font: 17px;
+  }
+
+  .section-title {
+    font-size: 1.45rem;
+  }
 }

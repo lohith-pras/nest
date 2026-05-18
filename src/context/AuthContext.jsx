@@ -133,7 +133,7 @@ export function AuthProvider({ children }) {
           .insert(profileData)
         
         if (!pErr) {
-          console.debug("Self-healing: Created profile successfully", { hasUnitId: Boolean(unitId) })
+          console.log("Self-healing: Created profile successfully:", profileData)
           setProfile(profileData)
         } else {
           console.error("Self-healing error creating profile:", pErr)

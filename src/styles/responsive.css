@@ -1,0 +1,39 @@
+/* Mobile-First Responsive Breakpoints */
+@media (min-width: 481px) {
+  :root {
+    --spacing-h: 32px;
+    --font-h1: 32px;
+    --font-h2: 24px;
+  }
+}
+
+@media (min-width: 769px) {
+  :root {
+    --spacing-h: 48px;
+    --font-h1: 36px;
+    --font-h2: 28px;
+    --max-content-width: 900px;
+  }
+}
+
+/* Responsive utilities */
+.container-responsive {
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 var(--spacing-h, 24px);
+}
+
+@media (min-width: 769px) {
+  .container-responsive {
+    max-width: var(--max-content-width);
+  }
+}
+
+/* Prevent horizontal scroll */
+* {
+  overflow-x: visible;
+}
+
+main {
+  overflow-x: hidden;
+}
