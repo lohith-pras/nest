@@ -120,8 +120,7 @@ export default function Calendar() {
         </button>
       </header>
 
-      <div className="cal-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 340px)', gap: 28, alignItems: 'start' }}>
-        <style>{`@media(max-width:768px){.cal-grid{grid-template-columns:1fr!important;}}`}</style>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
 
         {/* Month grid */}
         <div className="glass-card" style={{ padding: 24 }}>
