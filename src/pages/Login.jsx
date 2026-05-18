@@ -124,8 +124,8 @@ export default function Login() {
                 </div>
                 
                 <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
-                  <button type="button" onClick={() => setSignupType('create')} className={`btn-primary`} style={{ flex: 1, padding: '8px', fontSize: '0.8rem', background: signupType === 'create' ? 'var(--primary)' : 'transparent', color: signupType === 'create' ? 'white' : 'var(--muted)', border: signupType === 'create' ? 'none' : '1px solid var(--border)' }}>Create Unit</button>
-                  <button type="button" onClick={() => setSignupType('join')} className={`btn-primary`} style={{ flex: 1, padding: '8px', fontSize: '0.8rem', background: signupType === 'join' ? 'var(--primary)' : 'transparent', color: signupType === 'join' ? 'white' : 'var(--muted)', border: signupType === 'join' ? 'none' : '1px solid var(--border)' }}>Join Unit</button>
+                  <button type="button" onClick={() => setSignupType('create')} className={`btn-primary`} style={{ flex: 1, padding: '8px', fontSize: '0.8rem', background: signupType === 'create' ? 'var(--primary)' : 'transparent', color: signupType === 'create' ? 'var(--primary-fg)' : 'var(--muted)', border: signupType === 'create' ? 'none' : '1px solid var(--border)' }}>Create Unit</button>
+                  <button type="button" onClick={() => setSignupType('join')} className={`btn-primary`} style={{ flex: 1, padding: '8px', fontSize: '0.8rem', background: signupType === 'join' ? 'var(--primary)' : 'transparent', color: signupType === 'join' ? 'var(--primary-fg)' : 'var(--muted)', border: signupType === 'join' ? 'none' : '1px solid var(--border)' }}>Join Unit</button>
                 </div>
 
                 {signupType === 'create' ? (

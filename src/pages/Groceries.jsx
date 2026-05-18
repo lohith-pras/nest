@@ -15,14 +15,16 @@ export default function Groceries() {
 
   useGSAP(() => {
     if (loading) return
-    gsap.from('header', { autoAlpha: 0, y: -15, duration: 0.4 })
-    gsap.from('form', { autoAlpha: 0, y: 10, duration: 0.4, delay: 0.05 })
+    gsap.from('header', { autoAlpha: 0, y: -8, duration: 0.35, ease: 'expo.out' })
+    gsap.from('form', { autoAlpha: 0, y: 4, duration: 0.35, delay: 0.04, ease: 'expo.out' })
     gsap.from('.glass-card', {
       autoAlpha: 0,
-      y: 12,
-      stagger: 0.03,
-      duration: 0.4,
-      clearProps: 'opacity,visibility,transform'
+      y: 8,
+      stagger: 0.025,
+      duration: 0.35,
+      ease: 'expo.out',
+      clearProps: 'opacity,visibility,transform',
+      force3D: true
     })
   }, { scope: containerRef, dependencies: [loading] })
 

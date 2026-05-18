@@ -72,7 +72,7 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
             <input className="input" value={desc} onChange={e => setDesc(e.target.value)} placeholder="e.g. Electricity bill" required />
           </div>
           <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Amount ($)</label>
+            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Amount (€)</label>
             <input className="input" type="number" min="0.01" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" required />
           </div>
           
@@ -87,7 +87,7 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
           
           {splitType === 'custom' && (
             <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Amount Owed to Payer ($)</label>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Amount Owed to Payer (€)</label>
               <input className="input" type="number" min="0" step="0.01" value={splitAmount} onChange={e => setSplitAmount(e.target.value)} placeholder="0.00" required />
             </div>
           )}
@@ -131,13 +131,24 @@ export default function Expenses() {
 
   useGSAP(() => {
     if (loading) return
-    gsap.from('header', { autoAlpha: 0, y: -15, duration: 0.4 })
-    gsap.from('.glass-card', {
+    gsap.from('header', { autoAlpha: 0, y: -8, duration: 0.35, ease: 'expo.out' })
+    gsap.from('.summary-grid > div', {
       autoAlpha: 0,
-      y: 15,
-      stagger: 0.04,
-      duration: 0.45,
-      clearProps: 'opacity,visibility,transform'
+      y: 4,
+      stagger: 0.03,
+      duration: 0.35,
+      ease: 'expo.out',
+      delay: 0.05
+    })
+    gsap.from('.glass-card:not(.summary-grid .glass-card)', {
+      autoAlpha: 0,
+      y: 8,
+      stagger: 0.02,
+      duration: 0.35,
+      ease: 'expo.out',
+      delay: 0.1,
+      clearProps: 'opacity,visibility,transform',
+      force3D: true
     })
   }, { scope: containerRef, dependencies: [loading] })
 
@@ -216,18 +227,18 @@ export default function Expenses() {
       </header>
 
       {/* Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 36 }}>
+      <div className="summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 36 }}>
         <div className="glass-card" style={{ padding: 24 }}>
           <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Owed to you</p>
-          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--success, #27ae60)' }}>${owedToMe.toFixed(2)}</p>
+          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--success, #27ae60)', fontVariantNumeric: 'tabular-nums' }}>€{owedToMe.toFixed(2)}</p>
         </div>
         <div className="glass-card" style={{ padding: 24 }}>
           <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>You owe</p>
-          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, color: owedToMe > 0 ? 'var(--danger, #c0392b)' : 'var(--fg)' }}>${iOwe.toFixed(2)}</p>
+          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, color: iOwe > 0 ? 'var(--danger, #c0392b)' : 'var(--fg)', fontVariantNumeric: 'tabular-nums' }}>€{iOwe.toFixed(2)}</p>
         </div>
         <div className="glass-card" style={{ padding: 24 }}>
           <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Pending</p>
-          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800 }}>{pending.length}</p>
+          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{pending.length}</p>
         </div>
       </div>
 
@@ -292,8 +303,8 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, settled
         </p>
       </div>
       <div style={{ textAlign: 'right' }}>
-        <p className="font-display" style={{ fontSize: '1.2rem', fontWeight: 800 }}>${exp.amount.toFixed(2)}</p>
-        <p style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>${each} owed</p>
+        <p className="font-display" style={{ fontSize: '1.2rem', fontWeight: 800 }}>€{exp.amount.toFixed(2)}</p>
+        <p style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>€{each} owed</p>
       </div>
       <span className={`badge ${settled ? 'badge-green' : paidByMe ? 'badge-blue' : 'badge-orange'}`}>
         {settled ? 'Settled' : paidByMe ? 'You paid' : 'You owe'}
