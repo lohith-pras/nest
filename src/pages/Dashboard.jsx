@@ -73,7 +73,7 @@ export default function Dashboard() {
         duration: 0.8,
         ease: 'expo.out',
         onUpdate: () => {
-          owedRef.current.textContent = `$${obj.val.toFixed(2)}`
+          owedRef.current.textContent = `€${obj.val.toFixed(2)}`
         }
       })
     }
@@ -126,7 +126,7 @@ export default function Dashboard() {
             </div>
             <div className="glass-card" style={{ padding: '28px 24px' }}>
               <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{stats.owedToMe >= 0 ? 'You are owed' : 'You owe'}</p>
-              <h3 ref={owedRef} className="font-display" style={{ fontSize: '2.4rem', fontWeight: 800, marginBottom: 8, fontVariantNumeric: 'tabular-nums' }}>$0.00</h3>
+              <h3 ref={owedRef} className="font-display" style={{ fontSize: '2.4rem', fontWeight: 800, marginBottom: 8, fontVariantNumeric: 'tabular-nums' }}>€0.00</h3>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span className="badge badge-green">Pending settlement</span>
                 <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>• {stats.uncheckedGroceries} groceries left</span>

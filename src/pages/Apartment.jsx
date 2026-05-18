@@ -27,7 +27,7 @@ export default function Apartment() {
     if (profile) loadData()
   }, [profile])
 
-  const initials = (name) => name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
+  const initials = (name) => name?.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
 
   return (
     <div>
@@ -180,8 +180,8 @@ function NoUnitView({ profile }) {
       {error && <div style={{ background: '#fef2f2', color: '#dc2626', padding: 12, borderRadius: 8, fontSize: '0.85rem', marginBottom: 16 }}>{error}</div>}
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
-        <button onClick={() => setMode('create')} className="btn-ghost" style={{ flex: 1, background: mode === 'create' ? 'var(--primary)' : 'transparent', color: mode === 'create' ? 'white' : 'var(--muted)' }}>Create Unit</button>
-        <button onClick={() => setMode('join')} className="btn-ghost" style={{ flex: 1, background: mode === 'join' ? 'var(--primary)' : 'transparent', color: mode === 'join' ? 'white' : 'var(--muted)' }}>Join Unit</button>
+        <button onClick={() => setMode('create')} className="btn-ghost" style={{ flex: 1, background: mode === 'create' ? 'var(--primary)' : 'transparent', color: mode === 'create' ? 'var(--primary-fg)' : 'var(--muted)' }}>Create Unit</button>
+        <button onClick={() => setMode('join')} className="btn-ghost" style={{ flex: 1, background: mode === 'join' ? 'var(--primary)' : 'transparent', color: mode === 'join' ? 'var(--primary-fg)' : 'var(--muted)' }}>Join Unit</button>
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>

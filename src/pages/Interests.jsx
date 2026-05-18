@@ -161,8 +161,8 @@ export default function Interests() {
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)} style={{
             padding: '10px 20px', borderRadius: 50, fontWeight: 700, fontSize: '0.9rem',
-            background: tab === t.key ? 'var(--primary)' : 'rgba(255,255,255,0.5)',
-            color: tab === t.key ? 'white' : 'var(--muted)',
+            background: tab === t.key ? 'var(--primary)' : 'transparent',
+            color: tab === t.key ? 'var(--primary-fg)' : 'var(--muted)',
             border: '1px solid', borderColor: tab === t.key ? 'transparent' : 'var(--border)',
             transition: 'all 0.2s var(--ease-out)', cursor: 'pointer',
           }}>
