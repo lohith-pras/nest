@@ -31,6 +31,7 @@
   /* Custom Easing Curves (Emil Kowalski's Philosophy) */
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 /* ─── Reset & Base ──────────────────────────────────────────── */
@@ -67,16 +68,18 @@ body {
   background-attachment: fixed;
   position: relative;
   box-shadow: 0 0 40px rgba(0,0,0,0.1);
+  overflow-x: hidden;
 }
 
 h1, h2, h3, h4, h5, h6, label, .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em; /* Tighten up for premium look */
 }
 
 a {
   text-decoration: none;
   color: inherit;
+  -webkit-tap-highlight-color: transparent;
 }
 
 button {
@@ -84,6 +87,12 @@ button {
   border: none;
   background: none;
   font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 160ms var(--ease-out);
+}
+
+button:active {
+  transform: scale(0.97); /* Physical press feedback */
 }
 
 input, textarea, select {
@@ -95,17 +104,25 @@ input, textarea, select {
   background: oklch(99.2% 0.003 145 / 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
-  box-shadow: 0 4px 20px -2px oklch(24% 0.038 145 / 0.02);
+  border: 1px solid oklch(100% 0 0 / 0.12); /* Liquid edge */
+  box-shadow: 
+    0 4px 20px -2px oklch(24% 0.038 145 / 0.02),
+    inset 0 1px 0 0 oklch(100% 0 0 / 0.08); /* Reflection highlight */
 }
 
-/* Eradicated default glass-card slop for a pristine surface */
 .glass-card {
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: 0 4px 24px -4px oklch(24% 0.038 145 / 0.03), 0 1px 3px -1px oklch(24% 0.038 145 / 0.02);
-  transition: transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out), background-color 200ms var(--ease-out);
+  box-shadow: 
+    0 4px 24px -4px oklch(24% 0.038 145 / 0.03), 
+    0 1px 3px -1px oklch(24% 0.038 145 / 0.02),
+    inset 0 1px 0 0 oklch(100% 0 0 / 0.4);
+  transition: transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out), background-color 160ms var(--ease-out);
+}
+
+.glass-card:active {
+  transform: scale(0.985); /* Micro-feedback on card press */
 }
 
 /* ─── Sidebar ───────────────────────────────────────────────── */

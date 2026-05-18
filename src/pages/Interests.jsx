@@ -80,13 +80,16 @@ export default function Interests() {
 
   useGSAP(() => {
     if (loading) return
-    gsap.from('header', { autoAlpha: 0, y: -15, duration: 0.4 })
+    gsap.from('header', { autoAlpha: 0, y: -8, duration: 0.35, ease: 'expo.out' })
     gsap.from('.glass-card', {
       autoAlpha: 0,
-      y: 15,
-      stagger: 0.04,
-      duration: 0.45,
-      clearProps: 'opacity,visibility,transform'
+      y: 8,
+      stagger: 0.025,
+      duration: 0.35,
+      ease: 'expo.out',
+      delay: 0.05,
+      clearProps: 'opacity,visibility,transform',
+      force3D: true
     })
   }, { scope: containerRef, dependencies: [loading, tab] })
 
@@ -161,7 +164,7 @@ export default function Interests() {
             background: tab === t.key ? 'var(--primary)' : 'rgba(255,255,255,0.5)',
             color: tab === t.key ? 'white' : 'var(--muted)',
             border: '1px solid', borderColor: tab === t.key ? 'transparent' : 'var(--border)',
-            transition: 'all 0.2s ease', cursor: 'pointer',
+            transition: 'all 0.2s var(--ease-out)', cursor: 'pointer',
           }}>
             {t.label} <span style={{ opacity: 0.7 }}>({items.filter(i => i.category === t.key).length})</span>
           </button>

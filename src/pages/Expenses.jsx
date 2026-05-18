@@ -131,13 +131,24 @@ export default function Expenses() {
 
   useGSAP(() => {
     if (loading) return
-    gsap.from('header', { autoAlpha: 0, y: -15, duration: 0.4 })
+    gsap.from('header', { autoAlpha: 0, y: -8, duration: 0.35, ease: 'expo.out' })
+    gsap.from('.summary-grid > div', {
+      autoAlpha: 0,
+      y: 4,
+      stagger: 0.03,
+      duration: 0.35,
+      ease: 'expo.out',
+      delay: 0.05
+    })
     gsap.from('.glass-card', {
       autoAlpha: 0,
-      y: 15,
-      stagger: 0.04,
-      duration: 0.45,
-      clearProps: 'opacity,visibility,transform'
+      y: 8,
+      stagger: 0.02,
+      duration: 0.35,
+      ease: 'expo.out',
+      delay: 0.1,
+      clearProps: 'opacity,visibility,transform',
+      force3D: true
     })
   }, { scope: containerRef, dependencies: [loading] })
 
@@ -209,25 +220,25 @@ export default function Expenses() {
           <h1 className="font-display" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800 }}>Expenses</h1>
           <p style={{ color: 'var(--muted)', marginTop: 4 }}>Track and split shared costs</p>
         </div>
-        <button className="btn-primary" onClick={() => { setEditData(null); setShowModal(true) }}>
+        <button className="btn-primary" onClick={() => { setEditData(null); setSelectedDate?.(null); setShowModal(true) }}>
           <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
           Add Expense
         </button>
       </header>
 
       {/* Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 36 }}>
+      <div className="summary-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 16, marginBottom: 36 }}>
         <div className="glass-card" style={{ padding: 24 }}>
           <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Owed to you</p>
-          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--success, #27ae60)' }}>${owedToMe.toFixed(2)}</p>
+          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, color: 'var(--success, #27ae60)', fontVariantNumeric: 'tabular-nums' }}>${owedToMe.toFixed(2)}</p>
         </div>
         <div className="glass-card" style={{ padding: 24 }}>
           <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>You owe</p>
-          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, color: owedToMe > 0 ? 'var(--danger, #c0392b)' : 'var(--fg)' }}>${iOwe.toFixed(2)}</p>
+          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, color: iOwe > 0 ? 'var(--danger, #c0392b)' : 'var(--fg)', fontVariantNumeric: 'tabular-nums' }}>${iOwe.toFixed(2)}</p>
         </div>
         <div className="glass-card" style={{ padding: 24 }}>
           <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Pending</p>
-          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800 }}>{pending.length}</p>
+          <p className="font-display" style={{ fontSize: '1.8rem', fontWeight: 800, fontVariantNumeric: 'tabular-nums' }}>{pending.length}</p>
         </div>
       </div>
 
