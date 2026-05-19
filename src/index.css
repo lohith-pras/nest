@@ -1,4 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&family=Plus+Jakarta+Sans:ital,wght@0,200..800;1,200..800&display=swap');
 @import './styles/responsive.css';
 
 /* ─── Premium OKLCH Design Tokens ───────────────────────────── */
@@ -22,8 +21,8 @@
   --danger-hover: oklch(52% 0.14 28);
   --success: oklch(62% 0.14 145);        /* Elegant emerald success green */
   
-  --font-display: 'Plus Jakarta Sans', system-ui, sans-serif;
-  --font-body: 'Outfit', system-ui, sans-serif;
+  --font-display: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SFNS Display", "SF Compact Display", system-ui, sans-serif;
+  --font-body: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SFNS Text", "SF Compact Text", system-ui, sans-serif;
 
   /* Responsive Spacing & Typography (Mobile-First) */
   --spacing-h: 24px;     /* Horizontal padding */
@@ -101,7 +100,10 @@ body {
   background-color: oklch(15% 0.02 145); /* Darker backdrop for outside the app container */
   color: var(--fg);
   min-height: 100%;
+  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "cv11", "ss01", "ss02";
   display: flex;
   justify-content: center;
 }
@@ -123,7 +125,25 @@ body {
 
 h1, h2, h3, h4, h5, h6, label, .font-display {
   font-family: var(--font-display);
-  letter-spacing: -0.025em; /* Tighten up for premium look */
+}
+
+h1, h2, .dashboard-greeting {
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+
+h3, h4, .section-title {
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+h5, h6, label {
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+}
+
+p, span, li, a, button, input, textarea, select {
+  letter-spacing: -0.011em;
 }
 
 a {

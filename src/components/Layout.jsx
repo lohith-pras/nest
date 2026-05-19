@@ -1,5 +1,4 @@
 import { NavLink, Outlet } from 'react-router-dom'
-import TopNavBar from './TopNavBar'
 
 const mobileNav = [
   {
@@ -27,15 +26,12 @@ const mobileNav = [
 export default function Layout() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', position: 'relative' }}>
-      
-      {/* ── Sticky Top Navbar ──────────────────────────────────── */}
-      <TopNavBar />
 
       {/* ── Main Content Area ──────────────────────────────────── */}
       <main style={{
         flex: 1,
         padding: '24px',
-        paddingTop: '24px',
+        paddingTop: 'max(24px, env(safe-area-inset-top))',
         paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
         overflowY: 'auto',
         overflowX: 'hidden'
