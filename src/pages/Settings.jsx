@@ -90,28 +90,60 @@ export default function Settings() {
             />
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 0', borderTop: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <label style={{ fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' }} onClick={toggleDarkMode}>Dark Mode</label>
-              <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>Toggle dark theme</span>
-            </div>
-            <button 
-              type="button"
-              onClick={toggleDarkMode}
-              style={{
-                width: 44, height: 24, borderRadius: 12,
-                background: isDarkMode ? 'var(--primary)' : 'var(--border)',
-                position: 'relative', transition: 'background 0.2s',
-                border: 'none', cursor: 'pointer'
-              }}
-            >
+          {/* Appearance toggle — full-row tappable */}
+          <button
+            type="button"
+            onClick={toggleDarkMode}
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              padding: '14px 16px', borderRadius: 'var(--radius-md)',
+              background: 'var(--surface-mid)', border: '1px solid var(--border)',
+              cursor: 'pointer', width: '100%', marginTop: 4,
+              transition: 'background 150ms',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{
-                position: 'absolute', top: 2, left: isDarkMode ? 22 : 2,
-                width: 20, height: 20, borderRadius: '50%', background: isDarkMode ? 'oklch(24% 0.038 145)' : 'white',
-                transition: 'left 0.2s, background 0.2s', boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                width: 36, height: 36, borderRadius: 10,
+                background: isDarkMode ? 'var(--surface-hover)' : 'var(--accent)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: isDarkMode ? 'var(--cream-dim)' : '#fff', flexShrink: 0,
+                transition: 'background 250ms',
+              }}>
+                {isDarkMode ? (
+                  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+                  </svg>
+                ) : (
+                  <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="5"/>
+                    <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+                    <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+                  </svg>
+                )}
+              </div>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--cream)' }}>Appearance</div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: 1 }}>{isDarkMode ? 'Dark mode' : 'Light mode'}</div>
+              </div>
+            </div>
+            {/* Toggle pill */}
+            <div style={{
+              width: 52, height: 30, borderRadius: 999, flexShrink: 0,
+              background: isDarkMode ? 'var(--accent)' : 'var(--border-rule)',
+              position: 'relative', transition: 'background 0.25s',
+            }}>
+              <div style={{
+                position: 'absolute', top: 3, left: isDarkMode ? 25 : 3,
+                width: 24, height: 24, borderRadius: '50%',
+                background: '#fff',
+                transition: 'left 0.25s var(--ease-spring)',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.28)',
               }} />
-            </button>
-          </div>
+            </div>
+          </button>
 
           {message && (
             <p style={{ 

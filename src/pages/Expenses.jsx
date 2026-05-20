@@ -53,7 +53,7 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
 
   const fieldStyle = {
     background: 'transparent', border: 'none',
-    borderBottom: '1px solid rgba(255,255,255,0.18)',
+    borderBottom: '1px solid var(--border-rule)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
     fontSize: 20, color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
@@ -86,7 +86,7 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
                 fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
                 background: splitType === s ? 'var(--cream)' : 'transparent',
                 color: splitType === s ? 'var(--primary-fg)' : 'var(--cream-faint)',
-                border: splitType === s ? 'none' : '1px solid rgba(255,255,255,0.2)',
+                border: splitType === s ? 'none' : '1px solid var(--border-rule)',
               }}>
                 {s === '5050' ? '50 / 50 Split' : 'Custom Split'}
               </button>
@@ -226,31 +226,42 @@ export default function Expenses() {
       </div>
 
       {/* Stat row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginTop: 22, borderTop: '1px solid rgba(255,255,255,0.14)', paddingTop: 14 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginTop: 22, borderTop: '1px solid var(--border-rule)', paddingTop: 14 }}>
         <StatCell kicker="Owed to you" amount={`€${owedToMe.toFixed(2)}`} />
         <StatCell kicker="You owe" amount={`€${iOwe.toFixed(2)}`} />
         <StatCell kicker="Pending" amount={String(pending.length)} />
       </div>
 
-      {/* Add expense */}
-      <button onClick={() => { setEditData(null); setShowModal(true) }} style={{
-        marginTop: 18, width: '100%',
-        background: 'transparent', color: 'var(--cream)',
-        border: '1px dashed rgba(255,255,255,0.28)', borderRadius: 14,
-        padding: '14px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        fontFamily: 'var(--font-body)', fontSize: 13, cursor: 'pointer',
-      }}>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <PlusIcon size={16} stroke={2} /> Add a new expense
-        </span>
-        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>
-          or scan receipt
-        </span>
+      {/* FAB — add expense */}
+      <button
+        onClick={() => { setEditData(null); setShowModal(true) }}
+        onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
+        onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
+        onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        style={{
+          position: 'fixed',
+          bottom: 'calc(92px + env(safe-area-inset-bottom))',
+          right: 20,
+          width: 52, height: 52,
+          borderRadius: '50%',
+          background: 'var(--accent)',
+          color: '#fff',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 20px rgba(154,129,116,0.35)',
+          transition: 'transform 150ms var(--ease-spring)',
+          zIndex: 40,
+        }}
+      >
+        <PlusIcon size={22} stroke={2} />
       </button>
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+          <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
         </div>
       ) : (
         <div style={{ marginTop: 26 }}>
@@ -283,7 +294,7 @@ export default function Expenses() {
             <div style={{
               fontFamily: 'var(--font-display)', fontStyle: 'italic',
               fontSize: 15, color: 'var(--cream-faint)', textAlign: 'center', lineHeight: 1.3,
-              padding: '18px 24px 8px', borderTop: '1px solid rgba(255,255,255,0.10)', marginTop: 24,
+              padding: '18px 24px 8px', borderTop: '1px solid var(--border)', marginTop: 24,
             }}>
               "Money rules ruin friendships. Clear receipts save them."
             </div>
@@ -314,7 +325,7 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, isLast 
     <div style={{
       display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 12,
       padding: '12px 0',
-      borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
+      borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
       <InitialsAvatar initials={payerInitials} isMe={paidByMe} size={34} />
       <div>

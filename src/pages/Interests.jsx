@@ -22,7 +22,7 @@ function Modal({ onClose, onSave, loading, defaultCategory, initialData = null }
 
   const fieldStyle = {
     background: 'transparent', border: 'none',
-    borderBottom: '1px solid rgba(255,255,255,0.18)',
+    borderBottom: '1px solid var(--border-rule)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
     fontSize: 20, color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
@@ -46,7 +46,7 @@ function Modal({ onClose, onSave, loading, defaultCategory, initialData = null }
                 fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
                 background: category === c ? 'var(--cream)' : 'transparent',
                 color: category === c ? 'var(--primary-fg)' : 'var(--cream-faint)',
-                border: category === c ? 'none' : '1px solid rgba(255,255,255,0.2)',
+                border: category === c ? 'none' : '1px solid var(--border-rule)',
                 textTransform: 'capitalize',
               }}>{c}</button>
             ))}
@@ -161,7 +161,7 @@ export default function Interests() {
             padding: '8px 16px', borderRadius: 999,
             fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600,
             cursor: 'pointer', letterSpacing: '-0.01em',
-            border: tab === t.id ? 'none' : '1px solid rgba(255,255,255,0.18)',
+            border: tab === t.id ? 'none' : '1px solid var(--border-rule)',
             background: tab === t.id ? 'var(--cream)' : 'transparent',
             color: tab === t.id ? 'var(--primary-fg)' : 'var(--cream)',
           }}>
@@ -173,18 +173,11 @@ export default function Interests() {
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+          <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
         </div>
       ) : (
         <div style={{ marginTop: 24 }}>
-          <SectionRule
-            label={`01 — ${tab === 'watchlist' ? 'On the watchlist' : 'On the map'}`}
-            right={
-              <button onClick={() => { setEditData(null); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
-                <PlusIcon size={10} stroke={2} /> Add
-              </button>
-            }
-          />
+          <SectionRule label={`01 — ${tab === 'watchlist' ? 'On the watchlist' : 'On the map'}`} />
 
           {filtered.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '50px 0' }}>
@@ -210,12 +203,39 @@ export default function Interests() {
           <div style={{
             fontFamily: 'var(--font-display)', fontStyle: 'italic',
             fontSize: 15, color: 'var(--cream-faint)', textAlign: 'center', lineHeight: 1.3,
-            padding: '18px 24px 8px', borderTop: '1px solid rgba(255,255,255,0.10)', marginTop: 28,
+            padding: '18px 24px 8px', borderTop: '1px solid var(--border)', marginTop: 28,
           }}>
             "A shared list is a quiet promise."
           </div>
         </div>
       )}
+
+      {/* FAB — add interest */}
+      <button
+        onClick={() => { setEditData(null); setShowModal(true) }}
+        onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
+        onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
+        onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        style={{
+          position: 'fixed',
+          bottom: 'calc(92px + env(safe-area-inset-bottom))',
+          right: 20,
+          width: 52, height: 52,
+          borderRadius: '50%',
+          background: 'var(--accent)',
+          color: '#fff',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 20px rgba(154,129,116,0.35)',
+          transition: 'transform 150ms var(--ease-spring)',
+          zIndex: 40,
+        }}
+      >
+        <PlusIcon size={22} stroke={2} />
+      </button>
     </div>
   )
 }
@@ -229,13 +249,13 @@ function WatchRow({ item, profiles, myId, isLast, onEdit, onDelete }) {
   return (
     <div style={{
       display: 'grid', gridTemplateColumns: '52px 1fr auto auto auto', gap: 12, alignItems: 'center',
-      padding: '10px 0', borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
+      padding: '10px 0', borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
       <div style={{
         width: 52, aspectRatio: '2 / 3',
         background: color, borderRadius: 4,
         display: 'flex', alignItems: 'flex-end', padding: 4,
-        color: 'rgba(255,255,255,0.85)', fontFamily: 'var(--font-display)', fontSize: 10,
+        color: 'var(--cream-dim)', fontFamily: 'var(--font-display)', fontSize: 10,
         letterSpacing: '-0.01em', lineHeight: 1,
         boxShadow: '0 4px 10px -4px rgba(0,0,0,0.5)',
       }}>
@@ -269,12 +289,12 @@ function PlaceRow({ item, profiles, myId, isLast, onEdit, onDelete }) {
   return (
     <div style={{
       display: 'grid', gridTemplateColumns: '44px 1fr auto auto auto', gap: 12, alignItems: 'center',
-      padding: '12px 0', borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
+      padding: '12px 0', borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
       <div style={{
         width: 44, height: 44, borderRadius: 999,
         background: 'var(--surface-raised)',
-        border: '1px solid rgba(255,255,255,0.10)',
+        border: '1px solid var(--border)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         color: 'var(--accent-soft)',
       }}>

@@ -27,7 +27,7 @@ export default function More() {
       <div style={{
         display: 'flex', alignItems: 'center', gap: 14,
         marginTop: 22, paddingBottom: 22,
-        borderBottom: '1px solid rgba(255,255,255,0.10)',
+        borderBottom: '1px solid var(--border)',
       }}>
         <InitialsAvatar initials={initials} isMe size={56} />
         <div>
@@ -46,14 +46,13 @@ export default function More() {
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 4 }}>
           {[
             { to: '/interests', icon: SparkleIcon, title: 'Interests', sub: 'Watchlist & places' },
-            { to: '/calendar', icon: CalendarIcon, title: 'Calendar', sub: 'Events & reminders' },
-            { to: '/expenses', icon: DollarIcon, title: 'Expenses', sub: 'Shared ledger' },
             { to: '/apartment', icon: HouseIcon, title: 'Apartment', sub: 'Unit settings' },
+            { to: '/settings', icon: GearIcon, title: 'Settings', sub: 'Profile & preferences' },
           ].map((s, i, arr) => (
             <Link key={s.to} to={s.to} style={{
               display: 'grid', gridTemplateColumns: 'auto 1fr auto',
               alignItems: 'center', gap: 14, padding: '16px 0',
-              borderBottom: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
+              borderBottom: i < arr.length - 1 ? '1px solid var(--border)' : 'none',
               textDecoration: 'none', color: 'var(--cream)',
             }}>
               <s.icon />
@@ -70,7 +69,7 @@ export default function More() {
       {/* Sign out */}
       <button onClick={handleSignOut} style={{
         marginTop: 28, width: '100%',
-        background: 'transparent', border: '1px solid rgba(255,255,255,0.18)', borderRadius: 999,
+        background: 'transparent', border: '1px solid var(--border-rule)', borderRadius: 999,
         padding: 14, color: 'var(--cream)',
         fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
       }}>
@@ -95,28 +94,20 @@ function SparkleIcon() {
   )
 }
 
-function CalendarIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="5" width="18" height="16" rx="2"/>
-      <path d="M3 9h18M8 3v4M16 3v4"/>
-    </svg>
-  )
-}
-
-function DollarIcon() {
-  return (
-    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3v18M16 6.5c0-1.4-1.8-2.5-4-2.5s-4 1.1-4 2.5 1.8 2.5 4 2.5 4 1.1 4 2.5-1.8 2.5-4 2.5-4-1.1-4-2.5"/>
-    </svg>
-  )
-}
-
 function HouseIcon() {
   return (
     <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
       <path d="M3 11.5 L12 4 L21 11.5 V20 a1 1 0 0 1-1 1 H4 a1 1 0 0 1-1-1 z"/>
       <path d="M10 21v-7h4v7"/>
+    </svg>
+  )
+}
+
+function GearIcon() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
     </svg>
   )
 }

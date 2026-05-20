@@ -1,16 +1,67 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { useModalAnimation } from '../hooks/useModalAnimation'
 import { Masthead, SectionRule, Kicker, InitialsAvatar, PlusIcon, CheckIcon, XIcon } from '../components/RoomyUI'
+
+function AddItemModal({ onClose, onSave, loading, initialData = null }) {
+  const overlayRef = useRef(null)
+  const panelRef = useRef(null)
+  const { handleClose } = useModalAnimation(overlayRef, panelRef, onClose)
+  const [item, setItem] = useState(initialData?.item_name || '')
+  const [qty, setQty] = useState(initialData?.quantity || '')
+  const itemRef = useRef(null)
+
+  useEffect(() => { itemRef.current?.focus() }, [])
+
+  function submit(e) {
+    e.preventDefault()
+    if (!item.trim()) return
+    onSave({ item_name: item.trim(), quantity: qty.trim() || null }, initialData?.id, handleClose)
+  }
+
+  const fieldStyle = {
+    background: 'transparent', border: 'none',
+    borderBottom: '1px solid var(--input-border)',
+    padding: '10px 0', fontFamily: 'var(--font-display)',
+    fontSize: 20, color: 'var(--cream)', outline: 'none',
+    letterSpacing: '-0.01em', width: '100%',
+  }
+
+  return (
+    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
+      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 24 }}>
+          {initialData ? 'Edit item.' : 'Add to pantry.'}
+        </div>
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Item</div>
+            <input ref={itemRef} style={fieldStyle} value={item} onChange={e => setItem(e.target.value)} placeholder="e.g. Oat milk" required />
+          </div>
+          <div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Quantity (optional)</div>
+            <input style={fieldStyle} value={qty} onChange={e => setQty(e.target.value)} placeholder="e.g. ×2, 500g" />
+          </div>
+          <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
+            <button type="button" className="btn-ghost" onClick={handleClose} style={{ flex: 1 }}>Cancel</button>
+            <button type="submit" className="btn-primary" disabled={loading || !item.trim()} style={{ flex: 1, justifyContent: 'center' }}>
+              {loading ? '…' : initialData ? 'Save' : 'Add'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
 
 export default function Groceries() {
   const { session, profile } = useAuth()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
-  const [newItem, setNewItem] = useState('')
-  const [newQty, setNewQty] = useState('')
   const [adding, setAdding] = useState(false)
-  const [editingId, setEditingId] = useState(null)
+  const [showModal, setShowModal] = useState(false)
+  const [editData, setEditData] = useState(null)
 
   useEffect(() => {
     load()
@@ -30,29 +81,23 @@ export default function Groceries() {
     setLoading(false)
   }
 
-  async function handleSubmit(e) {
-    e.preventDefault()
-    if (!newItem.trim()) return
+  async function saveItem({ item_name, quantity }, id, handleClose) {
     setAdding(true)
-    if (editingId) {
+    if (id) {
       await supabase.from('groceries').update({
-        item_name: newItem.trim(),
-        quantity: newQty.trim() || null,
+        item_name, quantity,
         updated_at: new Date().toISOString(),
-      }).eq('id', editingId)
-      setEditingId(null)
+      }).eq('id', id)
     } else {
       await supabase.from('groceries').insert({
-        item_name: newItem.trim(),
-        quantity: newQty.trim() || null,
+        item_name, quantity,
         is_checked: false,
         added_by: session.user.id,
         unit_id: profile?.unit_id || null,
       })
     }
-    setNewItem('')
-    setNewQty('')
     setAdding(false)
+    handleClose()
     load()
   }
 
@@ -62,7 +107,6 @@ export default function Groceries() {
   }
 
   async function deleteItem(id) {
-    if (editingId === id) { setEditingId(null); setNewItem(''); setNewQty('') }
     await supabase.from('groceries').delete().eq('id', id)
     setItems(prev => prev.filter(i => i.id !== id))
   }
@@ -75,10 +119,8 @@ export default function Groceries() {
   }
 
   function handleEdit(item) {
-    setNewItem(item.item_name)
-    setNewQty(item.quantity || '')
-    setEditingId(item.id)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    setEditData(item)
+    setShowModal(true)
   }
 
   const unchecked = items.filter(i => !i.is_checked)
@@ -86,6 +128,15 @@ export default function Groceries() {
 
   return (
     <div style={{ paddingTop: 16 }}>
+      {showModal && (
+        <AddItemModal
+          onClose={() => { setShowModal(false); setEditData(null) }}
+          onSave={saveItem}
+          loading={adding}
+          initialData={editData}
+        />
+      )}
+
       <Masthead
         title="Pantry"
         meta={
@@ -107,52 +158,10 @@ export default function Groceries() {
         </h1>
       </div>
 
-      {/* Add row */}
-      <form onSubmit={handleSubmit} style={{
-        display: 'grid', gridTemplateColumns: '1fr 70px 60px', gap: 6, marginTop: 22,
-        padding: '10px 12px', background: 'var(--surface-raised)', borderRadius: 14,
-        border: '1px solid rgba(255,255,255,0.06)',
-        alignItems: 'center',
-      }}>
-        <input
-          value={newItem}
-          onChange={e => setNewItem(e.target.value)}
-          placeholder="Add something…"
-          style={{
-            background: 'transparent', border: 'none', outline: 'none',
-            fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--cream)', padding: '6px 4px',
-          }}
-        />
-        <input
-          value={newQty}
-          onChange={e => setNewQty(e.target.value)}
-          placeholder="Qty"
-          style={{
-            background: 'transparent', border: 'none', outline: 'none',
-            fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--cream)', padding: '6px 4px',
-          }}
-        />
-        <button type="submit" disabled={adding || !newItem.trim()} style={{
-          background: 'var(--cream)', color: 'var(--primary-fg)',
-          border: 'none', borderRadius: 999,
-          fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600,
-          cursor: 'pointer', padding: '8px 4px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
-          opacity: adding || !newItem.trim() ? 0.5 : 1,
-        }}>
-          <PlusIcon size={13} stroke={2.5} />
-          {editingId ? 'Save' : 'Add'}
-        </button>
-      </form>
-      {editingId && (
-        <button onClick={() => { setEditingId(null); setNewItem(''); setNewQty('') }} className="btn-ghost" style={{ marginTop: 8, fontSize: 12, padding: '6px 14px' }}>
-          Cancel edit
-        </button>
-      )}
 
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+          <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
         </div>
       ) : (
         <>
@@ -203,12 +212,39 @@ export default function Groceries() {
           <div style={{
             fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
             color: 'var(--cream-faint)', marginTop: 28, paddingTop: 18,
-            borderTop: '1px solid rgba(255,255,255,0.10)', textAlign: 'center',
+            borderTop: '1px solid var(--border)', textAlign: 'center',
           }}>
             Live-synced · shared list
           </div>
         </>
       )}
+
+      {/* FAB — add to pantry */}
+      <button
+        onClick={() => { setEditData(null); setShowModal(true) }}
+        onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
+        onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
+        onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        style={{
+          position: 'fixed',
+          bottom: 'calc(92px + env(safe-area-inset-bottom))',
+          right: 20,
+          width: 52, height: 52,
+          borderRadius: '50%',
+          background: 'var(--accent)',
+          color: '#fff',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 20px rgba(154,129,116,0.35)',
+          transition: 'transform 150ms var(--ease-spring)',
+          zIndex: 40,
+        }}
+      >
+        <PlusIcon size={22} stroke={2} />
+      </button>
     </div>
   )
 }
@@ -221,11 +257,11 @@ function GroceryRow({ item, isMe, onToggle, onDelete, onEdit, isLast }) {
       display: 'grid', gridTemplateColumns: '26px 1fr auto auto auto',
       alignItems: 'center', gap: 10,
       padding: '12px 0',
-      borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
+      borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
       <button onClick={onToggle} style={{
         width: 22, height: 22,
-        border: `1.5px solid ${checked ? 'var(--accent)' : 'rgba(255,255,255,0.38)'}`,
+        border: `1.5px solid ${checked ? 'var(--accent)' : 'var(--cream-faint)'}`,
         background: checked ? 'var(--accent)' : 'transparent',
         borderRadius: 6, cursor: 'pointer', padding: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',

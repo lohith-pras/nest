@@ -75,7 +75,7 @@ export default function Dashboard() {
     <div style={{ paddingTop: 16 }}>
       <Masthead title="Roomy" meta={formatDate()} />
       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
-        <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+        <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
       </div>
     </div>
   )
@@ -149,7 +149,7 @@ export default function Dashboard() {
                 <div key={e.id} style={{
                   display: 'grid', gridTemplateColumns: '54px 1fr',
                   alignItems: 'center', gap: 12, paddingBottom: 10,
-                  borderBottom: i < events.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                  borderBottom: i < events.length - 1 ? '1px solid var(--border)' : 'none',
                 }}>
                   <div>
                     <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>{dayLabel}</div>
@@ -167,7 +167,7 @@ export default function Dashboard() {
       <div style={{
         fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--cream-faint)', padding: '20px 0 8px',
-        textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.10)', marginTop: 24,
+        textAlign: 'center', borderTop: '1px solid var(--border)', marginTop: 24,
       }}>
         End of edition · pull to refresh ↓
       </div>
@@ -190,10 +190,10 @@ function PantryCard({ groceries, onOpen }) {
           <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ width: 4, height: 4, borderRadius: 999, background: 'var(--accent)', flexShrink: 0 }} />
             {g.item_name}
-            {g.quantity && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.3)', marginLeft: 2 }}>×{g.quantity}</span>}
+            {g.quantity && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', marginLeft: 2 }}>×{g.quantity}</span>}
           </div>
         ))}
-        {total > 3 && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.28)', marginLeft: 10 }}>+ {total - 3} more</div>}
+        {total > 3 && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', marginLeft: 10 }}>+ {total - 3} more</div>}
       </div>
       <div style={cardLinkStyle}>Open list <ArrowRight size={11} stroke={2} /></div>
     </button>
@@ -217,7 +217,7 @@ function InterestsCard({ watchlist, onOpen }) {
               background: colors[i % colors.length],
               borderRadius: 4,
               display: 'flex', alignItems: 'flex-end', padding: 4,
-              color: 'rgba(255,255,255,0.8)',
+              color: 'var(--cream-dim)',
               fontFamily: 'var(--font-display)', fontSize: 9,
               lineHeight: 1, letterSpacing: '-0.01em',
               boxShadow: '0 4px 10px -4px rgba(0,0,0,0.6)',
@@ -234,7 +234,7 @@ function InterestsCard({ watchlist, onOpen }) {
 
 const cardStyle = {
   background: 'var(--surface-raised)',
-  border: '1px solid rgba(255,255,255,0.06)',
+  border: '1px solid var(--border)',
   borderRadius: 16, padding: '14px 14px 12px',
   textAlign: 'left', color: 'inherit', cursor: 'pointer',
   display: 'flex', flexDirection: 'column',

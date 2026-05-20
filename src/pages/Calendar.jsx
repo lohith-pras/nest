@@ -20,7 +20,7 @@ function Modal({ onClose, onSave, loading, selected, initialData = null }) {
 
   const fieldStyle = {
     background: 'transparent', border: 'none',
-    borderBottom: '1px solid rgba(255,255,255,0.18)',
+    borderBottom: '1px solid var(--border-rule)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
     fontSize: 20, color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
@@ -160,7 +160,7 @@ export default function Calendar() {
             <div key={i} style={{
               fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.16em',
               color: 'var(--cream-faint)', textAlign: 'center', paddingBottom: 6,
-              borderBottom: '1px solid rgba(255,255,255,0.08)',
+              borderBottom: '1px solid var(--border)',
             }}>{d}</div>
           ))}
           {cells.map((d, i) => {
@@ -232,7 +232,7 @@ export default function Calendar() {
 
         {loading ? (
           <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
-            <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+            <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
           </div>
         ) : upcomingEvents.length === 0 ? (
           <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: 'var(--cream-faint)', padding: '24px 0' }}>
@@ -250,10 +250,37 @@ export default function Calendar() {
       <div style={{
         fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--cream-faint)', marginTop: 28, paddingTop: 18,
-        borderTop: '1px solid rgba(255,255,255,0.10)', textAlign: 'center',
+        borderTop: '1px solid var(--border)', textAlign: 'center',
       }}>
         Synced · shared calendar
       </div>
+
+      {/* FAB — add event */}
+      <button
+        onClick={() => { setEditData(null); setShowModal(true) }}
+        onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
+        onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
+        onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
+        style={{
+          position: 'fixed',
+          bottom: 'calc(92px + env(safe-area-inset-bottom))',
+          right: 20,
+          width: 52, height: 52,
+          borderRadius: '50%',
+          background: 'var(--accent)',
+          color: '#fff',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          boxShadow: '0 4px 20px rgba(154,129,116,0.35)',
+          transition: 'transform 150ms var(--ease-spring)',
+          zIndex: 40,
+        }}
+      >
+        <PlusIcon size={22} stroke={2} />
+      </button>
     </div>
   )
 }
@@ -264,7 +291,7 @@ function EventRow({ ev, onDelete, onEdit, isLast }) {
     <div style={{
       display: 'grid', gridTemplateColumns: '54px 1fr auto auto',
       alignItems: 'center', gap: 12, padding: '10px 0',
-      borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
+      borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
       <div>
         <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>

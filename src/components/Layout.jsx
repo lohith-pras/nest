@@ -62,7 +62,7 @@ export default function Layout() {
         flex: 1,
         padding: '0 20px',
         paddingTop: 'max(16px, env(safe-area-inset-top))',
-        paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
+        paddingBottom: 'calc(96px + env(safe-area-inset-bottom))',
         overflowY: 'auto',
         overflowX: 'hidden',
         color: 'var(--cream)',
@@ -72,13 +72,17 @@ export default function Layout() {
 
       <nav className="bottom-nav" style={{
         position: 'fixed',
-        bottom: 0, left: 0, right: 0,
-        display: 'grid',
-        gridTemplateColumns: 'repeat(5, 1fr)',
-        gap: 4,
-        padding: '10px 12px',
-        paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
+        bottom: 'calc(16px + env(safe-area-inset-bottom))',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        display: 'flex',
+        alignItems: 'center',
+        padding: '6px 6px',
+        borderRadius: 999,
+        gap: 2,
         zIndex: 50,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08)',
+        whiteSpace: 'nowrap',
       }}>
         {NAV_ITEMS.map(item => (
           <NavLink
@@ -86,20 +90,30 @@ export default function Layout() {
             to={item.to}
             end={item.exact}
             style={({ isActive }) => ({
-              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: 3,
               color: isActive ? 'var(--cream)' : 'var(--cream-faint)',
               fontFamily: 'var(--font-mono)',
-              fontSize: 9, fontWeight: 500,
-              letterSpacing: '0.16em', textTransform: 'uppercase',
-              transition: 'color 200ms',
+              fontSize: 9,
+              fontWeight: 500,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              transition: 'all 220ms var(--ease-spring)',
               WebkitTapHighlightColor: 'transparent',
               textDecoration: 'none',
+              padding: isActive ? '8px 14px' : '10px 12px',
+              borderRadius: 999,
+              background: isActive ? 'var(--surface-hover)' : 'transparent',
+              minWidth: 44,
+              justifyContent: 'center',
             })}
           >
             {({ isActive }) => (
               <>
                 {item.icon(isActive)}
-                <span>{item.label}</span>
+                {isActive && <span style={{ lineHeight: 1 }}>{item.label}</span>}
               </>
             )}
           </NavLink>

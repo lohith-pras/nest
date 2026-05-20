@@ -2,40 +2,43 @@
 
 /* ── Editorial Roomy Design Tokens ──────────────────────────── */
 :root {
-  /* ── Dark editorial palette ─── */
-  --bg: #050206;
-  --surface: #0c0a0c;
-  --surface-mid: #131113;
-  --surface-raised: #1c191a;
-  --surface-hover: #262324;
+  /* ── Light editorial palette (default) ─── */
+  --bg: #F5F2EE;
+  --surface: #FFFFFF;
+  --surface-mid: #F0EDE8;
+  --surface-raised: #ECEAE5;
+  --surface-hover: #E5E2DC;
   --charcoal: #3B3B3B;
 
   --accent: #9A8174;
   --accent-soft: #b09d92;
   --accent-deep: #7d6557;
+  --accent-rgb: 154, 129, 116;
 
-  --cream: #FFFFFF;
-  --cream-dim: rgba(255,255,255,0.72);
-  --cream-faint: rgba(255,255,255,0.42);
+  --cream: #1A1618;
+  --cream-dim: rgba(26,22,24,0.72);
+  --cream-faint: rgba(26,22,24,0.42);
 
   /* ── Legacy compat tokens ─── */
-  --fg: #FFFFFF;
-  --muted: rgba(255,255,255,0.45);
-  --primary: #FFFFFF;
-  --primary-hover: rgba(255,255,255,0.90);
-  --primary-fg: #050206;
-  --secondary: #1c191a;
+  --fg: #1A1618;
+  --muted: rgba(26,22,24,0.45);
+  --primary: #1A1618;
+  --primary-hover: rgba(26,22,24,0.90);
+  --primary-fg: #F5F2EE;
+  --secondary: #ECEAE5;
   --tertiary: #9A8174;
-  --danger: #e57373;
-  --danger-hover: #ef9a9a;
-  --success: #81c784;
-  --border: rgba(255,255,255,0.08);
-  --border-rule: rgba(255,255,255,0.18);
-  --glass-bg: rgba(28,25,26,0.88);
-  --nav-bg: rgba(5,2,6,0.94);
-  --input-bg: rgba(255,255,255,0.05);
-  --input-focus-bg: rgba(255,255,255,0.09);
-  --surface-hover-legacy: #262324;
+  --danger: #d32f2f;
+  --danger-hover: #ef5350;
+  --success: #2e7d32;
+  --border: rgba(0,0,0,0.08);
+  --border-rule: rgba(0,0,0,0.18);
+  --glass-bg: rgba(255,255,255,0.88);
+  --nav-bg: rgba(250,248,245,0.94);
+  --input-bg: rgba(0,0,0,0.04);
+  --input-focus-bg: rgba(0,0,0,0.07);
+  --input-border: rgba(26,22,24,0.22);
+  --overlay-bg: rgba(245,242,238,0.82);
+  --scrollbar-thumb: rgba(0,0,0,0.15);
 
   /* ── Typography ─────────────── */
   --font-display: "Instrument Serif", Georgia, serif;
@@ -61,10 +64,37 @@
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* Dark class is a no-op — palette is always dark editorial */
-:root.dark { }
-:root.dark body { }
-:root.dark #root { }
+/* ── Dark palette ───────────────────────────────────────────── */
+:root.dark {
+  --bg: #050206;
+  --surface: #0c0a0c;
+  --surface-mid: #131113;
+  --surface-raised: #1c191a;
+  --surface-hover: #262324;
+
+  --cream: #FFFFFF;
+  --cream-dim: rgba(255,255,255,0.72);
+  --cream-faint: rgba(255,255,255,0.42);
+
+  --fg: #FFFFFF;
+  --muted: rgba(255,255,255,0.45);
+  --primary: #FFFFFF;
+  --primary-hover: rgba(255,255,255,0.90);
+  --primary-fg: #050206;
+  --secondary: #1c191a;
+  --danger: #e57373;
+  --danger-hover: #ef9a9a;
+  --success: #81c784;
+  --border: rgba(255,255,255,0.08);
+  --border-rule: rgba(255,255,255,0.18);
+  --glass-bg: rgba(28,25,26,0.88);
+  --nav-bg: rgba(5,2,6,0.94);
+  --input-bg: rgba(255,255,255,0.05);
+  --input-focus-bg: rgba(255,255,255,0.09);
+  --input-border: rgba(255,255,255,0.22);
+  --overlay-bg: rgba(5,2,6,0.78);
+  --scrollbar-thumb: rgba(255,255,255,0.12);
+}
 
 /* ── Reset & Base ───────────────────────────────────────────── */
 *, *::before, *::after {
@@ -73,11 +103,14 @@
   padding: 0;
 }
 
-html { height: 100%; }
+html {
+  height: 100%;
+  transition: background-color 250ms ease, color 250ms ease;
+}
 
 body {
   font-family: var(--font-body);
-  background-color: #020103;
+  background-color: var(--bg);
   color: var(--fg);
   min-height: 100%;
   text-rendering: optimizeLegibility;
@@ -148,12 +181,12 @@ input, textarea, select {
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255,255,255,0.07);
+  border: 1px solid var(--border);
 }
 
 .glass-card {
   background: var(--surface-raised);
-  border: 1px solid rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   transition: transform 160ms var(--ease-out), background 160ms var(--ease-out);
 }
@@ -165,9 +198,9 @@ input, textarea, select {
 /* ── Bottom Nav ─────────────────────────────────────────────── */
 .bottom-nav {
   background: var(--nav-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-rule);
 }
 
 /* ── Sidebar ────────────────────────────────────────────────── */
@@ -225,7 +258,7 @@ input, textarea, select {
 .btn-ghost {
   background: transparent;
   color: var(--cream);
-  border: 1px solid rgba(255,255,255,0.25);
+  border: 1px solid var(--border-rule);
   border-radius: 999px;
   padding: 10px 18px;
   font-family: var(--font-body);
@@ -253,7 +286,7 @@ input, textarea, select {
   width: 100%;
   background: transparent;
   border: none;
-  border-bottom: 1px solid rgba(255,255,255,0.22);
+  border-bottom: 1px solid var(--input-border);
   padding: 10px 0;
   font-family: var(--font-display);
   font-size: 20px;
@@ -311,7 +344,7 @@ input, textarea, select {
 .modal-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(5,2,6,0.75);
+  background: var(--overlay-bg);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   display: flex;
@@ -325,7 +358,7 @@ input, textarea, select {
   border-radius: 20px 20px 0 0;
   padding: 32px 24px calc(32px + env(safe-area-inset-bottom));
   width: 100%;
-  border: 1px solid rgba(255,255,255,0.08);
+  border: 1px solid var(--border);
   border-bottom: none;
   will-change: transform, opacity;
 }
@@ -362,7 +395,7 @@ input, textarea, select {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.12);
+  background: var(--scrollbar-thumb);
   border-radius: 99px;
 }
 
