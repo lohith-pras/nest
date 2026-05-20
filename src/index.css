@@ -41,8 +41,8 @@
   --scrollbar-thumb: rgba(0,0,0,0.15);
 
   /* ── Typography ─────────────── */
-  --font-display: "Instrument Serif", Georgia, serif;
-  --font-body: "Geist", "Geist Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Newsreader", Georgia, serif;
+  --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
 
   /* ── Spacing ─────────────────── */
