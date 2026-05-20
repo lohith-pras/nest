@@ -1,10 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
+import { Masthead, SectionRule, Kicker, PlusIcon, XIcon } from '../components/RoomyUI'
 
-const DAYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
 
 function Modal({ onClose, onSave, loading, selected, initialData = null }) {
@@ -19,28 +18,40 @@ function Modal({ onClose, onSave, loading, selected, initialData = null }) {
     onSave({ title, date, time: time || null, note: note || null }, initialData?.id)
   }
 
+  const fieldStyle = {
+    background: 'transparent', border: 'none',
+    borderBottom: '1px solid rgba(255,255,255,0.18)',
+    padding: '10px 0', fontFamily: 'var(--font-display)',
+    fontSize: 20, color: 'var(--cream)', outline: 'none',
+    letterSpacing: '-0.01em', width: '100%',
+  }
+  const labelStyle = {
+    fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em',
+    textTransform: 'uppercase', color: 'var(--cream-faint)', display: 'block', marginBottom: 6,
+  }
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()}>
-        <h2 className="font-display" style={{ fontSize: '1.4rem', fontWeight: 800, marginBottom: 24 }}>
-          {initialData ? 'Edit Event' : 'Add Event'}
-        </h2>
-        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 22 }}>
+          {initialData ? 'Edit event.' : 'New event.'}
+        </div>
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {[
-            { label: 'Event Title', type: 'text', val: title, set: setTitle, placeholder: 'e.g. Movie night' },
-            { label: 'Date', type: 'date', val: date, set: setDate, placeholder: '' },
-            { label: 'Time (optional)', type: 'time', val: time, set: setTime, placeholder: '' },
-            { label: 'Note (optional)', type: 'text', val: note, set: setNote, placeholder: 'Any details…' },
-          ].map(({ label, type, val, set, placeholder }) => (
+            { label: 'Event title', type: 'text', val: title, set: setTitle, placeholder: 'e.g. Movie night', req: true },
+            { label: 'Date', type: 'date', val: date, set: setDate, placeholder: '', req: true },
+            { label: 'Time (optional)', type: 'time', val: time, set: setTime, placeholder: '', req: false },
+            { label: 'Note (optional)', type: 'text', val: note, set: setNote, placeholder: 'Any details…', req: false },
+          ].map(({ label, type, val, set, placeholder, req }) => (
             <div key={label}>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</label>
-              <input className="input" type={type} value={val} onChange={e => set(e.target.value)} placeholder={placeholder} required={!label.includes('optional')} />
+              <label style={labelStyle}>{label}</label>
+              <input style={fieldStyle} type={type} value={val} onChange={e => set(e.target.value)} placeholder={placeholder} required={req} />
             </div>
           ))}
-          <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+          <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
             <button type="button" className="btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1, justifyContent: 'center' }}>
-              {loading ? '…' : 'Save Event'}
+              {loading ? '…' : 'Save event'}
             </button>
           </div>
         </form>
@@ -61,24 +72,8 @@ export default function Calendar() {
   const today = new Date()
   const [viewYear, setViewYear] = useState(today.getFullYear())
   const [viewMonth, setViewMonth] = useState(today.getMonth())
-  const containerRef = useRef(null)
 
   useEffect(() => { load() }, [])
-
-  useGSAP(() => {
-    if (loading) return
-    gsap.from('header', { autoAlpha: 0, y: -8, duration: 0.35, ease: 'expo.out' })
-    gsap.from('.glass-card', {
-      autoAlpha: 0,
-      y: 8,
-      stagger: 0.04,
-      duration: 0.35,
-      ease: 'expo.out',
-      delay: 0.05,
-      clearProps: 'opacity,visibility,transform',
-      force3D: true
-    })
-  }, { scope: containerRef, dependencies: [loading] })
 
   async function load() {
     const { data } = await supabase.from('events').select('*').order('date', { ascending: true })
@@ -103,7 +98,6 @@ export default function Calendar() {
     setEvents(prev => prev.filter(e => e.id !== id))
   }
 
-  // Calendar grid
   const firstDay = new Date(viewYear, viewMonth, 1).getDay()
   const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate()
   const cells = Array.from({ length: firstDay + daysInMonth }, (_, i) =>
@@ -120,145 +114,175 @@ export default function Calendar() {
     return `${viewYear}-${String(viewMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`
   }
 
+  const todayStr = today.toISOString().split('T')[0]
   const selectedEvents = selectedDate ? (eventsByDate[selectedDate] || []) : []
-  const upcomingEvents = events.filter(e => e.date >= today.toISOString().split('T')[0])
+  const upcomingEvents = events.filter(e => e.date >= todayStr)
+  const monthLabel = `${MONTHS[viewMonth]} ${viewYear}`
 
   return (
-    <div ref={containerRef}>
+    <div style={{ paddingTop: 16 }}>
       {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveEvent} loading={adding} selected={selectedDate} initialData={editData} />}
 
-      <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16, flexWrap: 'wrap' }}>
-        <div>
-          <h1 className="font-display" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800 }}>Calendar</h1>
-          <p style={{ color: 'var(--muted)', marginTop: 4 }}>{upcomingEvents.length} upcoming event{upcomingEvents.length !== 1 ? 's' : ''}</p>
-        </div>
-        <button className="btn-primary" onClick={() => { setEditData(null); setSelectedDate(today.toISOString().split('T')[0]); setShowModal(true) }}>
-          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-          Add Event
-        </button>
-      </header>
+      <Masthead title="Calendar" meta={`${upcomingEvents.length} events`} />
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
+      <div style={{ marginTop: 18 }}>
+        <Kicker>The agenda</Kicker>
+        <h1 style={{
+          fontFamily: 'var(--font-display)', fontSize: 'clamp(34px, 10vw, 44px)',
+          lineHeight: 0.95, margin: '8px 0 0', letterSpacing: '-0.025em', color: 'var(--cream)',
+        }}>
+          {MONTHS[viewMonth].slice(0, 3)}{' '}
+          <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>{viewYear}</span>
+        </h1>
+      </div>
 
-        {/* Month grid */}
-        <div className="glass-card" style={{ padding: 24 }}>
-          {/* Nav */}
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
-            <button onClick={() => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) } else setViewMonth(m => m - 1) }}
-              style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-              onMouseOver={e => e.currentTarget.style.background = 'rgba(0,0,0,0.05)'}
-              onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <h2 className="font-display" style={{ fontWeight: 800, fontSize: '1.1rem' }}>{MONTHS[viewMonth]} {viewYear}</h2>
-            <button onClick={() => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) } else setViewMonth(m => m + 1) }}
-              style={{ width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'background 0.2s' }}
-              onMouseOver={e => e.currentTarget.style.background = 'rgba(0,0,0,0.05)'}
-              onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-          </div>
-
-          {/* Day headers */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', marginBottom: 8 }}>
-            {DAYS.map(d => (
-              <div key={d} style={{ textAlign: 'center', fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '4px 0' }}>{d}</div>
-            ))}
-          </div>
-
-          {/* Cells */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 3 }}>
-            {cells.map((day, i) => {
-              if (!day) return <div key={i} />
-              const ds = dateStr(day)
-              const isToday = ds === today.toISOString().split('T')[0]
-              const hasEvent = !!eventsByDate[ds]
-              const isSelected = selectedDate === ds
-              return (
-                <button key={i} onClick={() => setSelectedDate(isSelected ? null : ds)} style={{
-                  padding: '8px 4px', borderRadius: 10, textAlign: 'center', fontSize: '0.9rem',
-                  fontWeight: isToday ? 800 : 500,
-                  background: isSelected ? 'var(--primary)' : isToday ? 'var(--secondary)' : 'transparent',
-                  color: isSelected ? 'white' : isToday ? 'var(--primary)' : 'var(--fg)',
-                  position: 'relative', transition: 'all 0.15s ease',
-                  cursor: 'pointer',
-                }}
-                  onMouseOver={e => { if (!isSelected) e.currentTarget.style.background = 'rgba(0,0,0,0.05)' }}
-                  onMouseOut={e => { if (!isSelected) e.currentTarget.style.background = isToday ? 'var(--secondary)' : 'transparent' }}
-                >
-                  {day}
-                  {hasEvent && (
-                    <span style={{
-                      position: 'absolute', bottom: 2, left: '50%', transform: 'translateX(-50%)',
-                      width: 5, height: 5, borderRadius: '50%',
-                      background: isSelected ? 'white' : 'var(--primary)',
-                    }} />
-                  )}
-                </button>
-              )
-            })}
-          </div>
+      {/* Month nav + grid */}
+      <div style={{ marginTop: 22 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+          <button
+            onClick={() => { if (viewMonth === 0) { setViewMonth(11); setViewYear(y => y - 1) } else setViewMonth(m => m - 1) }}
+            style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>{monthLabel}</div>
+          <button
+            onClick={() => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) } else setViewMonth(m => m + 1) }}
+            style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
         </div>
 
-        {/* Event detail / upcoming */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          {selectedDate && (
-            <div className="glass-card" style={{ padding: 20 }}>
-              <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>
-                {new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-              </p>
-              {selectedEvents.length === 0
-                ? (
-                  <div>
-                    <p style={{ color: 'var(--muted)', fontSize: '0.9rem', marginBottom: 12 }}>No events</p>
-                    <button className="btn-primary" style={{ fontSize: '0.85rem', padding: '8px 16px' }} onClick={() => { setEditData(null); setShowModal(true) }}>+ Add event</button>
-                  </div>
-                )
-                : selectedEvents.map(ev => <EventCard key={ev.id} ev={ev} onDelete={deleteEvent} onEdit={() => { setEditData(ev); setShowModal(true) }} />)
-              }
+        {/* Day headers */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', rowGap: 4 }}>
+          {DAYS.map((d, i) => (
+            <div key={i} style={{
+              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.16em',
+              color: 'var(--cream-faint)', textAlign: 'center', paddingBottom: 6,
+              borderBottom: '1px solid rgba(255,255,255,0.08)',
+            }}>{d}</div>
+          ))}
+          {cells.map((d, i) => {
+            if (!d) return <div key={i} />
+            const ds = dateStr(d)
+            const isToday = ds === todayStr
+            const hasDot = !!eventsByDate[ds]
+            const isSelected = selectedDate === ds
+            return (
+              <button key={i} onClick={() => setSelectedDate(isSelected ? null : ds)} style={{
+                aspectRatio: '1', display: 'flex', flexDirection: 'column',
+                alignItems: 'center', justifyContent: 'center',
+                position: 'relative', padding: 2,
+                background: 'none', border: 'none', cursor: 'pointer',
+              }}>
+                <div style={{
+                  width: 30, height: 30, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: 999,
+                  background: isSelected ? 'var(--cream)' : isToday ? 'rgba(154,129,116,0.2)' : 'transparent',
+                  border: isToday && !isSelected ? '1px solid rgba(154,129,116,0.5)' : 'none',
+                }}>
+                  <span style={{
+                    fontFamily: isToday ? 'var(--font-display)' : 'var(--font-body)',
+                    fontSize: isToday ? 18 : 13,
+                    color: isSelected ? 'var(--primary-fg)' : isToday ? 'var(--cream)' : 'var(--cream-dim)',
+                    fontWeight: isToday ? 400 : 500, lineHeight: 1,
+                  }}>{d}</span>
+                </div>
+                {hasDot && (
+                  <span style={{
+                    position: 'absolute', bottom: 2, left: '50%', transform: 'translateX(-50%)',
+                    width: 3, height: 3, borderRadius: 999,
+                    background: isSelected ? 'var(--primary-fg)' : 'var(--accent)',
+                  }} />
+                )}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Selected date events */}
+      {selectedDate && (
+        <div style={{ marginTop: 22 }}>
+          <SectionRule
+            label={new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+            right={<button onClick={() => { setEditData(null); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' }}><PlusIcon size={10} stroke={2} /> Add</button>}
+          />
+          {selectedEvents.length === 0 ? (
+            <div style={{ padding: '16px 0', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--cream-faint)' }}>
+              No events — <button onClick={() => { setEditData(null); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-soft)', fontFamily: 'var(--font-body)', fontSize: 13 }}>add one</button>
+            </div>
+          ) : (
+            <div style={{ marginTop: 12 }}>
+              {selectedEvents.map((ev, i) => (
+                <EventRow key={ev.id} ev={ev} onDelete={deleteEvent} onEdit={() => { setEditData(ev); setShowModal(true) }} isLast={i === selectedEvents.length - 1} />
+              ))}
             </div>
           )}
-
-          <div className="glass-card" style={{ padding: 20 }}>
-            <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Upcoming</p>
-            {loading ? <div className="animate-spin" style={{ width: 24, height: 24, border: '2px solid var(--secondary)', borderTopColor: 'var(--primary)', borderRadius: '50%' }} />
-              : upcomingEvents.length === 0
-                ? <p style={{ color: 'var(--muted)', fontSize: '0.9rem' }}>Nothing scheduled</p>
-                : <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                  {upcomingEvents.slice(0, 6).map(ev => <EventCard key={ev.id} ev={ev} onDelete={deleteEvent} onEdit={() => { setEditData(ev); setShowModal(true) }} compact />)}
-                </div>
-            }
-          </div>
         </div>
+      )}
+
+      {/* Upcoming */}
+      <div style={{ marginTop: 26 }}>
+        <SectionRule
+          label="01 — Coming up"
+          right={<button onClick={() => { setEditData(null); setSelectedDate(todayStr); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' }}><PlusIcon size={10} stroke={2} /> Add event</button>}
+        />
+
+        {loading ? (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+            <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+          </div>
+        ) : upcomingEvents.length === 0 ? (
+          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: 'var(--cream-faint)', padding: '24px 0' }}>
+            Nothing scheduled yet.
+          </div>
+        ) : (
+          <div style={{ marginTop: 12 }}>
+            {upcomingEvents.slice(0, 8).map((ev, i) => (
+              <EventRow key={ev.id} ev={ev} onDelete={deleteEvent} onEdit={() => { setEditData(ev); setShowModal(true) }} isLast={i === Math.min(upcomingEvents.length, 8) - 1} />
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div style={{
+        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+        color: 'var(--cream-faint)', marginTop: 28, paddingTop: 18,
+        borderTop: '1px solid rgba(255,255,255,0.10)', textAlign: 'center',
+      }}>
+        Synced · shared calendar
       </div>
     </div>
   )
 }
 
-function EventCard({ ev, onDelete, onEdit, compact }) {
+function EventRow({ ev, onDelete, onEdit, isLast }) {
   const d = new Date(ev.date + 'T12:00:00')
   return (
-    <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start', padding: compact ? '8px 0' : 0, borderBottom: compact ? '1px solid rgba(0,0,0,0.05)' : 'none' }}>
-      <div style={{ flexShrink: 0, textAlign: 'center', width: 40 }}>
-        <p style={{ fontSize: '0.65rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase' }}>{d.toLocaleDateString('en-US', { month: 'short' })}</p>
-        <p className="font-display" style={{ fontSize: '1.2rem', fontWeight: 800, lineHeight: 1 }}>{d.getDate()}</p>
+    <div style={{
+      display: 'grid', gridTemplateColumns: '54px 1fr auto auto',
+      alignItems: 'center', gap: 12, padding: '10px 0',
+      borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
+    }}>
+      <div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>
+          {d.toLocaleDateString('en-US', { weekday: 'short' })}
+        </div>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--cream)', marginTop: 1 }}>
+          {ev.time || '—'}
+        </div>
       </div>
-      <div style={{ flex: 1 }}>
-        <p style={{ fontWeight: 700, marginBottom: 2 }}>{ev.title}</p>
-        {ev.time && <p style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>{ev.time}</p>}
-        {ev.note && <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: 2 }}>{ev.note}</p>}
+      <div>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{ev.title}</div>
+        {ev.note && <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 2 }}>{ev.note}</div>}
       </div>
-      
-      <button onClick={onEdit} style={{ color: 'var(--muted)', flexShrink: 0, transition: 'color 0.2s', padding: 2 }}
-        onMouseOver={e => e.currentTarget.style.color = 'var(--fg)'}
-        onMouseOut={e => e.currentTarget.style.color = 'var(--muted)'}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121(0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <button onClick={onEdit} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, opacity: 0.7 }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 4l6 6L9 21H3v-6L14 4z"/></svg>
       </button>
-
-      <button onClick={() => onDelete(ev.id)} style={{ color: 'var(--muted)', flexShrink: 0, transition: 'color 0.2s', padding: 2 }}
-        onMouseOver={e => e.currentTarget.style.color = 'var(--danger)'}
-        onMouseOut={e => e.currentTarget.style.color = 'var(--muted)'}>
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <button onClick={() => onDelete(ev.id)} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, opacity: 0.6 }}>
+        <XIcon size={13} />
       </button>
     </div>
   )

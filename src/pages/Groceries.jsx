@@ -1,8 +1,7 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
+import { Masthead, SectionRule, Kicker, InitialsAvatar, PlusIcon, CheckIcon, XIcon } from '../components/RoomyUI'
 
 export default function Groceries() {
   const { session, profile } = useAuth()
@@ -11,32 +10,14 @@ export default function Groceries() {
   const [newItem, setNewItem] = useState('')
   const [newQty, setNewQty] = useState('')
   const [adding, setAdding] = useState(false)
-  const containerRef = useRef(null)
-
-  useGSAP(() => {
-    if (loading) return
-    gsap.from('header', { autoAlpha: 0, y: -8, duration: 0.35, ease: 'expo.out' })
-    gsap.from('form', { autoAlpha: 0, y: 4, duration: 0.35, delay: 0.04, ease: 'expo.out' })
-    gsap.from('.glass-card', {
-      autoAlpha: 0,
-      y: 8,
-      stagger: 0.025,
-      duration: 0.35,
-      ease: 'expo.out',
-      clearProps: 'opacity,visibility,transform',
-      force3D: true
-    })
-  }, { scope: containerRef, dependencies: [loading] })
+  const [editingId, setEditingId] = useState(null)
 
   useEffect(() => {
     load()
-
-    // Real-time subscription
     const channel = supabase
       .channel('groceries-room')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'groceries' }, () => load())
       .subscribe()
-
     return () => supabase.removeChannel(channel)
   }, [])
 
@@ -49,18 +30,15 @@ export default function Groceries() {
     setLoading(false)
   }
 
-  const [editingId, setEditingId] = useState(null)
-
   async function handleSubmit(e) {
     e.preventDefault()
     if (!newItem.trim()) return
     setAdding(true)
-
     if (editingId) {
       await supabase.from('groceries').update({
         item_name: newItem.trim(),
         quantity: newQty.trim() || null,
-        updated_at: new Date().toISOString()
+        updated_at: new Date().toISOString(),
       }).eq('id', editingId)
       setEditingId(null)
     } else {
@@ -69,21 +47,13 @@ export default function Groceries() {
         quantity: newQty.trim() || null,
         is_checked: false,
         added_by: session.user.id,
-        unit_id: profile?.unit_id || null
+        unit_id: profile?.unit_id || null,
       })
     }
-    
     setNewItem('')
     setNewQty('')
     setAdding(false)
     load()
-  }
-
-  function handleEdit(item) {
-    setNewItem(item.item_name)
-    setNewQty(item.quantity || '')
-    setEditingId(item.id)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
   }
 
   async function toggleItem(id, current) {
@@ -104,141 +74,190 @@ export default function Groceries() {
     setItems(prev => prev.filter(i => !i.is_checked))
   }
 
+  function handleEdit(item) {
+    setNewItem(item.item_name)
+    setNewQty(item.quantity || '')
+    setEditingId(item.id)
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
   const unchecked = items.filter(i => !i.is_checked)
   const checked = items.filter(i => i.is_checked)
 
   return (
-    <div ref={containerRef}>
-      <header style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32, gap: 16, flexWrap: 'wrap' }}>
-        <div>
-          <h1 className="font-display" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.5rem)', fontWeight: 800 }}>Groceries</h1>
-          <p style={{ color: 'var(--muted)', marginTop: 4 }}>
-            {unchecked.length} item{unchecked.length !== 1 ? 's' : ''} left
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, marginLeft: 8 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#10b981', display: 'inline-block' }} className="animate-pulse" />
-              <span style={{ fontSize: '0.75rem' }}>Live sync</span>
-            </span>
-          </p>
-        </div>
-        {checked.length > 0 && (
-          <button className="btn-ghost" onClick={clearChecked} style={{ fontSize: '0.85rem' }}>
-            Clear checked ({checked.length})
-          </button>
-        )}
-      </header>
+    <div style={{ paddingTop: 16 }}>
+      <Masthead
+        title="Pantry"
+        meta={
+          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+            <span style={{ width: 6, height: 6, borderRadius: 999, background: '#7AC57E' }} />
+            Live · {unchecked.length} left
+          </span>
+        }
+      />
 
-      {/* Add Item Form */}
-      <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 10, marginBottom: 32, flexWrap: 'wrap' }}>
+      <div style={{ marginTop: 18 }}>
+        <Kicker>The pantry</Kicker>
+        <h1 style={{
+          fontFamily: 'var(--font-display)', fontSize: 'clamp(34px, 10vw, 44px)',
+          lineHeight: 0.95, margin: '8px 0 0', letterSpacing: '-0.025em', color: 'var(--cream)',
+        }}>
+          Things you<br />
+          <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>still need.</span>
+        </h1>
+      </div>
+
+      {/* Add row */}
+      <form onSubmit={handleSubmit} style={{
+        display: 'grid', gridTemplateColumns: '1fr 70px 60px', gap: 6, marginTop: 22,
+        padding: '10px 12px', background: 'var(--surface-raised)', borderRadius: 14,
+        border: '1px solid rgba(255,255,255,0.06)',
+        alignItems: 'center',
+      }}>
         <input
-          className="input"
-          style={{ flex: 2, minWidth: 160 }}
           value={newItem}
           onChange={e => setNewItem(e.target.value)}
-          placeholder="Item name…"
+          placeholder="Add something…"
+          style={{
+            background: 'transparent', border: 'none', outline: 'none',
+            fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--cream)', padding: '6px 4px',
+          }}
         />
         <input
-          className="input"
-          style={{ flex: 1, minWidth: 100, maxWidth: 140 }}
           value={newQty}
           onChange={e => setNewQty(e.target.value)}
-          placeholder="Qty (optional)"
+          placeholder="Qty"
+          style={{
+            background: 'transparent', border: 'none', outline: 'none',
+            fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--cream)', padding: '6px 4px',
+          }}
         />
-        <button type="submit" className="btn-primary" disabled={adding || !newItem.trim()}>
-          {adding ? '…' : editingId ? 'Save' : (
-            <>
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-              Add
-            </>
-          )}
+        <button type="submit" disabled={adding || !newItem.trim()} style={{
+          background: 'var(--cream)', color: 'var(--primary-fg)',
+          border: 'none', borderRadius: 999,
+          fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600,
+          cursor: 'pointer', padding: '8px 4px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 3,
+          opacity: adding || !newItem.trim() ? 0.5 : 1,
+        }}>
+          <PlusIcon size={13} stroke={2.5} />
+          {editingId ? 'Save' : 'Add'}
         </button>
-        {editingId && (
-          <button type="button" className="btn-ghost" onClick={() => { setEditingId(null); setNewItem(''); setNewQty('') }}>Cancel</button>
-        )}
       </form>
+      {editingId && (
+        <button onClick={() => { setEditingId(null); setNewItem(''); setNewQty('') }} className="btn-ghost" style={{ marginTop: 8, fontSize: 12, padding: '6px 14px' }}>
+          Cancel edit
+        </button>
+      )}
 
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-          <div className="animate-spin" style={{ width: 36, height: 36, border: '3px solid var(--secondary)', borderTopColor: 'var(--primary)', borderRadius: '50%' }} />
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
+          <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
         </div>
       ) : (
         <>
-          {items.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--muted)' }}>
-              <p style={{ fontSize: '3rem', marginBottom: 12 }}>🛒</p>
-              <p style={{ fontWeight: 700 }}>List is empty</p>
-              <p style={{ fontSize: '0.9rem' }}>Add items above</p>
+          {/* To grab */}
+          <div style={{ marginTop: 24 }}>
+            <SectionRule label="01 — To grab" right={`${unchecked.length} items`} />
+            <div style={{ marginTop: 12 }}>
+              {unchecked.map((item, i) => (
+                <GroceryRow
+                  key={item.id} item={item}
+                  isMe={item.added_by === session?.user?.id}
+                  onToggle={() => toggleItem(item.id, item.is_checked)}
+                  onDelete={() => deleteItem(item.id)}
+                  onEdit={() => handleEdit(item)}
+                  isLast={i === unchecked.length - 1}
+                />
+              ))}
+              {unchecked.length === 0 && (
+                <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: 'var(--cream-faint)', padding: '24px 0', textAlign: 'center' }}>
+                  Pantry's full. Nice work, you two.
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* In cart */}
+          {checked.length > 0 && (
+            <div style={{ marginTop: 28 }}>
+              <SectionRule
+                label={`02 — In cart · ${checked.length}`}
+                right={<span onClick={clearChecked} style={{ cursor: 'pointer' }}>Clear all</span>}
+              />
+              <div style={{ marginTop: 12 }}>
+                {checked.map((item, i) => (
+                  <GroceryRow
+                    key={item.id} item={item}
+                    isMe={item.added_by === session?.user?.id}
+                    onToggle={() => toggleItem(item.id, item.is_checked)}
+                    onDelete={() => deleteItem(item.id)}
+                    onEdit={() => handleEdit(item)}
+                    isLast={i === checked.length - 1}
+                  />
+                ))}
+              </div>
             </div>
           )}
 
-          {unchecked.length > 0 && (
-            <section style={{ marginBottom: 28 }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {unchecked.map(item => (
-                  <GroceryRow key={item.id} item={item} onToggle={toggleItem} onDelete={deleteItem} onEdit={() => handleEdit(item)} />
-                ))}
-              </div>
-            </section>
-          )}
-
-          {/* Checked */}
-          {checked.length > 0 && (
-            <section style={{ opacity: 0.5 }}>
-              <p style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>In cart</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {checked.map(item => (
-                  <GroceryRow key={item.id} item={item} onToggle={toggleItem} onDelete={deleteItem} onEdit={() => handleEdit(item)} />
-                ))}
-              </div>
-            </section>
-          )}
+          <div style={{
+            fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: 'var(--cream-faint)', marginTop: 28, paddingTop: 18,
+            borderTop: '1px solid rgba(255,255,255,0.10)', textAlign: 'center',
+          }}>
+            Live-synced · shared list
+          </div>
         </>
       )}
     </div>
   )
 }
 
-function GroceryRow({ item, onToggle, onDelete, onEdit }) {
+function GroceryRow({ item, isMe, onToggle, onDelete, onEdit, isLast }) {
+  const checked = item.is_checked
+
   return (
-    <div className="glass-card" style={{
-      padding: '14px 18px',
-      display: 'flex', alignItems: 'center', gap: 14,
-      textDecoration: item.is_checked ? 'line-through' : 'none',
+    <div style={{
+      display: 'grid', gridTemplateColumns: '26px 1fr auto auto auto',
+      alignItems: 'center', gap: 10,
+      padding: '12px 0',
+      borderBottom: isLast ? 'none' : '1px solid rgba(255,255,255,0.06)',
     }}>
-      <button
-        onClick={() => onToggle(item.id, item.is_checked)}
-        style={{
-          width: 24, height: 24, borderRadius: 8, flexShrink: 0,
-          border: `2px solid ${item.is_checked ? 'var(--primary)' : 'var(--border)'}`,
-          background: item.is_checked ? 'var(--primary)' : 'transparent',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          transition: 'all 0.2s ease',
-        }}
-      >
-        {item.is_checked && (
-          <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-        )}
-      </button>
-      <span style={{ flex: 1, fontWeight: 500 }}>{item.item_name}</span>
-      {item.quantity && (
-        <span style={{ fontSize: '0.8rem', color: 'var(--muted)', fontWeight: 600 }}>{item.quantity}</span>
-      )}
-      
-      <button
-        onClick={onEdit}
-        style={{ color: 'var(--muted)', padding: 4, borderRadius: 8, transition: 'color 0.2s', flexShrink: 0 }}
-        onMouseOver={e => e.currentTarget.style.color = 'var(--fg)'}
-        onMouseOut={e => e.currentTarget.style.color = 'var(--muted)'}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      <button onClick={onToggle} style={{
+        width: 22, height: 22,
+        border: `1.5px solid ${checked ? 'var(--accent)' : 'rgba(255,255,255,0.38)'}`,
+        background: checked ? 'var(--accent)' : 'transparent',
+        borderRadius: 6, cursor: 'pointer', padding: 0,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        transition: 'all 180ms ease', flexShrink: 0,
+      }}>
+        {checked && <CheckIcon size={12} stroke={3} />}
       </button>
 
-      <button
-        onClick={() => onDelete(item.id)}
-        style={{ color: 'var(--muted)', padding: 4, borderRadius: 8, transition: 'color 0.2s', flexShrink: 0 }}
-        onMouseOver={e => e.currentTarget.style.color = 'var(--danger)'}
-        onMouseOut={e => e.currentTarget.style.color = 'var(--muted)'}
-      >
-        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <div>
+        <div style={{
+          fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)',
+          lineHeight: 1.1, letterSpacing: '-0.01em',
+          textDecoration: checked ? 'line-through' : 'none',
+          opacity: checked ? 0.45 : 1, transition: 'all 180ms ease',
+        }}>
+          {item.item_name}
+        </div>
+        {item.quantity && (
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', marginTop: 2, letterSpacing: '0.1em' }}>
+            ×{item.quantity}
+          </div>
+        )}
+      </div>
+
+      <div style={{ width: 20, height: 20, borderRadius: 999, background: isMe ? '#3B3B3B' : 'var(--accent)', flexShrink: 0 }} />
+
+      <button onClick={onEdit} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, flexShrink: 0, opacity: 0.7 }}>
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 4l6 6L9 21H3v-6L14 4z"/></svg>
+      </button>
+
+      <button onClick={onDelete} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, flexShrink: 0, opacity: 0.6 }}>
+        <XIcon size={14} />
       </button>
     </div>
   )

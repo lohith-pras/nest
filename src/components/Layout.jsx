@@ -1,78 +1,107 @@
 import { NavLink, Outlet } from 'react-router-dom'
 
-const mobileNav = [
+const NAV_ITEMS = [
   {
-    to: '/', label: 'Dashboard', exact: true,
-    icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="7" height="9" x="3" y="3" rx="1"/><rect width="7" height="5" x="14" y="3" rx="1"/><rect width="7" height="9" x="14" y="12" rx="1"/><rect width="7" height="5" x="3" y="16" rx="1"/></svg>
+    to: '/', exact: true, label: 'Home',
+    icon: (active) => (
+      <svg width={22} height={22} viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth={active ? 2 : 1.6} strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+        <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+        <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+        <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+      </svg>
+    )
   },
   {
     to: '/expenses', label: 'Expenses',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+    icon: (active) => (
+      <svg width={22} height={22} viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth={active ? 2 : 1.6} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 3v18M16 6.5c0-1.4-1.8-2.5-4-2.5s-4 1.1-4 2.5 1.8 2.5 4 2.5 4 1.1 4 2.5-1.8 2.5-4 2.5-4-1.1-4-2.5"/>
+      </svg>
+    )
   },
   {
-    to: '/groceries', label: 'Groceries',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+    to: '/groceries', label: 'Pantry',
+    icon: (active) => (
+      <svg width={22} height={22} viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth={active ? 2 : 1.6} strokeLinecap="round" strokeLinejoin="round">
+        <path d="M4 7h16l-1.5 12.2A2 2 0 0 1 16.5 21h-9a2 2 0 0 1-2-1.8L4 7z"/>
+        <path d="M8 7V5.5A3.5 3.5 0 0 1 11.5 2h1A3.5 3.5 0 0 1 16 5.5V7"/>
+      </svg>
+    )
   },
   {
     to: '/calendar', label: 'Calendar',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
+    icon: (active) => (
+      <svg width={22} height={22} viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth={active ? 2 : 1.6} strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="5" width="18" height="16" rx="2"/>
+        <path d="M3 9h18M8 3v4M16 3v4"/>
+      </svg>
+    )
   },
   {
     to: '/more', label: 'More',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+    icon: (active) => (
+      <svg width={22} height={22} viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" strokeWidth={active ? 2 : 1.6} strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="5" cy="12" r="1.4" fill={active ? 'currentColor' : 'none'} stroke={active ? 'none' : 'currentColor'} strokeWidth="1.6"/>
+        <circle cx="12" cy="12" r="1.4" fill={active ? 'currentColor' : 'none'} stroke={active ? 'none' : 'currentColor'} strokeWidth="1.6"/>
+        <circle cx="19" cy="12" r="1.4" fill={active ? 'currentColor' : 'none'} stroke={active ? 'none' : 'currentColor'} strokeWidth="1.6"/>
+      </svg>
+    )
   },
 ]
 
 export default function Layout() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', position: 'relative' }}>
-
-      {/* ── Main Content Area ──────────────────────────────────── */}
       <main style={{
         flex: 1,
-        padding: '24px',
-        paddingTop: 'max(24px, env(safe-area-inset-top))',
+        padding: '0 20px',
+        paddingTop: 'max(16px, env(safe-area-inset-top))',
         paddingBottom: 'calc(80px + env(safe-area-inset-bottom))',
         overflowY: 'auto',
-        overflowX: 'hidden'
+        overflowX: 'hidden',
+        color: 'var(--cream)',
       }}>
         <Outlet />
       </main>
 
-      {/* ── Bottom Nav (Fixed, Always Visible) ───────────────── */}
       <nav className="bottom-nav" style={{
         position: 'fixed',
-        bottom: 0,
-        left: 0,
-        right: 0,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-around',
-        padding: '12px 8px',
-        paddingBottom: 'calc(12px + env(safe-area-inset-bottom))',
+        bottom: 0, left: 0, right: 0,
+        display: 'grid',
+        gridTemplateColumns: 'repeat(5, 1fr)',
+        gap: 4,
+        padding: '10px 12px',
+        paddingBottom: 'calc(10px + env(safe-area-inset-bottom))',
         zIndex: 50,
-        backgroundColor: 'var(--nav-bg)',
-        borderTop: '1px solid var(--border)',
-        backdropFilter: 'blur(12px)',
       }}>
-        {mobileNav.map(item => (
+        {NAV_ITEMS.map(item => (
           <NavLink
             key={item.to}
             to={item.to}
             end={item.exact}
             style={({ isActive }) => ({
               display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-              color: isActive ? 'var(--primary)' : 'var(--muted)',
-              fontSize: '0.65rem', fontWeight: 800, textTransform: 'uppercase',
-              letterSpacing: '0.04em', transition: 'color 0.2s, transform 0.15s ease',
-              transform: isActive ? 'scale(1.05)' : 'scale(1)',
-              flex: 1,
+              color: isActive ? 'var(--cream)' : 'var(--cream-faint)',
+              fontFamily: 'var(--font-mono)',
+              fontSize: 9, fontWeight: 500,
+              letterSpacing: '0.16em', textTransform: 'uppercase',
+              transition: 'color 200ms',
               WebkitTapHighlightColor: 'transparent',
-              textDecoration: 'none'
+              textDecoration: 'none',
             })}
           >
-            {item.icon}
-            <span style={{ marginTop: 2 }}>{item.label}</span>
+            {({ isActive }) => (
+              <>
+                {item.icon(isActive)}
+                <span>{item.label}</span>
+              </>
+            )}
           </NavLink>
         ))}
       </nav>

@@ -1,198 +1,257 @@
-import { useEffect, useState, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import gsap from 'gsap'
-import { useGSAP } from '@gsap/react'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { InitialsAvatar, AvatarStack, SectionRule, Masthead, Kicker, ArrowRight } from '../components/RoomyUI'
+
+function getTimeOfDay() {
+  const h = new Date().getHours()
+  if (h < 12) return 'Morning'
+  if (h < 17) return 'Afternoon'
+  return 'Evening'
+}
+
+function formatTime() {
+  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+}
+
+function formatDate() {
+  return new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
+    .replace(',', ' ·')
+}
 
 export default function Dashboard() {
   const { profile } = useAuth()
-  const [stats, setStats] = useState({ owedToMe: 0, totalSpend: 0, uncheckedGroceries: 0, upcomingEvents: 0 })
+  const navigate = useNavigate()
+  const [owedToMe, setOwedToMe] = useState(0)
   const [groceries, setGroceries] = useState([])
-  const [recentInterests, setRecentInterests] = useState([])
+  const [watchlist, setWatchlist] = useState([])
+  const [events, setEvents] = useState([])
+  const [roommateProfile, setRoommateProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
-  const containerRef = useRef(null)
-  const owedRef = useRef(null)
-
-  const hour = new Date().getHours()
-  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening'
-  const firstName = profile?.full_name?.split(' ')[0] || ''
-  const greetingText = `${greeting}${firstName ? `, ${firstName}` : ''}.`
-  const greetingWords = greetingText.split(' ')
+  const firstName = profile?.full_name?.split(' ')[0] || 'there'
+  const greeting = `Good ${getTimeOfDay()}`
 
   useEffect(() => {
     async function load() {
       setLoading(true)
       const userId = (await supabase.auth.getUser()).data.user?.id
 
-      const [expRes, grocRes, calRes, intRes] = await Promise.all([
-        supabase.from('expenses').select('amount, paid_by, status').eq('status', 'pending'),
-        supabase.from('groceries').select('id, item_name, is_checked').eq('is_checked', false).limit(4),
-        supabase.from('events').select('id').gte('date', new Date().toISOString().split('T')[0]),
-        supabase.from('interests').select('id, category, title, added_by').order('created_at', { ascending: false }).limit(4),
+      const [expRes, grocRes, intRes, evtRes, profRes] = await Promise.all([
+        supabase.from('expenses').select('amount, paid_by, split_amount, status').eq('status', 'pending'),
+        supabase.from('groceries').select('id, item_name, quantity, is_checked').eq('is_checked', false).limit(5),
+        supabase.from('interests').select('id, title, category').eq('category', 'watchlist').order('created_at', { ascending: false }).limit(3),
+        supabase.from('events').select('id, title, date, time').gte('date', new Date().toISOString().split('T')[0]).order('date').limit(3),
+        supabase.from('profiles').select('id, full_name'),
       ])
 
-      const owedToMe = (expRes.data || [])
+      const owed = (expRes.data || [])
         .filter(e => e.paid_by === userId)
-        .reduce((sum, e) => sum + (e.amount / 2), 0)
+        .reduce((sum, e) => sum + (e.split_amount != null ? e.split_amount : e.amount / 2), 0)
 
-      setStats({
-        owedToMe,
-        uncheckedGroceries: grocRes.data?.length || 0,
-        upcomingEvents: calRes.data?.length || 0,
-      })
+      setOwedToMe(owed)
       setGroceries(grocRes.data || [])
-      setRecentInterests((intRes.data || []).filter(i => i.category === 'watchlist').slice(0, 2))
+      setWatchlist(intRes.data || [])
+      setEvents(evtRes.data || [])
+
+      const roommate = (profRes.data || []).find(p => p.id !== userId)
+      setRoommateProfile(roommate || null)
       setLoading(false)
     }
     load()
   }, [])
 
-  useGSAP(() => {
-    if (loading) return
+  const wholeStr = Math.floor(Math.abs(owedToMe)).toString()
+  const centsStr = (Math.abs(owedToMe) % 1).toFixed(2).slice(1)
+  const roomateName = roommateProfile?.full_name?.split(' ')[0] || 'your roommate'
+  const myInitials = profile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
+  const roommateInitials = roommateProfile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
 
-    // Greeting stagger - Sharper and faster
-    gsap.fromTo('.dashboard-greeting span', 
-      { y: 12, autoAlpha: 0 },
-      { y: 0, autoAlpha: 1, stagger: 0.03, ease: 'expo.out', duration: 0.5 }
-    )
+  const meAvatar = { initials: myInitials, isMe: true }
+  const roommateAvatar = { initials: roommateInitials, isMe: false }
 
-    // Date fade
-    gsap.fromTo('.dashboard-date', 
-      { y: -6, autoAlpha: 0 },
-      { y: 0, autoAlpha: 1, duration: 0.4, delay: 0.05, ease: 'expo.out' }
-    )
-
-    // Count up for Owed - Snappier
-    if (owedRef.current) {
-      const obj = { val: 0 }
-      gsap.to(obj, {
-        val: stats.owedToMe,
-        duration: 0.8,
-        ease: 'expo.out',
-        onUpdate: () => {
-          owedRef.current.textContent = `€${obj.val.toFixed(2)}`
-        }
-      })
-    }
-
-    // Batch cards - Waterfall effect
-    gsap.set('.glass-card', { autoAlpha: 0, y: 8 })
-    ScrollTrigger.batch('.glass-card', {
-      start: 'top 94%',
-      onEnter: (batch) => gsap.to(batch, { 
-        autoAlpha: 1, 
-        y: 0, 
-        stagger: 0.03, 
-        duration: 0.35,
-        ease: 'expo.out',
-        overwrite: true,
-        force3D: true
-      }),
-    })
-
-    return () => ScrollTrigger.getAll().forEach(t => t.kill())
-  }, { scope: containerRef, dependencies: [loading, stats] })
-
-  return (
-    <div ref={containerRef}>
-      {/* Header */}
-      <header style={{ marginBottom: 40 }}>
-        <p className="dashboard-date" style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
-          {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-        </p>
-        <h1 className="font-display dashboard-greeting" style={{ fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, lineHeight: 1.1, marginBottom: 6 }}>
-          {greetingWords.map((word, i) => (
-            <span key={i} style={{ display: 'inline-block', marginRight: '0.25em' }}>{word}</span>
-          ))}
-        </h1>
-        <p style={{ color: 'var(--muted)', fontWeight: 500 }}>Here's what's happening at your place today.</p>
-      </header>
-
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <div className="animate-spin" style={{ width: 32, height: 32, border: '2px solid var(--secondary)', borderTopColor: 'var(--primary)', borderRadius: '50%' }} />
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-          {/* Finance Snapshot */}
-          <section>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h2 className="section-title">Financial Snapshot</h2>
-              <Link to="/expenses" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)', transition: 'opacity 0.2s' }}>View all →</Link>
-            </div>
-            <div className="glass-card" style={{ padding: '28px 24px' }}>
-              <p style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>{stats.owedToMe >= 0 ? 'You are owed' : 'You owe'}</p>
-              <h3 ref={owedRef} className="font-display" style={{ fontSize: '2.4rem', fontWeight: 800, marginBottom: 8, fontVariantNumeric: 'tabular-nums' }}>€0.00</h3>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span className="badge badge-green">Pending settlement</span>
-                <span style={{ fontSize: '0.8rem', color: 'var(--muted)' }}>• {stats.uncheckedGroceries} groceries left</span>
-              </div>
-            </div>
-          </section>
-
-          {/* Upcoming Events */}
-          <section>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h2 className="section-title">Calendar</h2>
-              <Link to="/calendar" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>Open →</Link>
-            </div>
-            <div className="glass-card" style={{ padding: 24, display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ width: 48, height: 48, borderRadius: 14, background: 'var(--secondary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--primary)', flexShrink: 0 }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
-              </div>
-              <div>
-                <p style={{ fontWeight: 700, marginBottom: 2 }}>{stats.upcomingEvents} upcoming event{stats.upcomingEvents !== 1 ? 's' : ''}</p>
-                <p style={{ fontSize: '0.85rem', color: 'var(--muted)' }}>Check shared calendar</p>
-              </div>
-            </div>
-          </section>
-
-          {/* Grocery preview */}
-          <section>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <h2 className="section-title">Grocery List</h2>
-              <Link to="/groceries" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>Shop →</Link>
-            </div>
-            <div className="glass-card" style={{ padding: '20px 24px' }}>
-              {groceries.length === 0
-                ? <p style={{ color: 'var(--muted)', fontSize: '0.9rem', padding: '8px 0' }}>All stocked up! 🎉</p>
-                : (
-                  <ul style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                    {groceries.map(g => (
-                      <li key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--primary)', opacity: 0.4 }} />
-                        <span style={{ fontWeight: 500, fontSize: '0.95rem' }}>{g.item_name}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )
-              }
-            </div>
-          </section>
-
-          {/* Watchlist preview */}
-          {recentInterests.length > 0 && (
-            <section>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                <h2 className="section-title">Watchlist</h2>
-                <Link to="/interests" style={{ fontSize: '0.85rem', fontWeight: 700, color: 'var(--primary)' }}>See all →</Link>
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                {recentInterests.map(item => (
-                  <div key={item.id} className="glass-card" style={{ padding: 18, minHeight: 80, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <p style={{ fontWeight: 700, marginBottom: 4, fontSize: '0.9rem', lineHeight: 1.2 }}>{item.title}</p>
-                    <span className="badge badge-sage" style={{ alignSelf: 'flex-start' }}>Watchlist</span>
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-        </div>
-      )}
+  if (loading) return (
+    <div style={{ paddingTop: 16 }}>
+      <Masthead title="Roomy" meta={formatDate()} />
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
+        <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid rgba(255,255,255,0.12)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+      </div>
     </div>
   )
+
+  return (
+    <div style={{ paddingTop: 16, paddingBottom: 8 }}>
+      {/* Masthead */}
+      <Masthead title="Roomy" meta={`№ 47 · ${formatDate()}`} />
+
+      {/* Hero */}
+      <div style={{ paddingTop: 18, paddingBottom: 20 }}>
+        <Kicker>{getTimeOfDay()} Edition · {formatTime()}</Kicker>
+        <h1 style={{
+          fontFamily: 'var(--font-display)', fontSize: 'clamp(42px, 12vw, 52px)',
+          lineHeight: 0.92, margin: '10px 0 0', letterSpacing: '-0.025em', color: 'var(--cream)',
+        }}>
+          {greeting},<br />
+          <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>{firstName}</span>.
+        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
+          <AvatarStack items={[meAvatar, roommateAvatar]} size={26} />
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--cream-dim)' }}>
+            with <strong style={{ color: 'var(--cream)' }}>{roomateName}</strong>
+          </span>
+        </div>
+      </div>
+
+      {/* 01 — Ledger */}
+      <SectionRule
+        label="01 — Ledger"
+        right={<span onClick={() => navigate('/expenses')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>View all <ArrowRight size={11} /></span>}
+      />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
+        <div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', color: 'var(--cream-faint)', textTransform: 'uppercase', marginBottom: 4 }}>
+            {owedToMe >= 0 ? 'Owed to you' : 'You owe'}
+          </div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 14vw, 58px)', lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.035em' }}>
+            €{wholeStr}<span style={{ color: 'var(--accent-soft)' }}>{centsStr}</span>
+          </div>
+        </div>
+        {roommateProfile && (
+          <div style={{ textAlign: 'right', paddingBottom: 6 }}>
+            <InitialsAvatar initials={roommateInitials} isMe={false} size={28} />
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', color: 'var(--cream-dim)', marginTop: 4, textTransform: 'uppercase' }}>
+              from {roomateName}
+            </div>
+          </div>
+        )}
+      </div>
+      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+        <button onClick={() => navigate('/expenses')} className="btn-primary">Settle up</button>
+        <button className="btn-ghost">Remind {roomateName}</button>
+      </div>
+
+      {/* 02/03 — Quick access cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 24 }}>
+        <PantryCard groceries={groceries} onOpen={() => navigate('/groceries')} />
+        <InterestsCard watchlist={watchlist} onOpen={() => navigate('/interests')} />
+      </div>
+
+      {/* 04 — Agenda */}
+      {events.length > 0 && (
+        <div style={{ marginTop: 26 }}>
+          <SectionRule label="04 — On the agenda" right={<span onClick={() => navigate('/calendar')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>{events.length} ahead</span>} />
+          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {events.map((e, i) => {
+              const d = new Date(e.date + 'T12:00:00')
+              const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
+              return (
+                <div key={e.id} style={{
+                  display: 'grid', gridTemplateColumns: '54px 1fr',
+                  alignItems: 'center', gap: 12, paddingBottom: 10,
+                  borderBottom: i < events.length - 1 ? '1px solid rgba(255,255,255,0.07)' : 'none',
+                }}>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>{dayLabel}</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--cream)', marginTop: 1 }}>{e.time || '—'}</div>
+                  </div>
+                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{e.title}</div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <div style={{
+        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+        color: 'var(--cream-faint)', padding: '20px 0 8px',
+        textAlign: 'center', borderTop: '1px solid rgba(255,255,255,0.10)', marginTop: 24,
+      }}>
+        End of edition · pull to refresh ↓
+      </div>
+    </div>
+  )
+}
+
+function PantryCard({ groceries, onOpen }) {
+  const shown = groceries.slice(0, 3)
+  const total = groceries.length
+  return (
+    <button onClick={onOpen} style={cardStyle}>
+      <div style={cardKickerStyle}>02 — Pantry</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
+        {total} things<br />
+        <span style={{ fontStyle: 'italic', color: 'var(--cream-faint)' }}>left to grab.</span>
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 12 }}>
+        {shown.map((g, i) => (
+          <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ width: 4, height: 4, borderRadius: 999, background: 'var(--accent)', flexShrink: 0 }} />
+            {g.item_name}
+            {g.quantity && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.3)', marginLeft: 2 }}>×{g.quantity}</span>}
+          </div>
+        ))}
+        {total > 3 && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'rgba(255,255,255,0.28)', marginLeft: 10 }}>+ {total - 3} more</div>}
+      </div>
+      <div style={cardLinkStyle}>Open list <ArrowRight size={11} stroke={2} /></div>
+    </button>
+  )
+}
+
+function InterestsCard({ watchlist, onOpen }) {
+  return (
+    <button onClick={onOpen} style={cardStyle}>
+      <div style={cardKickerStyle}>03 — Interests</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
+        {watchlist.length} picks<br />
+        <span style={{ fontStyle: 'italic', color: 'var(--cream-faint)' }}>on the list.</span>
+      </div>
+      <div style={{ display: 'flex', gap: 4, marginTop: 12 }}>
+        {watchlist.slice(0, 3).map((w, i) => {
+          const colors = ['#5a3e2b', '#2b3a4a', '#4a3a2b']
+          return (
+            <div key={i} style={{
+              flex: 1, aspectRatio: '2 / 3',
+              background: colors[i % colors.length],
+              borderRadius: 4,
+              display: 'flex', alignItems: 'flex-end', padding: 4,
+              color: 'rgba(255,255,255,0.8)',
+              fontFamily: 'var(--font-display)', fontSize: 9,
+              lineHeight: 1, letterSpacing: '-0.01em',
+              boxShadow: '0 4px 10px -4px rgba(0,0,0,0.6)',
+            }}>
+              {w.title?.slice(0, 2).toUpperCase()}
+            </div>
+          )
+        })}
+      </div>
+      <div style={cardLinkStyle}>Open list <ArrowRight size={11} stroke={2} /></div>
+    </button>
+  )
+}
+
+const cardStyle = {
+  background: 'var(--surface-raised)',
+  border: '1px solid rgba(255,255,255,0.06)',
+  borderRadius: 16, padding: '14px 14px 12px',
+  textAlign: 'left', color: 'inherit', cursor: 'pointer',
+  display: 'flex', flexDirection: 'column',
+  minHeight: 190,
+  fontFamily: 'var(--font-body)',
+  transition: 'transform 150ms ease, background 200ms',
+  width: '100%',
+}
+
+const cardKickerStyle = {
+  fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em',
+  textTransform: 'uppercase', color: 'var(--accent-soft)',
+}
+
+const cardLinkStyle = {
+  marginTop: 'auto', paddingTop: 12,
+  fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', fontSize: 10,
+  letterSpacing: '0.16em', textTransform: 'uppercase',
+  color: 'var(--cream)', display: 'inline-flex', alignItems: 'center', gap: 6,
 }

@@ -2,11 +2,12 @@ import { useState } from 'react'
 import { Navigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { ArrowRight } from '../components/RoomyUI'
 
 export default function Login() {
   const { session } = useAuth()
-  const [mode, setMode] = useState('login') // 'login' | 'signup'
-  const [signupType, setSignupType] = useState('create') // 'create' | 'join'
+  const [mode, setMode] = useState('login')
+  const [signupType, setSignupType] = useState('create')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -25,13 +26,10 @@ export default function Login() {
     setLoading(true)
     try {
       if (mode === 'signup') {
-        // If joining, verify that the invite code is valid first before signing up the user.
-        // This is secure definer RPC, so it bypasses RLS and can run before authentication.
         if (signupType === 'join') {
           if (!inviteCode.trim()) throw new Error('Invite code is required')
           const { data: existingUnit, error: unitErr } = await supabase
             .rpc('get_unit_by_invite_code', { code: inviteCode.toUpperCase().trim() })
-          
           if (unitErr || !existingUnit || existingUnit.length === 0) {
             throw new Error('Invalid invite code. Please check the code and try again.')
           }
@@ -39,26 +37,23 @@ export default function Login() {
           if (!unitName.trim()) throw new Error('Apartment name is required')
         }
 
-        // Sign up and embed onboarding intent directly in user_metadata
-        const { data, error } = await supabase.auth.signUp({ 
-          email, 
+        const { data, error } = await supabase.auth.signUp({
+          email,
           password,
           options: {
             data: {
               full_name: name,
               signup_type: signupType,
               unit_name: signupType === 'create' ? unitName.trim() : null,
-              invite_code: signupType === 'join' ? inviteCode.toUpperCase().trim() : null
-            }
-          }
+              invite_code: signupType === 'join' ? inviteCode.toUpperCase().trim() : null,
+            },
+          },
         })
         if (error) throw error
-        
-        // Show proper feedback depending on whether email confirmation is enabled or not
         if (data.session) {
           setMessage('Signed up successfully!')
         } else {
-          setMessage('Account created! Please check your email to confirm your account and log in.')
+          setMessage('Account created! Please check your email to confirm your account.')
         }
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
@@ -74,101 +69,190 @@ export default function Login() {
   return (
     <div style={{
       minHeight: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '24px',
-      paddingTop: 'max(24px, env(safe-area-inset-top))',
+      padding: '56px 24px 32px',
+      paddingTop: 'max(56px, env(safe-area-inset-top))',
+      display: 'flex', flexDirection: 'column',
+      background: 'var(--bg)',
+      color: 'var(--cream)',
     }}>
-      <div style={{ width: '100%', maxWidth: 420 }}>
-        {/* Logo */}
-        <div style={{ textAlign: 'center', marginBottom: 40 }}>
-          <div style={{
-            width: 64, height: 64, borderRadius: 20,
-            background: 'var(--primary)', display: 'inline-flex',
-            alignItems: 'center', justifyContent: 'center',
-            color: 'white', marginBottom: 16,
-            boxShadow: '0 8px 32px rgba(27,67,50,0.25)'
-          }}>
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-          </div>
-          <h1 className="font-display" style={{ fontSize: '2rem', fontWeight: 800, marginBottom: 6 }}>Roomy</h1>
-          <p style={{ color: 'var(--muted)', fontSize: '0.95rem' }}>
-            {mode === 'login' ? 'Welcome back 👋' : 'Create your account'}
-          </p>
+      {/* Masthead */}
+      <div style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+        borderBottom: '1px solid rgba(255,255,255,0.18)', paddingBottom: 10,
+      }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, letterSpacing: '-0.01em' }}>
+          Roomy
         </div>
-
-        {/* Card */}
-        <div className="glass-card" style={{ padding: 32 }}>
-          {error && (
-            <div style={{
-              background: '#fef2f2', border: '1px solid #fecaca',
-              borderRadius: 12, padding: '12px 16px', marginBottom: 20,
-              color: '#dc2626', fontSize: '0.875rem',
-            }}>{error}</div>
-          )}
-          {message && (
-            <div style={{
-              background: '#f0fdf4', border: '1px solid #bbf7d0',
-              borderRadius: 12, padding: '12px 16px', marginBottom: 20,
-              color: '#15803d', fontSize: '0.875rem',
-            }}>{message}</div>
-          )}
-
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            {mode === 'signup' && (
-              <>
-                <div>
-                  <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Full Name</label>
-                  <input className="input" type="text" value={name} onChange={e => setName(e.target.value)} placeholder="Lohith Kumar" required />
-                </div>
-                
-                <div style={{ display: 'flex', gap: 8, marginBottom: 4 }}>
-                  <button type="button" onClick={() => setSignupType('create')} className={`btn-primary`} style={{ flex: 1, padding: '8px', fontSize: '0.8rem', background: signupType === 'create' ? 'var(--primary)' : 'transparent', color: signupType === 'create' ? 'var(--primary-fg)' : 'var(--muted)', border: signupType === 'create' ? 'none' : '1px solid var(--border)' }}>Create Unit</button>
-                  <button type="button" onClick={() => setSignupType('join')} className={`btn-primary`} style={{ flex: 1, padding: '8px', fontSize: '0.8rem', background: signupType === 'join' ? 'var(--primary)' : 'transparent', color: signupType === 'join' ? 'var(--primary-fg)' : 'var(--muted)', border: signupType === 'join' ? 'none' : '1px solid var(--border)' }}>Join Unit</button>
-                </div>
-
-                {signupType === 'create' ? (
-                  <div>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Apartment Name</label>
-                    <input className="input" type="text" value={unitName} onChange={e => setUnitName(e.target.value)} placeholder="e.g. The Treehouse" required />
-                  </div>
-                ) : (
-                  <div>
-                    <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Invite Code</label>
-                    <input className="input" type="text" value={inviteCode} onChange={e => setInviteCode(e.target.value)} placeholder="e.g. RJ3K9L" required />
-                  </div>
-                )}
-              </>
-            )}
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Email</label>
-              <input className="input" type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="you@example.com" required />
-            </div>
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--muted)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Password</label>
-              <input className="input" type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" required minLength={6} />
-            </div>
-
-            <button type="submit" className="btn-primary" disabled={loading} style={{ justifyContent: 'center', marginTop: 8 }}>
-              {loading
-                ? <span className="animate-spin" style={{ display: 'inline-block', width: 18, height: 18, border: '2px solid rgba(255,255,255,0.4)', borderTopColor: 'white', borderRadius: '50%' }} />
-                : mode === 'login' ? 'Sign In' : 'Create Account'
-              }
-            </button>
-          </form>
-
-          <p style={{ marginTop: 24, textAlign: 'center', fontSize: '0.875rem', color: 'var(--muted)' }}>
-            {mode === 'login' ? "Don't have an account? " : "Already have an account? "}
-            <button
-              onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null); setMessage(null) }}
-              style={{ color: 'var(--primary)', fontWeight: 700 }}
-            >
-              {mode === 'login' ? 'Sign up' : 'Sign in'}
-            </button>
-          </p>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>
+          № 47 · since 2024
         </div>
       </div>
+
+      {/* Hero */}
+      <div style={{ marginTop: 22 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginBottom: 10 }}>
+          {mode === 'login' ? "Editor's note" : 'New edition'}
+        </div>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 10vw, 52px)', lineHeight: 0.95, letterSpacing: '-0.025em', margin: 0 }}>
+          {mode === 'login' ? (
+            <>Welcome<br /><span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>home</span>, friend.</>
+          ) : (
+            <>Start your<br /><span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>story</span>.</>
+          )}
+        </h1>
+      </div>
+
+      {mode === 'login' && (
+        <>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: 1.5, color: 'var(--cream-dim)', marginTop: 16, maxWidth: 340 }}>
+            The quiet little app that keeps you and your roommate{' '}
+            <em style={{ fontFamily: 'var(--font-display)', color: 'var(--cream)' }}>squared up</em>, well-fed,
+            and reminded the trash goes out on Tuesdays.
+          </p>
+
+          <div style={{ marginTop: 22, paddingLeft: 14, borderLeft: '2px solid var(--accent)' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, lineHeight: 1.3, color: 'var(--cream)' }}>
+              "Living together is mostly logistics. Roomy handles the logistics so you can get back to the living."
+            </div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', color: 'var(--cream-faint)', marginTop: 8, textTransform: 'uppercase' }}>
+              — From the README
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Form */}
+      <div style={{ marginTop: 32 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.18)', marginBottom: 4 }}>
+          01 — {mode === 'login' ? 'Sign in' : 'Create account'}
+        </div>
+
+        {error && (
+          <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(229,115,115,0.12)', border: '1px solid rgba(229,115,115,0.25)', borderRadius: 10, color: '#e57373', fontSize: 13, fontFamily: 'var(--font-body)' }}>
+            {error}
+          </div>
+        )}
+        {message && (
+          <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(129,199,132,0.12)', border: '1px solid rgba(129,199,132,0.2)', borderRadius: 10, color: '#81c784', fontSize: 13, fontFamily: 'var(--font-body)' }}>
+            {message}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column' }}>
+          {mode === 'signup' && (
+            <>
+              <EditorialField label="Full Name" value={name} onChange={setName} placeholder="Lohith Kumar" />
+              <div style={{ marginTop: 20, display: 'flex', gap: 8 }}>
+                <button type="button" onClick={() => setSignupType('create')} style={{
+                  flex: 1, padding: '9px', borderRadius: 999, fontSize: 12, fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
+                  background: signupType === 'create' ? 'var(--cream)' : 'transparent',
+                  color: signupType === 'create' ? 'var(--primary-fg)' : 'var(--cream-faint)',
+                  border: signupType === 'create' ? 'none' : '1px solid rgba(255,255,255,0.22)',
+                }}>Create Unit</button>
+                <button type="button" onClick={() => setSignupType('join')} style={{
+                  flex: 1, padding: '9px', borderRadius: 999, fontSize: 12, fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
+                  background: signupType === 'join' ? 'var(--cream)' : 'transparent',
+                  color: signupType === 'join' ? 'var(--primary-fg)' : 'var(--cream-faint)',
+                  border: signupType === 'join' ? 'none' : '1px solid rgba(255,255,255,0.22)',
+                }}>Join Unit</button>
+              </div>
+              {signupType === 'create' ? (
+                <EditorialField label="Apartment Name" value={unitName} onChange={setUnitName} placeholder="e.g. The Treehouse" />
+              ) : (
+                <EditorialField label="Invite Code" value={inviteCode} onChange={setInviteCode} placeholder="e.g. RJ3K9L" />
+              )}
+            </>
+          )}
+
+          <EditorialField label="Email" value={email} onChange={setEmail} type="email" placeholder="you@example.com" />
+          <EditorialField label="Password" value={password} onChange={setPassword} type="password" placeholder="••••••••" />
+
+          <button type="submit" disabled={loading} style={{
+            marginTop: 28, width: '100%',
+            background: 'var(--cream)', color: 'var(--primary-fg)',
+            border: 'none', padding: '16px',
+            borderRadius: 999,
+            fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 600,
+            letterSpacing: '-0.01em', cursor: loading ? 'not-allowed' : 'pointer',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            opacity: loading ? 0.7 : 1,
+            transition: 'opacity 200ms',
+          }}>
+            {loading
+              ? <span className="animate-spin" style={{ width: 18, height: 18, border: '2px solid rgba(0,0,0,0.3)', borderTopColor: 'var(--primary-fg)', borderRadius: '50%', display: 'inline-block' }} />
+              : <>{mode === 'login' ? 'Sign in' : 'Create Account'}<ArrowRight size={16} stroke={2.4} /></>
+            }
+          </button>
+
+          <div style={{ marginTop: 18, display: 'flex', justifyContent: 'center', gap: 6, fontSize: 13, color: 'var(--cream-faint)', fontFamily: 'var(--font-body)' }}>
+            <span>{mode === 'login' ? 'New to Roomy?' : 'Already have an account?'}</span>
+            <button type="button" onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null); setMessage(null) }} style={{
+              color: 'var(--cream)', fontWeight: 600, background: 'none', border: 'none',
+              textDecoration: 'underline', textDecorationColor: 'var(--accent)', textUnderlineOffset: 3,
+              fontSize: 13, fontFamily: 'var(--font-body)', cursor: 'pointer',
+            }}>
+              {mode === 'login' ? 'Sign up' : 'Sign in'}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {/* Footer trio */}
+      {mode === 'login' && (
+        <>
+          <div style={{
+            marginTop: 'auto', paddingTop: 32,
+            display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14,
+            borderTop: '1px solid rgba(255,255,255,0.12)',
+          }}>
+            {[
+              { k: '01', t: 'Split bills', s: 'Without the math' },
+              { k: '02', t: 'Stock pantry', s: 'Synced live' },
+              { k: '03', t: 'Stay in sync', s: 'With one tap' },
+            ].map(f => (
+              <div key={f.k}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', color: 'var(--accent-soft)', textTransform: 'uppercase' }}>{f.k}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, lineHeight: 1.1, color: 'var(--cream)', marginTop: 4 }}>{f.t}</div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--cream-faint)', marginTop: 2 }}>{f.s}</div>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginTop: 22, textAlign: 'center' }}>
+            Made with care · Issue 47
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
+function EditorialField({ label, value, onChange, type = 'text', placeholder }) {
+  const [focus, setFocus] = useState(false)
+  return (
+    <div style={{ marginTop: 22 }}>
+      <div style={{
+        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
+        color: focus ? 'var(--accent-soft)' : 'var(--cream-faint)', marginBottom: 6, transition: 'color 200ms',
+      }}>{label}</div>
+      <input
+        type={type}
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        onFocus={() => setFocus(true)}
+        onBlur={() => setFocus(false)}
+        placeholder={placeholder}
+        required
+        style={{
+          width: '100%', boxSizing: 'border-box',
+          background: 'transparent', border: 'none',
+          borderBottom: `1px solid ${focus ? 'var(--cream)' : 'rgba(255,255,255,0.22)'}`,
+          padding: '10px 0',
+          fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--cream)',
+          outline: 'none', letterSpacing: '-0.01em',
+          transition: 'border-color 200ms',
+        }}
+      />
     </div>
   )
 }
