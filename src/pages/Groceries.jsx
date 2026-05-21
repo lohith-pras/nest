@@ -195,7 +195,7 @@ export default function Groceries() {
             <div style={{ marginTop: 28 }}>
               <SectionRule
                 label={`02 — In cart · ${checked.length}`}
-                right={<span onClick={clearChecked} style={{ cursor: 'pointer' }}>Clear all</span>}
+                right={<button onClick={clearChecked} style={{ cursor: 'pointer', background: 'none', border: 'none', color: 'inherit', fontFamily: 'inherit', fontSize: 'inherit', padding: 0 }}>Clear all</button>}
               />
               <div style={{ marginTop: 12 }}>
                 <AnimatePresence initial={false}>
@@ -278,7 +278,7 @@ function GroceryRow({ item, isMe, onToggle, onDelete, onEdit, isLast }) {
         background: checked ? 'var(--accent)' : 'transparent',
         borderRadius: 6, cursor: 'pointer', padding: 0,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        transition: 'all 180ms ease', flexShrink: 0,
+        transition: 'border-color 180ms ease, background 180ms ease', flexShrink: 0,
       }}>
         {checked && <CheckIcon size={12} stroke={3} />}
       </button>
@@ -288,7 +288,7 @@ function GroceryRow({ item, isMe, onToggle, onDelete, onEdit, isLast }) {
           fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)',
           lineHeight: 1.1, letterSpacing: '-0.01em',
           textDecoration: checked ? 'line-through' : 'none',
-          opacity: checked ? 0.45 : 1, transition: 'all 180ms ease',
+          opacity: checked ? 0.45 : 1, transition: 'opacity 180ms ease',
         }}>
           {item.item_name}
         </div>
