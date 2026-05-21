@@ -70,8 +70,8 @@ export default function Calendar() {
   const [selectedDate, setSelectedDate] = useState(null)
 
   const today = new Date()
-  const [viewYear, setViewYear] = useState(today.getFullYear())
-  const [viewMonth, setViewMonth] = useState(today.getMonth())
+  const [viewYear, setViewYear] = useState(() => today.getFullYear())
+  const [viewMonth, setViewMonth] = useState(() => today.getMonth())
 
   useEffect(() => { load() }, [])
 
@@ -164,13 +164,13 @@ export default function Calendar() {
             }}>{d}</div>
           ))}
           {cells.map((d, i) => {
-            if (!d) return <div key={i} />
+            if (!d) return <div key={`empty-${i}`} />
             const ds = dateStr(d)
             const isToday = ds === todayStr
             const hasDot = !!eventsByDate[ds]
             const isSelected = selectedDate === ds
             return (
-              <button key={i} onClick={() => setSelectedDate(isSelected ? null : ds)} style={{
+              <button key={ds} onClick={() => setSelectedDate(isSelected ? null : ds)} style={{
                 aspectRatio: '1', display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
                 position: 'relative', padding: 2,

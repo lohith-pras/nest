@@ -6,7 +6,7 @@ import { Masthead, SectionRule, InitialsAvatar, ArrowRight } from '../components
 export default function More() {
   const { profile } = useAuth()
   const initials = profile?.full_name
-    ? profile.full_name.split(' ').filter(Boolean).map(n => n[0]).join('').slice(0, 2).toUpperCase()
+    ? profile.full_name.split(' ').reduce((acc, n) => n ? acc + n[0] : acc, '').slice(0, 2).toUpperCase()
     : '?'
 
   async function handleSignOut() {

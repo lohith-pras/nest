@@ -17,7 +17,12 @@ function Modal({ onClose, onSave, loading, defaultCategory, initialData = null }
   function submit(e) {
     e.preventDefault()
     if (!title) return
-    onSave({ category, title, description: description || null, link: link || null }, initialData?.id, handleClose)
+    const trimmedLink = link.trim()
+    if (trimmedLink && !/^https?:\/\//i.test(trimmedLink)) {
+      alert('Link must start with http:// or https://')
+      return
+    }
+    onSave({ category, title, description: description || null, link: trimmedLink || null }, initialData?.id, handleClose)
   }
 
   const fieldStyle = {
@@ -267,7 +272,7 @@ function WatchRow({ item, profiles, myId, isLast, onEdit, onDelete }) {
         </div>
         <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 8 }}>
           {item.description && <span>{item.description}</span>}
-          {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Link ↗</a>}
+          {item.link && /^https?:\/\//i.test(item.link) && <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Link ↗</a>}
         </div>
       </div>
       <InitialsAvatar initials={initials} isMe={addedByMe} size={22} />
@@ -309,7 +314,7 @@ function PlaceRow({ item, profiles, myId, isLast, onEdit, onDelete }) {
         </div>
         <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 2 }}>
           {item.description || 'Place to visit'}
-          {item.link && <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 8, color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Link ↗</a>}
+          {item.link && /^https?:\/\//i.test(item.link) && <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 8, color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Link ↗</a>}
         </div>
       </div>
       <InitialsAvatar initials={initials} isMe={addedByMe} size={22} />
