@@ -220,6 +220,8 @@ export default function Interests() {
   const [adding, setAdding] = useState(false)
   const [profiles, setProfiles] = useState({})
   const [ratingsMap, setRatingsMap] = useState({})
+  const [allRatings, setAllRatings] = useState([])
+  const [suggestions, setSuggestions] = useState([])
 
   useEffect(() => { load() }, [])
 
@@ -240,11 +242,49 @@ export default function Interests() {
       const rMap = {}
       ;(ratRes.data || []).forEach(r => { rMap[r.interest_id] = r })
       setRatingsMap(rMap)
+      // Fetch all unit members' ratings (RLS scopes to unit via interest_id policy)
+      const { data: allRatData } = await supabase
+        .from('interest_ratings')
+        .select('id, interest_id, user_id, rating, would_rewatch, is_currently_watching')
+      setAllRatings(allRatData || [])
+      fetchSuggestions(intRes.data || [], allRatData || [])
     } catch (err) {
       console.error('Error loading interests:', err)
     } finally {
       setLoading(false)
     }
+  }
+
+  async function fetchSuggestions(interests, ratings) {
+    const highRated = ratings
+      .filter(r => r.rating >= 4)
+      .map(r => r.interest_id)
+    const highRatedItems = interests.filter(i => highRated.includes(i.id) && i.tmdb_id && i.media_type)
+    const seen = new Set()
+    const seeds = highRatedItems.filter(i => { if (seen.has(i.tmdb_id)) return false; seen.add(i.tmdb_id); return true }).slice(0, 3)
+    if (seeds.length === 0) return
+
+    const existingTmdbIds = new Set(interests.filter(i => i.tmdb_id).map(i => i.tmdb_id))
+
+    const allSuggestions = []
+    await Promise.all(seeds.map(async seed => {
+      try {
+        const res = await fetch(
+          `https://api.themoviedb.org/3/${seed.media_type}/${seed.tmdb_id}/recommendations?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
+        )
+        const data = await res.json()
+        const recs = (data.results || []).filter(r =>
+          !existingTmdbIds.has(String(r.id)) && (r.title || r.name)
+        ).slice(0, 4)
+        allSuggestions.push(...recs.map(r => ({ ...r, media_type: seed.media_type })))
+      } catch (err) {
+        console.error('TMDB recommendations error:', err)
+      }
+    }))
+
+    const dedupedSeen = new Set()
+    const deduped = allSuggestions.filter(r => { if (dedupedSeen.has(r.id)) return false; dedupedSeen.add(r.id); return true }).slice(0, 6)
+    setSuggestions(deduped)
   }
 
   async function upsertRating(interestId, patch) {
@@ -264,6 +304,29 @@ export default function Interests() {
       .single()
     if (error) { console.error('upsertRating error:', error); return }
     setRatingsMap(prev => ({ ...prev, [interestId]: data }))
+  }
+
+  async function toggleCurrentlyWatching(interestId) {
+    const current = ratingsMap[interestId]
+    const isNowWatching = !(current?.is_currently_watching ?? false)
+    if (isNowWatching) {
+      const otherIds = allRatings.filter(r => r.user_id === session.user.id && r.is_currently_watching && r.interest_id !== interestId)
+      for (const r of otherIds) {
+        await supabase.from('interest_ratings')
+          .upsert({ ...r, is_currently_watching: false }, { onConflict: 'user_id,interest_id' })
+      }
+      setAllRatings(prev => prev.map(r =>
+        r.user_id === session.user.id && r.interest_id !== interestId
+          ? { ...r, is_currently_watching: false }
+          : r
+      ))
+    }
+    await upsertRating(interestId, { is_currently_watching: isNowWatching })
+    setAllRatings(prev => {
+      const idx = prev.findIndex(r => r.interest_id === interestId && r.user_id === session.user.id)
+      if (idx >= 0) return prev.map((r, i) => i === idx ? { ...r, is_currently_watching: isNowWatching } : r)
+      return [...prev, { interest_id: interestId, user_id: session.user.id, is_currently_watching: isNowWatching }]
+    })
   }
 
   async function saveItem(data, id, handleClose) {
@@ -353,6 +416,50 @@ export default function Interests() {
         ))}
       </div>
 
+      {(() => {
+        const cwItems = tab === 'watchlist'
+          ? allRatings
+              .filter(r => r.is_currently_watching)
+              .map(r => {
+                const interest = items.find(i => i.id === r.interest_id)
+                if (!interest) return null
+                return { ...interest, watcherName: profiles[r.user_id]?.split(' ')[0] || '?', watcherIsMe: r.user_id === session?.user?.id }
+              })
+              .filter(Boolean)
+          : []
+        return tab === 'watchlist' && cwItems.length > 0 ? (
+          <div style={{ marginTop: 20 }}>
+            <SectionRule label="00 — Currently watching" />
+            <div style={{ display: 'flex', gap: 10, marginTop: 12, overflowX: 'auto', paddingBottom: 4 }}>
+              {cwItems.map(cw => {
+                const color = posterColor(cw.title || '')
+                return (
+                  <div key={cw.id} style={{ flexShrink: 0, width: 90, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    {cw.poster_path ? (
+                      <img src={`https://image.tmdb.org/t/p/w200${cw.poster_path}`} alt={cw.title}
+                        style={{ width: 72, height: 108, objectFit: 'cover', borderRadius: 6, boxShadow: '0 4px 14px rgba(0,0,0,0.4)' }} />
+                    ) : (
+                      <div style={{ width: 72, height: 108, background: color, borderRadius: 6, boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                        display: 'flex', alignItems: 'flex-end', padding: 5,
+                        fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1 }}>
+                        {cw.title?.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--cream)', fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>
+                      {cw.watcherName}
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--cream-faint)', textAlign: 'center', lineHeight: 1.2,
+                      display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {cw.title}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        ) : null
+      })()}
+
       {loading ? (
         <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
           <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
@@ -382,6 +489,8 @@ export default function Interests() {
                       myRating={ratingsMap[item.id] || null}
                       onRate={(rating) => upsertRating(item.id, { rating })}
                       onToggleRewatch={() => upsertRating(item.id, { would_rewatch: !(ratingsMap[item.id]?.would_rewatch ?? false) })}
+                      isCW={ratingsMap[item.id]?.is_currently_watching ?? false}
+                      onToggleCW={() => toggleCurrentlyWatching(item.id)}
                       isLast={i === filtered.length - 1}
                       onDelete={() => deleteItem(item.id)}
                     />
@@ -398,6 +507,38 @@ export default function Interests() {
           }}>
             &ldquo;A shared list is a quiet promise.&rdquo;
           </div>
+
+          {tab === 'watchlist' && suggestions.length > 0 && (
+            <div style={{ marginTop: 32 }}>
+              <SectionRule label="02 — You might like" />
+              <div style={{ display: 'flex', gap: 10, marginTop: 12, overflowX: 'auto', paddingBottom: 8 }}>
+                {suggestions.map(s => {
+                  const title = s.title || s.name
+                  const year = (s.release_date || s.first_air_date || '').slice(0, 4)
+                  const color = posterColor(title)
+                  return (
+                    <div key={s.id} style={{ flexShrink: 0, width: 90 }}>
+                      {s.poster_path ? (
+                        <img src={`https://image.tmdb.org/t/p/w200${s.poster_path}`} alt={title}
+                          style={{ width: 72, height: 108, objectFit: 'cover', borderRadius: 6, boxShadow: '0 4px 14px rgba(0,0,0,0.4)', display: 'block' }} />
+                      ) : (
+                        <div style={{ width: 72, height: 108, background: color, borderRadius: 6, boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
+                          display: 'flex', alignItems: 'flex-end', padding: 5,
+                          fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1 }}>
+                          {title?.slice(0, 2).toUpperCase()}
+                        </div>
+                      )}
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 12, color: 'var(--cream)', lineHeight: 1.2, marginTop: 6,
+                        display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {title}
+                      </div>
+                      {year && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', letterSpacing: '0.12em', marginTop: 2 }}>{year}</div>}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -431,7 +572,7 @@ export default function Interests() {
   )
 }
 
-function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, onToggleRewatch }) {
+function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, onToggleRewatch, isCW, onToggleCW }) {
   const addedByMe = item.added_by === myId
   const adderName = profiles[item.added_by]?.split(' ')[0] || '?'
   const initials = adderName[0]?.toUpperCase() || '?'
@@ -496,6 +637,16 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
               borderLeft: '1px solid var(--border)', marginLeft: 2,
             }}
           >↺ rewatch</button>
+          <button
+            onClick={onToggleCW}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0',
+              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              color: isCW ? 'var(--accent)' : 'var(--cream-faint)',
+              borderLeft: '1px solid var(--border)', paddingLeft: 6, marginLeft: 2,
+            }}
+          >👁</button>
         </div>
       </div>
       <InitialsAvatar initials={initials} isMe={addedByMe} size={22} />
