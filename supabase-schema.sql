@@ -210,3 +210,9 @@ create policy "interest_ratings_update" on public.interest_ratings
 drop policy if exists "interest_ratings_delete" on public.interest_ratings;
 create policy "interest_ratings_delete" on public.interest_ratings
   for delete using (auth.uid() = user_id);
+
+-- ──────────────────────────────────────────────────────────────
+-- Phase 1: DB Foundation — groceries table inventory columns
+-- ──────────────────────────────────────────────────────────────
+alter table public.groceries add column if not exists is_inventory boolean not null default false;
+alter table public.groceries add column if not exists stock_count integer not null default 1;
