@@ -64,7 +64,7 @@ coverage
 skills-lock.json
 plans/
 .claude/
-.planning/
+# .planning/ — tracked in git
 docs/superpowers/
 
 # ============================================================
