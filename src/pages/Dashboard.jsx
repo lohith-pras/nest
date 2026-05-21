@@ -5,7 +5,7 @@ import { usePageEntrance } from '../hooks/usePageEntrance'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { InitialsAvatar, AvatarStack, SectionRule, Masthead, Kicker, ArrowRight } from '../components/RoomyUI'
-import lohithAnim from '../assets/lohith_anim.gif'
+import lohithAnim from '../assets/lohith_anim.png'
 
 function getTimeOfDay() {
   const h = new Date().getHours()
