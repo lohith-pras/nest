@@ -134,8 +134,9 @@ values ('receipts', 'receipts', true)
 on conflict (id) do nothing;
 
 drop policy if exists "Receipts are publicly accessible" on storage.objects;
-create policy "Receipts are accessible by unit members" 
-  on storage.objects for select 
+drop policy if exists "Receipts are accessible by unit members" on storage.objects;
+create policy "Receipts are accessible by unit members"
+  on storage.objects for select
   using (bucket_id = 'receipts' and auth.role() = 'authenticated');
 
 drop policy if exists "Users can upload receipts" on storage.objects;
