@@ -153,3 +153,12 @@ alter table public.events add column if not exists unit_id uuid references publi
 alter table public.interests add column if not exists unit_id uuid references public.units(id) on delete cascade;
 
 -- Schema cache should reload automatically.
+
+-- ──────────────────────────────────────────────────────────────
+-- Phase 1: DB Foundation — interests table TMDB columns
+-- ──────────────────────────────────────────────────────────────
+alter table public.interests add column if not exists tmdb_id text;
+alter table public.interests add column if not exists media_type text check (media_type in ('movie', 'tv'));
+alter table public.interests add column if not exists poster_path text;
+alter table public.interests add column if not exists release_year integer;
+alter table public.interests add column if not exists overview text;
