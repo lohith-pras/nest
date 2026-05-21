@@ -219,15 +219,17 @@ export default function Interests() {
   const [editData, setEditData] = useState(null)
   const [adding, setAdding] = useState(false)
   const [profiles, setProfiles] = useState({})
+  const [ratingsMap, setRatingsMap] = useState({})
 
   useEffect(() => { load() }, [])
 
   async function load() {
     try {
       setLoading(true)
-      const [intRes, profRes] = await Promise.all([
+      const [intRes, profRes, ratRes] = await Promise.all([
         supabase.from('interests').select('*').order('created_at', { ascending: false }),
         supabase.from('profiles').select('id, full_name'),
+        supabase.from('interest_ratings').select('id, interest_id, rating, would_rewatch, is_currently_watching').eq('user_id', session.user.id),
       ])
       if (intRes.error) throw intRes.error
       if (profRes.error) throw profRes.error
@@ -235,11 +237,33 @@ export default function Interests() {
       const map = {}
       ;(profRes.data || []).forEach(p => { map[p.id] = p.full_name })
       setProfiles(map)
+      const rMap = {}
+      ;(ratRes.data || []).forEach(r => { rMap[r.interest_id] = r })
+      setRatingsMap(rMap)
     } catch (err) {
       console.error('Error loading interests:', err)
     } finally {
       setLoading(false)
     }
+  }
+
+  async function upsertRating(interestId, patch) {
+    const existing = ratingsMap[interestId]
+    const payload = {
+      user_id: session.user.id,
+      interest_id: interestId,
+      would_rewatch: existing?.would_rewatch ?? false,
+      is_currently_watching: existing?.is_currently_watching ?? false,
+      rating: existing?.rating ?? null,
+      ...patch,
+    }
+    const { data, error } = await supabase
+      .from('interest_ratings')
+      .upsert(payload, { onConflict: 'user_id,interest_id' })
+      .select('id, interest_id, rating, would_rewatch, is_currently_watching')
+      .single()
+    if (error) { console.error('upsertRating error:', error); return }
+    setRatingsMap(prev => ({ ...prev, [interestId]: data }))
   }
 
   async function saveItem(data, id, handleClose) {
@@ -350,8 +374,17 @@ export default function Interests() {
             <div style={{ marginTop: 14 }}>
               {filtered.map((item, i) => (
                 tab === 'watchlist'
-                  ? <WatchRow key={item.id} item={item} profiles={profiles} myId={session?.user?.id} isLast={i === filtered.length - 1}
-                      onDelete={() => deleteItem(item.id)} />
+                  ? <WatchRow
+                      key={item.id}
+                      item={item}
+                      profiles={profiles}
+                      myId={session?.user?.id}
+                      myRating={ratingsMap[item.id] || null}
+                      onRate={(rating) => upsertRating(item.id, { rating })}
+                      onToggleRewatch={() => upsertRating(item.id, { would_rewatch: !(ratingsMap[item.id]?.would_rewatch ?? false) })}
+                      isLast={i === filtered.length - 1}
+                      onDelete={() => deleteItem(item.id)}
+                    />
                   : <PlaceRow key={item.id} item={item} profiles={profiles} myId={session?.user?.id} isLast={i === filtered.length - 1}
                       onEdit={() => { setEditData(item); setShowModal(true) }} onDelete={() => deleteItem(item.id)} />
               ))}
@@ -398,7 +431,7 @@ export default function Interests() {
   )
 }
 
-function WatchRow({ item, profiles, myId, isLast, onDelete }) {
+function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, onToggleRewatch }) {
   const addedByMe = item.added_by === myId
   const adderName = profiles[item.added_by]?.split(' ')[0] || '?'
   const initials = adderName[0]?.toUpperCase() || '?'
@@ -406,7 +439,7 @@ function WatchRow({ item, profiles, myId, isLast, onDelete }) {
 
   return (
     <div style={{
-      display: 'grid', gridTemplateColumns: '52px 1fr auto auto', gap: 12, alignItems: 'center',
+      display: 'grid', gridTemplateColumns: '52px 1fr auto auto', gap: 12, alignItems: 'start',
       padding: '10px 0', borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
       {item.poster_path ? (
@@ -439,6 +472,30 @@ function WatchRow({ item, profiles, myId, isLast, onDelete }) {
           )}
           {!item.media_type && item.description && <span>{item.description}</span>}
           {item.link && /^https?:\/\//i.test(item.link) && <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Link ↗</a>}
+        </div>
+        {/* Star rating row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
+          {[1,2,3,4,5].map(star => (
+            <button
+              key={star}
+              onClick={() => onRate(star === myRating?.rating ? null : star)}
+              style={{
+                background: 'none', border: 'none', cursor: 'pointer', padding: 1,
+                color: (myRating?.rating ?? 0) >= star ? 'var(--accent-soft)' : 'var(--border)',
+                fontSize: 14, lineHeight: 1,
+              }}
+            >★</button>
+          ))}
+          <button
+            onClick={onToggleRewatch}
+            style={{
+              background: 'none', border: 'none', cursor: 'pointer', padding: '1px 6px',
+              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: myRating?.would_rewatch ? 'var(--accent-soft)' : 'var(--cream-faint)',
+              borderLeft: '1px solid var(--border)', marginLeft: 2,
+            }}
+          >↺ rewatch</button>
         </div>
       </div>
       <InitialsAvatar initials={initials} isMe={addedByMe} size={22} />
