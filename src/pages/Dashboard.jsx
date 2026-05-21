@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { usePageEntrance } from '../hooks/usePageEntrance'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { InitialsAvatar, AvatarStack, SectionRule, Masthead, Kicker, ArrowRight } from '../components/RoomyUI'
+import lohithAnim from '../assets/lohith_anim.gif'
 
 function getTimeOfDay() {
   const h = new Date().getHours()
@@ -88,21 +90,31 @@ export default function Dashboard() {
       <div className="enter-item"><Masthead title="Roomy" meta={`№ 47 · ${formatDate()}`} /></div>
 
       {/* Hero */}
-      <div className="enter-item" style={{ paddingTop: 18, paddingBottom: 20 }}>
-        <Kicker>{getTimeOfDay()} Edition · {formatTime()}</Kicker>
-        <h1 style={{
-          fontFamily: 'var(--font-display)', fontSize: 'clamp(42px, 12vw, 52px)',
-          lineHeight: 0.92, margin: '10px 0 0', letterSpacing: '-0.025em', color: 'var(--cream)',
-        }}>
-          {greeting},<br />
-          <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>{firstName}</span>.
-        </h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
-          <AvatarStack items={[meAvatar, roommateAvatar]} size={26} />
-          <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--cream-dim)' }}>
-            with <strong style={{ color: 'var(--cream)' }}>{roomateName}</strong>
-          </span>
+      <div className="enter-item" style={{ display: 'flex', alignItems: 'flex-start', gap: 16, paddingTop: 18, paddingBottom: 20 }}>
+        <div style={{ flex: 1 }}>
+          <Kicker>{getTimeOfDay()} Edition · {formatTime()}</Kicker>
+          <h1 style={{
+            fontFamily: 'var(--font-display)', fontSize: 'clamp(42px, 12vw, 52px)',
+            lineHeight: 0.92, margin: '10px 0 0', letterSpacing: '-0.025em', color: 'var(--cream)',
+          }}>
+            {greeting},<br />
+            <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>{firstName}</span>.
+          </h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
+            <AvatarStack items={[meAvatar, roommateAvatar]} size={26} />
+            <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--cream-dim)' }}>
+              with <strong style={{ color: 'var(--cream)' }}>{roomateName}</strong>
+            </span>
+          </div>
         </div>
+        <motion.img
+          src={lohithAnim}
+          alt=""
+          initial={{ opacity: 0, x: 24 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
+          style={{ width: 130, borderRadius: 12, flexShrink: 0 }}
+        />
       </div>
 
       {/* 01 — Ledger */}
