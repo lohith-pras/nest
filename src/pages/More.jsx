@@ -45,7 +45,7 @@ export default function More() {
         <SectionRule label="01 — Shortcuts" />
         <div style={{ display: 'flex', flexDirection: 'column', marginTop: 4 }}>
           {[
-            { to: '/interests', icon: SparkleIcon, title: 'Interests', sub: 'Watchlist & places' },
+            { to: '/calendar', icon: CalendarIcon, title: 'Calendar', sub: 'Shared schedule' },
             { to: '/apartment', icon: HouseIcon, title: 'Apartment', sub: 'Unit settings' },
             { to: '/settings', icon: GearIcon, title: 'Settings', sub: 'Profile & preferences' },
           ].map((s, i, arr) => (
@@ -86,10 +86,11 @@ export default function More() {
   )
 }
 
-function SparkleIcon() {
+function CalendarIcon() {
   return (
     <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M12 3v6M12 15v6M3 12h6M15 12h6M5.5 5.5l4 4M14.5 14.5l4 4M18.5 5.5l-4 4M9.5 14.5l-4 4"/>
+      <rect x="3" y="5" width="18" height="16" rx="2"/>
+      <path d="M3 9h18M8 3v4M16 3v4"/>
     </svg>
   )
 }
