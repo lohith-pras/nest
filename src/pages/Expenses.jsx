@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useModalAnimation } from '../hooks/useModalAnimation'
 import { Masthead, SectionRule, Kicker, InitialsAvatar, PlusIcon, ArrowRight } from '../components/RoomyUI'
+import { SuccessOverlay } from '../components/SuccessOverlay'
 
 function Modal({ onClose, onSave, loading, initialData = null }) {
   const overlayRef = useRef(null)
@@ -128,6 +130,7 @@ export default function Expenses() {
   const [showModal, setShowModal] = useState(false)
   const [editData, setEditData] = useState(null)
   const [saving, setSaving] = useState(false)
+  const [showSuccess, setShowSuccess] = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -157,11 +160,13 @@ export default function Expenses() {
       if (id) {
         const { error } = await supabase.from('expenses').update(data).eq('id', id)
         if (error) throw error
+        handleClose()
       } else {
         const { error } = await supabase.from('expenses').insert({ ...data, unit_id: profile?.unit_id || null })
         if (error) throw error
+        handleClose()
+        setShowSuccess(true)
       }
-      handleClose()
       load()
     } catch (err) {
       console.error('Error saving expense:', err)
@@ -207,6 +212,7 @@ export default function Expenses() {
 
   return (
     <div style={{ paddingTop: 16 }}>
+      <SuccessOverlay show={showSuccess} onComplete={() => setShowSuccess(false)} />
       {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveExpense} loading={saving} initialData={editData} />}
 
       <Masthead title="Ledger" meta="May 2026" />
@@ -272,14 +278,16 @@ export default function Expenses() {
               <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 8 }}>
                 {day}
               </div>
-              {groups[day].map((e, i) => (
-                <ExpenseRow
-                  key={e.id} exp={e} profiles={profiles} myId={myId}
-                  onMarkPaid={markPaid} onDelete={deleteExpense}
-                  onEdit={() => { setEditData(e); setShowModal(true) }}
-                  isLast={i === groups[day].length - 1}
-                />
-              ))}
+              <AnimatePresence initial={false}>
+                {groups[day].map((e, i) => (
+                  <ExpenseRow
+                    key={e.id} exp={e} profiles={profiles} myId={myId}
+                    onMarkPaid={markPaid} onDelete={deleteExpense}
+                    onEdit={() => { setEditData(e); setShowModal(true) }}
+                    isLast={i === groups[day].length - 1}
+                  />
+                ))}
+              </AnimatePresence>
             </div>
           ))}
 
@@ -322,11 +330,18 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, isLast 
   const youGet = paidByMe ? parseFloat(each) : -parseFloat(each)
 
   return (
-    <div style={{
-      display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 12,
-      padding: '12px 0',
-      borderBottom: isLast ? 'none' : '1px solid var(--border)',
-    }}>
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -16 }}
+      transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+      style={{
+        display: 'grid', gridTemplateColumns: 'auto 1fr auto', alignItems: 'center', gap: 12,
+        padding: '12px 0',
+        borderBottom: isLast ? 'none' : '1px solid var(--border)',
+      }}
+    >
       <InitialsAvatar initials={payerInitials} isMe={paidByMe} size={34} />
       <div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: 'var(--cream)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
@@ -369,6 +384,6 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, isLast 
           </div>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }

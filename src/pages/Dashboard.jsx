@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { usePageEntrance } from '../hooks/usePageEntrance'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { InitialsAvatar, AvatarStack, SectionRule, Masthead, Kicker, ArrowRight } from '../components/RoomyUI'
@@ -23,6 +24,7 @@ function formatDate() {
 export default function Dashboard() {
   const { profile } = useAuth()
   const navigate = useNavigate()
+  const containerRef = usePageEntrance()
   const [owedToMe, setOwedToMe] = useState(0)
   const [groceries, setGroceries] = useState([])
   const [watchlist, setWatchlist] = useState([])
@@ -81,12 +83,12 @@ export default function Dashboard() {
   )
 
   return (
-    <div style={{ paddingTop: 16, paddingBottom: 8 }}>
+    <div ref={containerRef} style={{ paddingTop: 16, paddingBottom: 8 }}>
       {/* Masthead */}
-      <Masthead title="Roomy" meta={`№ 47 · ${formatDate()}`} />
+      <div className="enter-item"><Masthead title="Roomy" meta={`№ 47 · ${formatDate()}`} /></div>
 
       {/* Hero */}
-      <div style={{ paddingTop: 18, paddingBottom: 20 }}>
+      <div className="enter-item" style={{ paddingTop: 18, paddingBottom: 20 }}>
         <Kicker>{getTimeOfDay()} Edition · {formatTime()}</Kicker>
         <h1 style={{
           fontFamily: 'var(--font-display)', fontSize: 'clamp(42px, 12vw, 52px)',
@@ -104,67 +106,71 @@ export default function Dashboard() {
       </div>
 
       {/* 01 — Ledger */}
-      <SectionRule
-        label="01 — Ledger"
-        right={<span onClick={() => navigate('/expenses')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>View all <ArrowRight size={11} /></span>}
-      />
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
-        <div>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', color: 'var(--cream-faint)', textTransform: 'uppercase', marginBottom: 4 }}>
-            {owedToMe >= 0 ? 'Owed to you' : 'You owe'}
-          </div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 14vw, 58px)', lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.035em' }}>
-            €{wholeStr}<span style={{ color: 'var(--accent-soft)' }}>{centsStr}</span>
-          </div>
-        </div>
-        {roommateProfile && (
-          <div style={{ textAlign: 'right', paddingBottom: 6 }}>
-            <InitialsAvatar initials={roommateInitials} isMe={false} size={28} />
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', color: 'var(--cream-dim)', marginTop: 4, textTransform: 'uppercase' }}>
-              from {roomateName}
+      <div className="enter-item">
+        <SectionRule
+          label="01 — Ledger"
+          right={<span onClick={() => navigate('/expenses')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>View all <ArrowRight size={11} /></span>}
+        />
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
+          <div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', color: 'var(--cream-faint)', textTransform: 'uppercase', marginBottom: 4 }}>
+              {owedToMe >= 0 ? 'Owed to you' : 'You owe'}
+            </div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 14vw, 58px)', lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.035em' }}>
+              €{wholeStr}<span style={{ color: 'var(--accent-soft)' }}>{centsStr}</span>
             </div>
           </div>
-        )}
-      </div>
-      <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-        <button onClick={() => navigate('/expenses')} className="btn-primary">Settle up</button>
-        <button className="btn-ghost">Remind {roomateName}</button>
+          {roommateProfile && (
+            <div style={{ textAlign: 'right', paddingBottom: 6 }}>
+              <InitialsAvatar initials={roommateInitials} isMe={false} size={28} />
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', color: 'var(--cream-dim)', marginTop: 4, textTransform: 'uppercase' }}>
+                from {roomateName}
+              </div>
+            </div>
+          )}
+        </div>
+        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
+          <button onClick={() => navigate('/expenses')} className="btn-primary">Settle up</button>
+          <button className="btn-ghost">Remind {roomateName}</button>
+        </div>
       </div>
 
       {/* 02/03 — Quick access cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 24 }}>
+      <div className="enter-item" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 24 }}>
         <PantryCard groceries={groceries} onOpen={() => navigate('/groceries')} />
         <InterestsCard watchlist={watchlist} onOpen={() => navigate('/interests')} />
       </div>
 
       {/* 04 — Agenda */}
-      {events.length > 0 && (
-        <div style={{ marginTop: 26 }}>
-          <SectionRule label="04 — On the agenda" right={<span onClick={() => navigate('/calendar')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>{events.length} ahead</span>} />
-          <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {events.map((e, i) => {
-              const d = new Date(e.date + 'T12:00:00')
-              const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
-              return (
-                <div key={e.id} style={{
-                  display: 'grid', gridTemplateColumns: '54px 1fr',
-                  alignItems: 'center', gap: 12, paddingBottom: 10,
-                  borderBottom: i < events.length - 1 ? '1px solid var(--border)' : 'none',
-                }}>
-                  <div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>{dayLabel}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--cream)', marginTop: 1 }}>{e.time || '—'}</div>
+      <div className="enter-item">
+        {events.length > 0 && (
+          <div style={{ marginTop: 26 }}>
+            <SectionRule label="04 — On the agenda" right={<span onClick={() => navigate('/calendar')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>{events.length} ahead</span>} />
+            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {events.map((e, i) => {
+                const d = new Date(e.date + 'T12:00:00')
+                const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
+                return (
+                  <div key={e.id} style={{
+                    display: 'grid', gridTemplateColumns: '54px 1fr',
+                    alignItems: 'center', gap: 12, paddingBottom: 10,
+                    borderBottom: i < events.length - 1 ? '1px solid var(--border)' : 'none',
+                  }}>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>{dayLabel}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--cream)', marginTop: 1 }}>{e.time || '—'}</div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{e.title}</div>
                   </div>
-                  <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{e.title}</div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Footer */}
-      <div style={{
+      <div className="enter-item" style={{
         fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--cream-faint)', padding: '20px 0 8px',
         textAlign: 'center', borderTop: '1px solid var(--border)', marginTop: 24,

@@ -1,4 +1,5 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
+import { AnimatePresence, motion, LayoutGroup } from 'framer-motion'
 
 const NAV_ITEMS = [
   {
@@ -56,6 +57,8 @@ const NAV_ITEMS = [
 ]
 
 export default function Layout() {
+  const location = useLocation()
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', position: 'relative' }}>
       <main style={{
@@ -67,7 +70,18 @@ export default function Layout() {
         overflowX: 'hidden',
         color: 'var(--cream)',
       }}>
-        <Outlet />
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={location.pathname}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: [0.23, 1, 0.32, 1] }}
+            style={{ height: '100%' }}
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </main>
 
       <nav className="bottom-nav" style={{
@@ -84,40 +98,55 @@ export default function Layout() {
         boxShadow: '0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08)',
         whiteSpace: 'nowrap',
       }}>
-        {NAV_ITEMS.map(item => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.exact}
-            style={({ isActive }) => ({
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 3,
-              color: isActive ? 'var(--cream)' : 'var(--cream-faint)',
-              fontFamily: 'var(--font-mono)',
-              fontSize: 9,
-              fontWeight: 500,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              transition: 'all 220ms var(--ease-spring)',
-              WebkitTapHighlightColor: 'transparent',
-              textDecoration: 'none',
-              padding: isActive ? '8px 14px' : '10px 12px',
-              borderRadius: 999,
-              background: isActive ? 'var(--surface-hover)' : 'transparent',
-              minWidth: 44,
-              justifyContent: 'center',
-            })}
-          >
-            {({ isActive }) => (
-              <>
-                {item.icon(isActive)}
-                {isActive && <span style={{ lineHeight: 1 }}>{item.label}</span>}
-              </>
-            )}
-          </NavLink>
-        ))}
+        <LayoutGroup>
+          {NAV_ITEMS.map(item => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.exact}
+              style={({ isActive }) => ({
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 3,
+                color: isActive ? 'var(--cream)' : 'var(--cream-faint)',
+                fontFamily: 'var(--font-mono)',
+                fontSize: 9,
+                fontWeight: 500,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                transition: 'all 220ms var(--ease-spring)',
+                WebkitTapHighlightColor: 'transparent',
+                textDecoration: 'none',
+                padding: isActive ? '8px 14px' : '10px 12px',
+                borderRadius: 999,
+                position: 'relative',
+                minWidth: 44,
+                justifyContent: 'center',
+              })}
+            >
+              {({ isActive }) => (
+                <>
+                  {isActive && (
+                    <motion.div
+                      layoutId="nav-pill"
+                      style={{
+                        position: 'absolute',
+                        inset: 0,
+                        borderRadius: 999,
+                        background: 'var(--surface-hover)',
+                        zIndex: -1,
+                      }}
+                      transition={{ type: 'spring', stiffness: 500, damping: 35 }}
+                    />
+                  )}
+                  {item.icon(isActive)}
+                  {isActive && <span style={{ lineHeight: 1 }}>{item.label}</span>}
+                </>
+              )}
+            </NavLink>
+          ))}
+        </LayoutGroup>
       </nav>
     </div>
   )

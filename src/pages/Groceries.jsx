@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useModalAnimation } from '../hooks/useModalAnimation'
@@ -169,16 +170,18 @@ export default function Groceries() {
           <div style={{ marginTop: 24 }}>
             <SectionRule label="01 — To grab" right={`${unchecked.length} items`} />
             <div style={{ marginTop: 12 }}>
-              {unchecked.map((item, i) => (
-                <GroceryRow
-                  key={item.id} item={item}
-                  isMe={item.added_by === session?.user?.id}
-                  onToggle={() => toggleItem(item.id, item.is_checked)}
-                  onDelete={() => deleteItem(item.id)}
-                  onEdit={() => handleEdit(item)}
-                  isLast={i === unchecked.length - 1}
-                />
-              ))}
+              <AnimatePresence initial={false}>
+                {unchecked.map((item, i) => (
+                  <GroceryRow
+                    key={item.id} item={item}
+                    isMe={item.added_by === session?.user?.id}
+                    onToggle={() => toggleItem(item.id, item.is_checked)}
+                    onDelete={() => deleteItem(item.id)}
+                    onEdit={() => handleEdit(item)}
+                    isLast={i === unchecked.length - 1}
+                  />
+                ))}
+              </AnimatePresence>
               {unchecked.length === 0 && (
                 <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: 'var(--cream-faint)', padding: '24px 0', textAlign: 'center' }}>
                   Pantry's full. Nice work, you two.
@@ -195,16 +198,18 @@ export default function Groceries() {
                 right={<span onClick={clearChecked} style={{ cursor: 'pointer' }}>Clear all</span>}
               />
               <div style={{ marginTop: 12 }}>
-                {checked.map((item, i) => (
-                  <GroceryRow
-                    key={item.id} item={item}
-                    isMe={item.added_by === session?.user?.id}
-                    onToggle={() => toggleItem(item.id, item.is_checked)}
-                    onDelete={() => deleteItem(item.id)}
-                    onEdit={() => handleEdit(item)}
-                    isLast={i === checked.length - 1}
-                  />
-                ))}
+                <AnimatePresence initial={false}>
+                  {checked.map((item, i) => (
+                    <GroceryRow
+                      key={item.id} item={item}
+                      isMe={item.added_by === session?.user?.id}
+                      onToggle={() => toggleItem(item.id, item.is_checked)}
+                      onDelete={() => deleteItem(item.id)}
+                      onEdit={() => handleEdit(item)}
+                      isLast={i === checked.length - 1}
+                    />
+                  ))}
+                </AnimatePresence>
               </div>
             </div>
           )}
@@ -253,12 +258,20 @@ function GroceryRow({ item, isMe, onToggle, onDelete, onEdit, isLast }) {
   const checked = item.is_checked
 
   return (
-    <div style={{
-      display: 'grid', gridTemplateColumns: '26px 1fr auto auto auto',
-      alignItems: 'center', gap: 10,
-      padding: '12px 0',
-      borderBottom: isLast ? 'none' : '1px solid var(--border)',
-    }}>
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: -16 }}
+      transition={{ duration: 0.22, ease: [0.23, 1, 0.32, 1] }}
+      style={{
+        display: 'grid', gridTemplateColumns: '26px 1fr auto auto auto',
+        alignItems: 'center', gap: 10,
+        padding: '12px 0',
+        borderBottom: isLast ? 'none' : '1px solid var(--border)',
+        overflow: 'hidden',
+      }}
+    >
       <button onClick={onToggle} style={{
         width: 22, height: 22,
         border: `1.5px solid ${checked ? 'var(--accent)' : 'var(--cream-faint)'}`,
@@ -295,6 +308,6 @@ function GroceryRow({ item, isMe, onToggle, onDelete, onEdit, isLast }) {
       <button onClick={onDelete} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, flexShrink: 0, opacity: 0.6 }}>
         <XIcon size={14} />
       </button>
-    </div>
+    </motion.div>
   )
 }
