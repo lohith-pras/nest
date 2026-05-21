@@ -622,11 +622,14 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
           <button
             onClick={onToggleRewatch}
             style={{
-              background: 'none', border: 'none', cursor: 'pointer', padding: '1px 6px',
+              border: 'none', cursor: 'pointer', padding: '2px 7px',
               fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em',
-              textTransform: 'uppercase',
+              textTransform: 'uppercase', borderRadius: 999,
+              marginLeft: 4,
               color: myRating?.would_rewatch ? 'var(--accent-soft)' : 'var(--cream-faint)',
-              borderLeft: '1px solid var(--border)', marginLeft: 2,
+              background: myRating?.would_rewatch ? 'rgba(154,129,116,0.15)' : 'none',
+              boxShadow: myRating?.would_rewatch ? '0 0 8px 1px rgba(154,129,116,0.45)' : 'none',
+              transition: 'box-shadow 200ms ease, background 200ms ease, color 200ms ease',
             }}
           >↺ rewatch</button>
           <button
