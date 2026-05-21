@@ -107,14 +107,18 @@ export default function Dashboard() {
             </span>
           </div>
         </div>
-        <motion.img
-          src={lohithAnim}
-          alt=""
+        <motion.div
           initial={{ x: 24 }}
           animate={{ x: 0 }}
           transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
-          style={{ width: 130, borderRadius: 12, flexShrink: 0, aspectRatio: '1 / 1' }}
-        />
+          style={{ flexShrink: 0, width: 110, height: 170, overflow: 'hidden' }}
+        >
+          <img
+            src={lohithAnim}
+            alt=""
+            style={{ height: '100%', width: 'auto', position: 'relative', left: '50%', transform: 'translateX(-50%)' }}
+          />
+        </motion.div>
       </div>
 
       {/* 01 — Ledger */}
