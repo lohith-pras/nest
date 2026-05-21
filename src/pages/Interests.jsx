@@ -500,14 +500,6 @@ export default function Interests() {
             </div>
           )}
 
-          <div style={{
-            fontFamily: 'var(--font-display)', fontStyle: 'italic',
-            fontSize: 15, color: 'var(--cream-faint)', textAlign: 'center', lineHeight: 1.3,
-            padding: '18px 24px 8px', borderTop: '1px solid var(--border)', marginTop: 28,
-          }}>
-            &ldquo;A shared list is a quiet promise.&rdquo;
-          </div>
-
           {tab === 'watchlist' && suggestions.length > 0 && (
             <div style={{ marginTop: 32 }}>
               <SectionRule label="02 — You might like" />
