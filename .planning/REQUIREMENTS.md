@@ -73,40 +73,38 @@
 
 ## Traceability
 
-*Populated during roadmap creation.*
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| MOVI-01 | TBD | Pending |
-| MOVI-02 | TBD | Pending |
-| MOVI-03 | TBD | Pending |
-| MOVI-04 | TBD | Pending |
-| MOVI-05 | TBD | Pending |
-| MOVI-06 | TBD | Pending |
-| MOVI-07 | TBD | Pending |
-| MOVI-08 | TBD | Pending |
-| PLAC-01 | TBD | Pending |
-| PLAC-02 | TBD | Pending |
-| PLAC-03 | TBD | Pending |
-| PLAC-04 | TBD | Pending |
-| PLAC-05 | TBD | Pending |
-| PLAC-06 | TBD | Pending |
-| PLAC-07 | TBD | Pending |
-| EXPN-01 | TBD | Pending |
-| EXPN-02 | TBD | Pending |
-| EXPN-03 | TBD | Pending |
-| GROC-01 | TBD | Pending |
-| GROC-02 | TBD | Pending |
-| GROC-03 | TBD | Pending |
-| GROC-04 | TBD | Pending |
-| GROC-05 | TBD | Pending |
-| GROC-06 | TBD | Pending |
+| GROC-01 | Phase 2 | Pending |
+| GROC-02 | Phase 2 | Pending |
+| GROC-03 | Phase 2 | Pending |
+| GROC-04 | Phase 2 | Pending |
+| GROC-05 | Phase 2 | Pending |
+| GROC-06 | Phase 2 | Pending |
+| MOVI-01 | Phase 3 | Pending |
+| MOVI-02 | Phase 3 | Pending |
+| MOVI-03 | Phase 3 | Pending |
+| MOVI-04 | Phase 3 | Pending |
+| MOVI-05 | Phase 3 | Pending |
+| MOVI-06 | Phase 3 | Pending |
+| MOVI-07 | Phase 3 | Pending |
+| MOVI-08 | Phase 3 | Pending |
+| PLAC-01 | Phase 4 | Pending |
+| PLAC-02 | Phase 4 | Pending |
+| PLAC-03 | Phase 4 | Pending |
+| PLAC-04 | Phase 4 | Pending |
+| PLAC-05 | Phase 4 | Pending |
+| PLAC-06 | Phase 4 | Pending |
+| PLAC-07 | Phase 4 | Pending |
+| EXPN-01 | Phase 5 | Pending |
+| EXPN-02 | Phase 5 | Pending |
+| EXPN-03 | Phase 5 | Pending |
 
 **Coverage:**
 - v1 requirements: 24 total
-- Mapped to phases: 0 (TBD — roadmap creation next)
-- Unmapped: 24 ⚠️
+- Mapped to phases: 24/24
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-05-21*
-*Last updated: 2026-05-21 after initial definition*
+*Last updated: 2026-05-21 — traceability populated after roadmap creation*
