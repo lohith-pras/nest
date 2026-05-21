@@ -110,10 +110,10 @@ export default function Dashboard() {
         <motion.img
           src={lohithAnim}
           alt=""
-          initial={{ opacity: 0, x: 24 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ x: 24 }}
+          animate={{ x: 0 }}
           transition={{ duration: 0.5, delay: 0.15, ease: 'easeOut' }}
-          style={{ width: 130, borderRadius: 12, flexShrink: 0 }}
+          style={{ width: 130, borderRadius: 12, flexShrink: 0, aspectRatio: '1 / 1' }}
         />
       </div>
 
