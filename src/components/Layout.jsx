@@ -110,7 +110,7 @@ export default function Layout() {
                 gap: 3,
                 color: isActive ? 'var(--cream)' : 'var(--cream-faint)',
                 fontFamily: 'var(--font-mono)',
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: 500,
                 letterSpacing: '0.14em',
                 textTransform: 'uppercase',

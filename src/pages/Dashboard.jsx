@@ -113,7 +113,7 @@ export default function Dashboard() {
         />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', color: 'var(--cream-faint)', textTransform: 'uppercase', marginBottom: 4 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', color: 'var(--cream-faint)', textTransform: 'uppercase', marginBottom: 4 }}>
               {owedToMe >= 0 ? 'Owed to you' : 'You owe'}
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 14vw, 58px)', lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.035em' }}>
@@ -123,7 +123,7 @@ export default function Dashboard() {
           {roommateProfile && (
             <div style={{ textAlign: 'right', paddingBottom: 6 }}>
               <InitialsAvatar initials={roommateInitials} isMe={false} size={28} />
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', color: 'var(--cream-dim)', marginTop: 4, textTransform: 'uppercase' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', color: 'var(--cream-dim)', marginTop: 4, textTransform: 'uppercase' }}>
                 from {roomateName}
               </div>
             </div>
@@ -171,7 +171,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <div className="enter-item" style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--cream-faint)', padding: '20px 0 8px',
         textAlign: 'center', borderTop: '1px solid var(--border)', marginTop: 24,
       }}>
@@ -196,10 +196,10 @@ function PantryCard({ groceries, onOpen }) {
           <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ width: 4, height: 4, borderRadius: 999, background: 'var(--accent)', flexShrink: 0 }} />
             {g.item_name}
-            {g.quantity && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', marginLeft: 2 }}>×{g.quantity}</span>}
+            {g.quantity && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--cream-faint)', marginLeft: 2 }}>×{g.quantity}</span>}
           </div>
         ))}
-        {total > 3 && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', marginLeft: 10 }}>+ {total - 3} more</div>}
+        {total > 3 && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--cream-faint)', marginLeft: 10 }}>+ {total - 3} more</div>}
       </div>
       <div style={cardLinkStyle}>Open list <ArrowRight size={11} stroke={2} /></div>
     </button>
@@ -224,7 +224,7 @@ function InterestsCard({ watchlist, onOpen }) {
               borderRadius: 4,
               display: 'flex', alignItems: 'flex-end', padding: 4,
               color: 'var(--cream-dim)',
-              fontFamily: 'var(--font-display)', fontSize: 9,
+              fontFamily: 'var(--font-display)', fontSize: 10,
               lineHeight: 1, letterSpacing: '-0.01em',
               boxShadow: '0 4px 10px -4px rgba(0,0,0,0.6)',
             }}>
@@ -251,7 +251,7 @@ const cardStyle = {
 }
 
 const cardKickerStyle = {
-  fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em',
+  fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em',
   textTransform: 'uppercase', color: 'var(--accent-soft)',
 }
 

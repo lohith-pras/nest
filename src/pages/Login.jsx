@@ -83,7 +83,7 @@ export default function Login() {
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, letterSpacing: '-0.01em' }}>
           Roomy
         </div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>
           № 47 · since 2024
         </div>
       </div>
@@ -114,7 +114,7 @@ export default function Login() {
             <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, lineHeight: 1.3, color: 'var(--cream)' }}>
               "Living together is mostly logistics. Roomy handles the logistics so you can get back to the living."
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', color: 'var(--cream-faint)', marginTop: 8, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em', color: 'var(--cream-faint)', marginTop: 8, textTransform: 'uppercase' }}>
               — From the README
             </div>
           </div>
@@ -211,14 +211,14 @@ export default function Login() {
               { k: '03', t: 'Stay in sync', s: 'With one tap' },
             ].map(f => (
               <div key={f.k}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', color: 'var(--accent-soft)', textTransform: 'uppercase' }}>{f.k}</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', color: 'var(--accent-soft)', textTransform: 'uppercase' }}>{f.k}</div>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, lineHeight: 1.1, color: 'var(--cream)', marginTop: 4 }}>{f.t}</div>
                 <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--cream-faint)', marginTop: 2 }}>{f.s}</div>
               </div>
             ))}
           </div>
 
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginTop: 22, textAlign: 'center' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginTop: 22, textAlign: 'center' }}>
             Made with care · Issue 47
           </div>
         </>
@@ -232,7 +232,7 @@ function EditorialField({ label, value, onChange, type = 'text', placeholder }) 
   return (
     <div style={{ marginTop: 22 }}>
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
+        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase',
         color: focus ? 'var(--accent-soft)' : 'var(--cream-faint)', marginBottom: 6, transition: 'color 200ms',
       }}>{label}</div>
       <input

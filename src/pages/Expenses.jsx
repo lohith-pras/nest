@@ -87,7 +87,7 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
     transition: 'border-color 200ms',
   }
   const labelStyle = {
-    fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em',
+    fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em',
     textTransform: 'uppercase', color: 'var(--cream-faint)', display: 'block', marginBottom: 6,
   }
 
@@ -326,11 +326,6 @@ export default function Expenses() {
       {/* FAB */}
       <button
         onClick={() => { setEditData(null); setShowModal(true) }}
-        onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
         style={{
           position: 'fixed',
           bottom: 'calc(92px + env(safe-area-inset-bottom))',
@@ -365,7 +360,7 @@ export default function Expenses() {
                 marginTop: 12, padding: '16px', borderRadius: 12,
                 background: 'var(--surface-raised)', border: '1px solid var(--border)',
               }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginBottom: 8 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginBottom: 8 }}>
                   {prevMonthName} {prevYear} · Month wrapped
                 </div>
                 <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--cream)', letterSpacing: '-0.025em', lineHeight: 1 }}>
@@ -377,7 +372,7 @@ export default function Expenses() {
                 <div style={{ display: 'flex', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
                   {Object.entries(prevMonthByUser).map(([uid, amt]) => (
                     <div key={uid}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>
                         {profiles[uid]?.split(' ')[0] || 'User'}
                       </div>
                       <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--cream)', letterSpacing: '-0.02em', marginTop: 2 }}>
@@ -390,7 +385,7 @@ export default function Expenses() {
                   <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 18 }}>{getExpenseCategory(topPrevCat[0]).emoji}</span>
                     <div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>Top category</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>Top category</div>
                       <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--cream)', marginTop: 1 }}>{topPrevCat[0]} · €{topPrevCat[1].toFixed(2)}</div>
                     </div>
                   </div>
@@ -427,11 +422,11 @@ export default function Expenses() {
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>This month</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>This month</div>
                         <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--cream)', letterSpacing: '-0.02em', lineHeight: 1.1, marginTop: 2 }}>€{monthlyAmt.toFixed(2)}</div>
                       </div>
                       <div style={{ marginTop: 8 }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>All time</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>All time</div>
                         <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--cream-faint)', letterSpacing: '-0.02em', lineHeight: 1.1, marginTop: 2 }}>€{lifetimeAmt.toFixed(2)}</div>
                       </div>
                     </div>
@@ -461,7 +456,7 @@ export default function Expenses() {
                         <div style={{ marginTop: 4, height: 3, borderRadius: 999, background: 'var(--border)', overflow: 'hidden' }}>
                           <div style={{ height: '100%', width: `${pct}%`, background: 'var(--accent-soft)', borderRadius: 999 }} />
                         </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--cream-faint)', letterSpacing: '0.12em', marginTop: 3 }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--cream-faint)', letterSpacing: '0.12em', marginTop: 3 }}>
                           {cat.count} expense{cat.count !== 1 ? 's' : ''} · {pct.toFixed(0)}%
                         </div>
                       </div>
@@ -480,7 +475,7 @@ export default function Expenses() {
 
           {dayOrder.map(day => (
             <div key={day} style={{ marginTop: 16 }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 8 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 8 }}>
                 {day}
               </div>
               <AnimatePresence initial={false}>
@@ -523,7 +518,7 @@ export default function Expenses() {
 function StatCell({ kicker, amount }) {
   return (
     <div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>{kicker}</div>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>{kicker}</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'var(--cream)', lineHeight: 1, marginTop: 4, letterSpacing: '-0.02em' }}>{amount}</div>
     </div>
   )
@@ -566,7 +561,7 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, isLast 
         <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           {paidByMe ? 'You paid' : `${payer.split(' ')[0]} paid`} · split 50/50
           {exp.status === 'paid' && (
-            <span style={{ padding: '1px 6px', borderRadius: 999, background: 'rgba(129,199,132,0.15)', fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#81c784' }}>Settled</span>
+            <span style={{ padding: '1px 6px', borderRadius: 999, background: 'rgba(129,199,132,0.15)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#81c784' }}>Settled</span>
           )}
         </div>
       </div>
@@ -578,12 +573,12 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, isLast 
         }}>
           {youGet > 0 ? '+' : youGet < 0 ? '−' : ''}€{Math.abs(youGet).toFixed(2)}
         </div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.14em', color: 'var(--cream-faint)', marginTop: 2, textTransform: 'uppercase' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em', color: 'var(--cream-faint)', marginTop: 2, textTransform: 'uppercase' }}>
           €{exp.amount.toFixed(2)} total
         </div>
         {exp.status === 'pending' && (
           <div style={{ display: 'flex', gap: 6, marginTop: 6, justifyContent: 'flex-end' }}>
-            <button onClick={() => onMarkPaid(exp.id)} style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent-soft)', background: 'none', border: '1px solid var(--accent)', borderRadius: 999, padding: '3px 8px', cursor: 'pointer' }}>
+            <button onClick={() => onMarkPaid(exp.id)} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent-soft)', background: 'none', border: '1px solid var(--accent)', borderRadius: 999, padding: '3px 8px', cursor: 'pointer' }}>
               Mark paid
             </button>
             <button onClick={onEdit} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}>

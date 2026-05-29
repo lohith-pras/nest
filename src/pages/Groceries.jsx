@@ -101,11 +101,11 @@ function AddItemModal({ onClose, onSave, loading, initialData = null }) {
         </div>
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Item</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Item</div>
             <input ref={itemRef} style={fieldStyle} value={item} onChange={e => setItem(e.target.value)} placeholder="e.g. Oat milk" required />
           </div>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Quantity (optional)</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Quantity (optional)</div>
             <input style={fieldStyle} value={qty} onChange={e => setQty(e.target.value)} placeholder="e.g. ×2, 500g" />
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
@@ -149,11 +149,11 @@ function AddInventoryModal({ onClose, onSave, loading }) {
         </div>
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Item</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Item</div>
             <input style={fieldStyle} value={item} onChange={e => setItem(e.target.value)} placeholder="e.g. Oat milk" autoFocus required />
           </div>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 10 }}>Quantity in stock</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 10 }}>Quantity in stock</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <button type="button" onClick={() => setCount(c => Math.max(1, c - 1))}
                 style={{ width: 36, height: 36, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
@@ -450,7 +450,7 @@ export default function Groceries() {
                       ) : (
                         <div key={`rsbtn-${item.id}`} style={{ paddingLeft: 36, paddingBottom: 8, borderBottom: i < checked.length - 1 ? '1px solid var(--border)' : 'none', marginTop: -4 }}>
                           <button onClick={() => setRestocking(p => ({ ...p, [item.id]: 1 }))}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)', padding: 0 }}>
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)', padding: 0 }}>
                             Restock →
                           </button>
                         </div>
@@ -463,7 +463,7 @@ export default function Groceries() {
           )}
 
           <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+            fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
             color: 'var(--cream-faint)', marginTop: 28, paddingTop: 18,
             borderTop: '1px solid var(--border)', textAlign: 'center',
           }}>
@@ -504,11 +504,6 @@ export default function Groceries() {
             setShowModal(true)
           }
         }}
-        onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
         style={{
           position: 'fixed',
           bottom: 'calc(92px + env(safe-area-inset-bottom))',
@@ -574,12 +569,12 @@ function GroceryRow({ item, isMe, onToggle, onDelete, onEdit, isLast, isLowStock
           {item.item_name}
         </div>
         {item.quantity && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', marginTop: 2, letterSpacing: '0.1em' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--cream-faint)', marginTop: 2, letterSpacing: '0.1em' }}>
             ×{item.quantity}
           </div>
         )}
         {isLowStock && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', color: 'var(--accent-soft)' }}>· reorder</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em', color: 'var(--accent-soft)' }}>· reorder</span>
         )}
       </div>
 
@@ -612,7 +607,7 @@ function InventoryRow({ item, isLast, onIncrement, onDecrement, onDelete }) {
           <span style={{ marginRight: 6, fontSize: 16 }}>{getGroceryEmoji(item.item_name)}</span>
           {item.item_name}
         </div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: isLow ? 'var(--accent-soft)' : 'var(--cream-faint)', marginTop: 2, letterSpacing: '0.1em' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: isLow ? 'var(--accent-soft)' : 'var(--cream-faint)', marginTop: 2, letterSpacing: '0.1em' }}>
           {isLow ? 'Low stock — ' : ''}{count} in stock
         </div>
       </div>

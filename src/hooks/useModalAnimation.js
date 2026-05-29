@@ -7,8 +7,10 @@ export function useModalAnimation(overlayRef, panelRef, onClose) {
 
   useGSAP(() => {
     if (!overlayRef.current || !panelRef.current) return
+    // Reduced motion: show overlay/panel instantly, no enter/exit timeline.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
 
-    tl.current = gsap.timeline({ 
+    tl.current = gsap.timeline({
       defaults: { ease: 'expo.out', duration: 0.25 }
     })
       .from(overlayRef.current, { 

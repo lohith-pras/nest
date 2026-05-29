@@ -35,7 +35,7 @@ export const SectionRule = ({ label, right }) => (
     }}>{label}</div>
     {right && (
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em',
+        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em',
         color: 'var(--cream-faint)', textTransform: 'uppercase',
         display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer',
         whiteSpace: 'nowrap',
@@ -56,7 +56,7 @@ export const Masthead = ({ title, meta }) => (
     }}>{title}</div>
     {meta && (
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em',
+        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em',
         textTransform: 'uppercase', color: 'var(--cream-faint)',
       }}>{meta}</div>
     )}

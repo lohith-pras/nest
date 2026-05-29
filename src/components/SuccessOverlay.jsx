@@ -4,6 +4,9 @@ import { DotLottieReact } from '@lottiefiles/dotlottie-react'
 
 export function SuccessOverlay({ show, onComplete }) {
   const dismissed = useRef(false)
+  const prefersReduced =
+    typeof window !== 'undefined' &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches
 
   // Reset guard each time overlay opens
   useEffect(() => {
@@ -19,7 +22,8 @@ export function SuccessOverlay({ show, onComplete }) {
   // Fallback: auto-dismiss after 3s if onComplete prop never fires
   useEffect(() => {
     if (!show) return
-    const t = setTimeout(dismiss, 1400)
+    // Reduced motion: don't autoplay the burst; dismiss quickly.
+    const t = setTimeout(dismiss, prefersReduced ? 500 : 1400)
     return () => clearTimeout(t)
   }, [show])
 
@@ -48,7 +52,7 @@ export function SuccessOverlay({ show, onComplete }) {
           <DotLottieReact
             src="/Money.lottie"
             loop={false}
-            autoplay
+            autoplay={!prefersReduced}
             speed={2}
             onComplete={dismiss}
             style={{ width: 220, height: 220 }}

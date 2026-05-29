@@ -77,7 +77,7 @@ export default function More() {
       </button>
 
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--cream-faint)', marginTop: 28, textAlign: 'center', paddingBottom: 8,
       }}>
         Roomy · Issue 47

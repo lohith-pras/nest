@@ -9,6 +9,8 @@ export function usePageEntrance(selector = '.enter-item') {
     if (!containerRef.current) return
     const items = containerRef.current.querySelectorAll(selector)
     if (!items.length) return
+    // Reduced motion: leave items at their natural rendered state, no entrance.
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
     gsap.fromTo(
       items,
       { opacity: 0, y: 10 },

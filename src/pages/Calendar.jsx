@@ -26,7 +26,7 @@ function Modal({ onClose, onSave, loading, selected, initialData = null }) {
     letterSpacing: '-0.01em', width: '100%',
   }
   const labelStyle = {
-    fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em',
+    fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em',
     textTransform: 'uppercase', color: 'var(--cream-faint)', display: 'block', marginBottom: 6,
   }
 
@@ -158,7 +158,7 @@ export default function Calendar() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', rowGap: 4 }}>
           {DAYS.map((d, i) => (
             <div key={i} style={{
-              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.16em',
+              fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em',
               color: 'var(--cream-faint)', textAlign: 'center', paddingBottom: 6,
               borderBottom: '1px solid var(--border)',
             }}>{d}</div>
@@ -207,7 +207,7 @@ export default function Calendar() {
         <div style={{ marginTop: 22 }}>
           <SectionRule
             label={new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-            right={<button onClick={() => { setEditData(null); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' }}><PlusIcon size={10} stroke={2} /> Add</button>}
+            right={<button onClick={() => { setEditData(null); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase' }}><PlusIcon size={10} stroke={2} /> Add</button>}
           />
           {selectedEvents.length === 0 ? (
             <div style={{ padding: '16px 0', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--cream-faint)' }}>
@@ -227,7 +227,7 @@ export default function Calendar() {
       <div style={{ marginTop: 26 }}>
         <SectionRule
           label="01 — Coming up"
-          right={<button onClick={() => { setEditData(null); setSelectedDate(todayStr); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' }}><PlusIcon size={10} stroke={2} /> Add event</button>}
+          right={<button onClick={() => { setEditData(null); setSelectedDate(todayStr); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase' }}><PlusIcon size={10} stroke={2} /> Add event</button>}
         />
 
         {loading ? (
@@ -248,7 +248,7 @@ export default function Calendar() {
       </div>
 
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--cream-faint)', marginTop: 28, paddingTop: 18,
         borderTop: '1px solid var(--border)', textAlign: 'center',
       }}>
@@ -258,11 +258,6 @@ export default function Calendar() {
       {/* FAB — add event */}
       <button
         onClick={() => { setEditData(null); setShowModal(true) }}
-        onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
         style={{
           position: 'fixed',
           bottom: 'calc(92px + env(safe-area-inset-bottom))',

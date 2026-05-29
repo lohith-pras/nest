@@ -116,6 +116,8 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Money app: align digits in amounts/columns. Inherited by inline styles. */
+  font-variant-numeric: tabular-nums;
   display: flex;
   justify-content: center;
 }
@@ -129,27 +131,30 @@ body {
 }
 
 /* ── Font Utilities ─────────────────────────────────────────── */
+/* Only Newsreader, DM Sans, JetBrains Mono are loaded (see index.html).
+   Utilities map to those three so display/sans text renders consistently. */
 .font-serif {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
   font-style: normal;
 }
 .font-serif-italic {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
   font-style: italic;
 }
 .font-sans {
-  font-family: "Geist", "Geist Sans", -apple-system, sans-serif;
+  font-family: var(--font-body);
 }
 .font-mono {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-family: var(--font-mono);
 }
 .font-display {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 400;
+  text-wrap: balance;
 }
 
 /* ── Links ──────────────────────────────────────────────────── */
@@ -216,10 +221,10 @@ input, textarea, select {
   gap: 12px;
   padding: 12px;
   border-radius: 12px;
-  transition: all 160ms var(--ease-out);
+  transition: color 160ms var(--ease-out), background 160ms var(--ease-out);
   color: var(--cream-faint);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -314,7 +319,7 @@ input, textarea, select {
   padding: 2px 8px;
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -389,6 +394,19 @@ input, textarea, select {
 @keyframes pulse {
   0%, 100% { opacity: 1; }
   50% { opacity: 0.4; }
+}
+
+/* ── Reduced motion ─────────────────────────────────────────── */
+/* GSAP motion is guarded per-hook (see usePageEntrance/useModalAnimation).
+   This neutralizes CSS transitions + infinite keyframes (spin/pulse) while
+   preserving final states so layout never breaks. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
 
 /* ── Scrollbar ──────────────────────────────────────────────── */

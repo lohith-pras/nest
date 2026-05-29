@@ -139,13 +139,13 @@ function TMDBSearchModal({ onClose, onSave, loading }) {
                   ) : (
                     <div style={{ width: 40, height: 60, borderRadius: 3, background: color, flexShrink: 0,
                       display: 'flex', alignItems: 'flex-end', padding: 3,
-                      fontFamily: 'var(--font-display)', fontSize: 9, color: 'var(--cream-dim)', lineHeight: 1 }}>
+                      fontFamily: 'var(--font-display)', fontSize: 10, color: 'var(--cream-dim)', lineHeight: 1 }}>
                       {title.slice(0, 2).toUpperCase()}
                     </div>
                   )}
                   <div>
                     <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--cream)', lineHeight: 1.2 }}>{title}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', color: 'var(--cream-faint)', marginTop: 3, textTransform: 'uppercase' }}>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', color: 'var(--cream-faint)', marginTop: 3, textTransform: 'uppercase' }}>
                       {r.media_type === 'tv' ? 'TV' : 'Film'}{year ? ` · ${year}` : ''}
                     </div>
                   </div>
@@ -273,7 +273,7 @@ function NominatimSearchModal({ onClose, onSave, loading }) {
                   }}>📍</div>
                   <div style={{ minWidth: 0 }}>
                     <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--cream)', lineHeight: 1.2 }}>{name}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', color: 'var(--accent-soft)', marginTop: 2, textTransform: 'uppercase' }}>{category}</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em', color: 'var(--accent-soft)', marginTop: 2, textTransform: 'uppercase' }}>{category}</div>
                     <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 2,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%' }}>
                       {address}
@@ -324,7 +324,7 @@ function PlaceNotesModal({ onClose, onSave, loading, initialNotes = '' }) {
         </div>
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Notes</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Notes</div>
             <textarea style={{ ...fieldStyle, minHeight: 80 }} value={notes} onChange={e => setNotes(e.target.value)} placeholder="e.g. Great for date night, book ahead…" autoFocus />
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
@@ -601,7 +601,7 @@ export default function Interests() {
           {placeCategories.map(cat => (
             <button key={cat} onClick={() => setPlaceFilter(cat)} style={{
               padding: '5px 12px', borderRadius: 999, flexShrink: 0,
-              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase',
+              fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em', textTransform: 'uppercase',
               cursor: 'pointer',
               border: placeFilter === cat ? 'none' : '1px solid var(--border-rule)',
               background: placeFilter === cat ? 'var(--accent-soft)' : 'transparent',
@@ -729,7 +729,7 @@ export default function Interests() {
                         display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {title}
                       </div>
-                      {year && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', letterSpacing: '0.12em', marginTop: 2 }}>{year}</div>}
+                      {year && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--cream-faint)', letterSpacing: '0.12em', marginTop: 2 }}>{year}</div>}
                     </div>
                   )
                 })}
@@ -742,11 +742,6 @@ export default function Interests() {
       {/* FAB */}
       <button
         onClick={() => { setEditData(null); setShowModal(true) }}
-        onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
         style={{
           position: 'fixed',
           bottom: 'calc(92px + env(safe-area-inset-bottom))',
@@ -806,12 +801,12 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
         </div>
         <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 8 }}>
           {item.media_type && (
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
               {item.media_type === 'tv' ? 'TV' : 'Film'}{item.release_year ? ` · ${item.release_year}` : ''}
             </span>
           )}
           {!item.media_type && item.description && <span>{item.description}</span>}
-          {item.link && /^https?:\/\//i.test(item.link) && <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Link ↗</a>}
+          {item.link && /^https?:\/\//i.test(item.link) && <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Link ↗</a>}
         </div>
         {/* Star rating row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
@@ -830,7 +825,7 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
             onClick={onToggleRewatch}
             style={{
               border: 'none', cursor: 'pointer', padding: '2px 7px',
-              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em',
+              fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em',
               textTransform: 'uppercase', borderRadius: 999,
               marginLeft: 4,
               color: myRating?.would_rewatch ? 'var(--accent-soft)' : 'var(--cream-faint)',
@@ -843,7 +838,7 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
             onClick={onToggleCW}
             style={{
               background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0',
-              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em',
+              fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em',
               textTransform: 'uppercase',
               color: isCW ? 'var(--accent)' : 'var(--cream-faint)',
               borderLeft: '1px solid var(--border)', paddingLeft: 6, marginLeft: 2,
@@ -902,7 +897,7 @@ function PlaceRow({ item, profiles, myId, isLast, onEditNotes, onDelete }) {
             {item.title}
           </div>
           {/* PLAC-03: category tag */}
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginTop: 2 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginTop: 2 }}>
             {category}
           </div>
           {/* PLAC-04: address */}
@@ -930,7 +925,7 @@ function PlaceRow({ item, profiles, myId, isLast, onEditNotes, onDelete }) {
       <div style={{ paddingLeft: 56, marginTop: 6 }}>
         <button onClick={onEditNotes} style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase',
+          fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', textTransform: 'uppercase',
           color: 'var(--cream-faint)', padding: 0,
         }}>
           {notes ? 'Edit notes →' : '+ Add notes'}
