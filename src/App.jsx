@@ -10,6 +10,7 @@ import Interests from './pages/Interests'
 import Apartment from './pages/Apartment'
 import Settings from './pages/Settings'
 import More from './pages/More'
+import Landing from './pages/Landing'
 
 function ProtectedRoute({ children }) {
   const { session, loading } = useAuth()
@@ -21,12 +22,13 @@ function ProtectedRoute({ children }) {
       }} />
     </div>
   )
-  return session ? children : <Navigate to="/login" replace />
+  return session ? children : <Navigate to="/welcome" replace />
 }
 
 export default function App() {
   return (
     <Routes>
+      <Route path="/welcome" element={<Landing />} />
       <Route path="/login" element={<Login />} />
       <Route path="/" element={
         <ProtectedRoute>

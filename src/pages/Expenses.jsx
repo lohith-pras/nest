@@ -6,6 +6,31 @@ import { useModalAnimation } from '../hooks/useModalAnimation'
 import { Masthead, SectionRule, Kicker, InitialsAvatar, PlusIcon, ArrowRight } from '../components/RoomyUI'
 import { SuccessOverlay } from '../components/SuccessOverlay'
 
+// ─── Expense category detector ────────────────────────────────────────────────
+
+const CATEGORY_PATTERNS = [
+  { pattern: /grocer|food|market|supermarket|walmart|aldi|lidl|trader|whole food|costco/i, label: 'Groceries', emoji: '🛒' },
+  { pattern: /restaurant|café|cafe|bar|pub|pizza|sushi|burger|kebab|takeaway|takeout|delivery|uber eat|doordash|just eat/i, label: 'Dining', emoji: '🍽️' },
+  { pattern: /netflix|spotify|disney|apple tv|hbo|prime|hulu|youtube|streaming|subscription/i, label: 'Subscriptions', emoji: '📺' },
+  { pattern: /electric|gas|water|internet|wifi|broadband|utility|utilities|bill|energy/i, label: 'Utilities', emoji: '⚡' },
+  { pattern: /rent|mortgage|lease/i, label: 'Rent', emoji: '🏠' },
+  { pattern: /uber|lyft|taxi|bus|train|metro|transit|transport|fuel|petrol|gas station|parking/i, label: 'Transport', emoji: '🚗' },
+  { pattern: /gym|fitness|sport|yoga|pilates|health/i, label: 'Health', emoji: '💪' },
+  { pattern: /amazon|shop|store|ikea|h&m|zara|clothing|clothes|shoes|fashion/i, label: 'Shopping', emoji: '🛍️' },
+  { pattern: /cinema|movie|ticket|concert|event|theatre|entertainment/i, label: 'Entertainment', emoji: '🎭' },
+  { pattern: /holiday|hotel|flight|airbnb|vacation|travel/i, label: 'Travel', emoji: '✈️' },
+  { pattern: /cleaning|laundry|household|home/i, label: 'Household', emoji: '🧹' },
+]
+
+function getExpenseCategory(description) {
+  for (const { pattern, label, emoji } of CATEGORY_PATTERNS) {
+    if (pattern.test(description)) return { label, emoji }
+  }
+  return { label: 'Other', emoji: '📦' }
+}
+
+// ─── Add / Edit Modal ─────────────────────────────────────────────────────────
+
 function Modal({ onClose, onSave, loading, initialData = null }) {
   const overlayRef = useRef(null)
   const panelRef = useRef(null)
@@ -122,6 +147,8 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
   )
 }
 
+// ─── Main page ────────────────────────────────────────────────────────────────
+
 export default function Expenses() {
   const { session, profile } = useAuth()
   const [expenses, setExpenses] = useState([])
@@ -196,7 +223,63 @@ export default function Expenses() {
   const wholeStr = Math.floor(Math.abs(net)).toString()
   const centsStr = (Math.abs(net) % 1).toFixed(2).slice(1)
 
-  // Group by date
+  // ── EXPN-01: Per-user spending totals ─────────────────────────────────────
+  const now = new Date()
+  const thisMonth = now.getMonth()
+  const thisYear = now.getFullYear()
+
+  const monthlyExpenses = expenses.filter(e => {
+    const d = new Date(e.created_at)
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear
+  })
+
+  // Per-user totals: amount paid by each user
+  const spendingByUser = {}
+  const monthlySpendingByUser = {}
+  expenses.forEach(e => {
+    spendingByUser[e.paid_by] = (spendingByUser[e.paid_by] || 0) + e.amount
+  })
+  monthlyExpenses.forEach(e => {
+    monthlySpendingByUser[e.paid_by] = (monthlySpendingByUser[e.paid_by] || 0) + e.amount
+  })
+
+  // ── EXPN-02: Category breakdown ───────────────────────────────────────────
+  const categoryTotals = {}
+  expenses.forEach(e => {
+    const { label, emoji } = getExpenseCategory(e.description)
+    if (!categoryTotals[label]) categoryTotals[label] = { label, emoji, total: 0, count: 0 }
+    categoryTotals[label].total += e.amount
+    categoryTotals[label].count += 1
+  })
+  const categoryList = Object.values(categoryTotals).sort((a, b) => b.total - a.total)
+  const totalSpend = expenses.reduce((s, e) => s + e.amount, 0)
+
+  // ── EXPN-03: Monthly summary card ────────────────────────────────────────
+  // Show if we have data from the just-closed previous month and we're in
+  // the first 7 days of the new month
+  const prevMonth = thisMonth === 0 ? 11 : thisMonth - 1
+  const prevYear = thisMonth === 0 ? thisYear - 1 : thisYear
+  const prevMonthName = new Date(prevYear, prevMonth, 1).toLocaleString('default', { month: 'long' })
+
+  const prevMonthExpenses = expenses.filter(e => {
+    const d = new Date(e.created_at)
+    return d.getMonth() === prevMonth && d.getFullYear() === prevYear
+  })
+  const showMonthlySummary = now.getDate() <= 7 && prevMonthExpenses.length > 0
+
+  const prevMonthTotal = prevMonthExpenses.reduce((s, e) => s + e.amount, 0)
+  const prevMonthByUser = {}
+  prevMonthExpenses.forEach(e => {
+    prevMonthByUser[e.paid_by] = (prevMonthByUser[e.paid_by] || 0) + e.amount
+  })
+  const prevMonthCats = {}
+  prevMonthExpenses.forEach(e => {
+    const { label, emoji } = getExpenseCategory(e.description)
+    prevMonthCats[label] = (prevMonthCats[label] || 0) + e.amount
+  })
+  const topPrevCat = Object.entries(prevMonthCats).sort((a, b) => b[1] - a[1])[0]
+
+  // Group activity by date
   const groups = {}
   const dayOrder = []
   expenses.forEach(e => {
@@ -210,12 +293,14 @@ export default function Expenses() {
     groups[dayKey].push(e)
   })
 
+  const uniqueSpenders = Object.keys(spendingByUser)
+
   return (
     <div style={{ paddingTop: 16 }}>
       <SuccessOverlay show={showSuccess} onComplete={() => setShowSuccess(false)} />
       {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveExpense} loading={saving} initialData={editData} />}
 
-      <Masthead title="Ledger" meta="May 2026" />
+      <Masthead title="Ledger" meta={now.toLocaleString('default', { month: 'long', year: 'numeric' })} />
 
       <div style={{ marginTop: 18 }}>
         <Kicker>The ledger</Kicker>
@@ -238,7 +323,7 @@ export default function Expenses() {
         <StatCell kicker="Pending" amount={String(pending.length)} />
       </div>
 
-      {/* FAB — add expense */}
+      {/* FAB */}
       <button
         onClick={() => { setEditData(null); setShowModal(true) }}
         onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
@@ -271,6 +356,126 @@ export default function Expenses() {
         </div>
       ) : (
         <div style={{ marginTop: 26 }}>
+
+          {/* EXPN-03: Monthly summary card */}
+          {showMonthlySummary && (
+            <div style={{ marginBottom: 28 }}>
+              <SectionRule label={`00 — ${prevMonthName} recap`} />
+              <div style={{
+                marginTop: 12, padding: '16px', borderRadius: 12,
+                background: 'var(--surface-raised)', border: '1px solid var(--border)',
+              }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginBottom: 8 }}>
+                  {prevMonthName} {prevYear} · Month wrapped
+                </div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--cream)', letterSpacing: '-0.025em', lineHeight: 1 }}>
+                  €{prevMonthTotal.toFixed(2)}
+                </div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 4 }}>
+                  Total unit spend
+                </div>
+                <div style={{ display: 'flex', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
+                  {Object.entries(prevMonthByUser).map(([uid, amt]) => (
+                    <div key={uid}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>
+                        {profiles[uid]?.split(' ')[0] || 'User'}
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--cream)', letterSpacing: '-0.02em', marginTop: 2 }}>
+                        €{amt.toFixed(2)}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                {topPrevCat && (
+                  <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 18 }}>{getExpenseCategory(topPrevCat[0]).emoji}</span>
+                    <div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>Top category</div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--cream)', marginTop: 1 }}>{topPrevCat[0]} · €{topPrevCat[1].toFixed(2)}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* EXPN-01: Per-user spending totals */}
+          {expenses.length > 0 && uniqueSpenders.length > 0 && (
+            <div style={{ marginBottom: 28 }}>
+              <SectionRule label="00 — Spending" />
+              <div style={{ marginTop: 12, display: 'grid', gridTemplateColumns: `repeat(${Math.min(uniqueSpenders.length, 2)}, 1fr)`, gap: 8 }}>
+                {uniqueSpenders.map(uid => {
+                  const name = profiles[uid]?.split(' ')[0] || 'User'
+                  const initials = (profiles[uid] || 'U').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
+                  const isMe = uid === myId
+                  const monthlyAmt = monthlySpendingByUser[uid] || 0
+                  const lifetimeAmt = spendingByUser[uid] || 0
+                  return (
+                    <div key={uid} style={{
+                      padding: '12px', borderRadius: 10,
+                      background: 'var(--surface-raised)', border: '1px solid var(--border)',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                        <div style={{
+                          width: 26, height: 26, borderRadius: 999,
+                          background: isMe ? '#3B3B3B' : 'var(--accent)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, color: 'var(--cream)',
+                        }}>{initials}</div>
+                        <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream)', fontWeight: 600 }}>
+                          {isMe ? 'You' : name}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>This month</div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--cream)', letterSpacing: '-0.02em', lineHeight: 1.1, marginTop: 2 }}>€{monthlyAmt.toFixed(2)}</div>
+                      </div>
+                      <div style={{ marginTop: 8 }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>All time</div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--cream-faint)', letterSpacing: '-0.02em', lineHeight: 1.1, marginTop: 2 }}>€{lifetimeAmt.toFixed(2)}</div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* EXPN-02: Category breakdown */}
+          {categoryList.length > 0 && (
+            <div style={{ marginBottom: 28 }}>
+              <SectionRule label="00 — By category" />
+              <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {categoryList.map((cat, i) => {
+                  const pct = totalSpend > 0 ? (cat.total / totalSpend) * 100 : 0
+                  return (
+                    <div key={cat.label} style={{
+                      display: 'grid', gridTemplateColumns: '24px 1fr auto',
+                      alignItems: 'center', gap: 10,
+                      padding: '10px 0',
+                      borderBottom: i === categoryList.length - 1 ? 'none' : '1px solid var(--border)',
+                    }}>
+                      <span style={{ fontSize: 16 }}>{cat.emoji}</span>
+                      <div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: 'var(--cream)', lineHeight: 1.2 }}>{cat.label}</div>
+                        <div style={{ marginTop: 4, height: 3, borderRadius: 999, background: 'var(--border)', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${pct}%`, background: 'var(--accent-soft)', borderRadius: 999 }} />
+                        </div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8, color: 'var(--cream-faint)', letterSpacing: '0.12em', marginTop: 3 }}>
+                          {cat.count} expense{cat.count !== 1 ? 's' : ''} · {pct.toFixed(0)}%
+                        </div>
+                      </div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--cream)', letterSpacing: '-0.02em', textAlign: 'right' }}>
+                        €{cat.total.toFixed(2)}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Activity feed */}
           <SectionRule label="01 — Activity" right="Filter" />
 
           {dayOrder.map(day => (
@@ -304,7 +509,7 @@ export default function Expenses() {
               fontSize: 15, color: 'var(--cream-faint)', textAlign: 'center', lineHeight: 1.3,
               padding: '18px 24px 8px', borderTop: '1px solid var(--border)', marginTop: 24,
             }}>
-              "Money rules ruin friendships. Clear receipts save them."
+              &ldquo;Money rules ruin friendships. Clear receipts save them.&rdquo;
             </div>
           )}
         </div>
@@ -312,6 +517,8 @@ export default function Expenses() {
     </div>
   )
 }
+
+// ─── Sub-components ───────────────────────────────────────────────────────────
 
 function StatCell({ kicker, amount }) {
   return (
@@ -328,6 +535,7 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, isLast 
   const payerInitials = payer.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
   const each = exp.split_amount != null ? exp.split_amount.toFixed(2) : (exp.amount / 2).toFixed(2)
   const youGet = paidByMe ? parseFloat(each) : -parseFloat(each)
+  const { emoji } = getExpenseCategory(exp.description)
 
   return (
     <motion.div
@@ -342,7 +550,10 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, isLast 
         borderBottom: isLast ? 'none' : '1px solid var(--border)',
       }}
     >
-      <InitialsAvatar initials={payerInitials} isMe={paidByMe} size={34} />
+      <div style={{ position: 'relative' }}>
+        <InitialsAvatar initials={payerInitials} isMe={paidByMe} size={34} />
+        <span style={{ position: 'absolute', bottom: -2, right: -4, fontSize: 12 }}>{emoji}</span>
+      </div>
       <div>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: 'var(--cream)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
           {exp.description}

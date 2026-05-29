@@ -34,12 +34,11 @@ const NAV_ITEMS = [
     )
   },
   {
-    to: '/calendar', label: 'Calendar',
+    to: '/interests', label: 'Interests',
     icon: (active) => (
       <svg width={22} height={22} viewBox="0 0 24 24" fill="none"
         stroke="currentColor" strokeWidth={active ? 2 : 1.6} strokeLinecap="round" strokeLinejoin="round">
-        <rect x="3" y="5" width="18" height="16" rx="2"/>
-        <path d="M3 9h18M8 3v4M16 3v4"/>
+        <path d="M12 3v6M12 15v6M3 12h6M15 12h6M5.5 5.5l4 4M14.5 14.5l4 4M18.5 5.5l-4 4M9.5 14.5l-4 4"/>
       </svg>
     )
   },

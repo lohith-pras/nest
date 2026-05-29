@@ -134,8 +134,9 @@ values ('receipts', 'receipts', true)
 on conflict (id) do nothing;
 
 drop policy if exists "Receipts are publicly accessible" on storage.objects;
-create policy "Receipts are accessible by unit members" 
-  on storage.objects for select 
+drop policy if exists "Receipts are accessible by unit members" on storage.objects;
+create policy "Receipts are accessible by unit members"
+  on storage.objects for select
   using (bucket_id = 'receipts' and auth.role() = 'authenticated');
 
 drop policy if exists "Users can upload receipts" on storage.objects;
@@ -153,3 +154,66 @@ alter table public.events add column if not exists unit_id uuid references publi
 alter table public.interests add column if not exists unit_id uuid references public.units(id) on delete cascade;
 
 -- Schema cache should reload automatically.
+
+-- ──────────────────────────────────────────────────────────────
+-- Phase 1: DB Foundation — interests table TMDB columns
+-- ──────────────────────────────────────────────────────────────
+alter table public.interests add column if not exists tmdb_id text;
+alter table public.interests add column if not exists media_type text check (media_type in ('movie', 'tv'));
+alter table public.interests add column if not exists poster_path text;
+alter table public.interests add column if not exists release_year integer;
+alter table public.interests add column if not exists overview text;
+
+-- ──────────────────────────────────────────────────────────────
+-- Phase 1: DB Foundation — interest_ratings table
+-- ──────────────────────────────────────────────────────────────
+create table if not exists public.interest_ratings (
+  id                    uuid primary key default gen_random_uuid(),
+  user_id               uuid not null references auth.users(id) on delete cascade,
+  interest_id           uuid not null references public.interests(id) on delete cascade,
+  rating                integer check (rating between 1 and 5),
+  would_rewatch         boolean not null default false,
+  is_currently_watching boolean not null default false,
+  created_at            timestamp with time zone default now(),
+  updated_at            timestamp with time zone default now(),
+  unique (user_id, interest_id)
+);
+
+alter table public.interest_ratings enable row level security;
+
+-- RLS: unit members can read all ratings for interests in their unit
+drop policy if exists "interest_ratings_select" on public.interest_ratings;
+create policy "interest_ratings_select" on public.interest_ratings
+  for select using (
+    interest_id in (
+      select id from public.interests
+      where unit_id = (select unit_id from public.profiles where id = auth.uid())
+    )
+  );
+
+-- RLS: user can insert their own rating for an interest in their unit
+drop policy if exists "interest_ratings_insert" on public.interest_ratings;
+create policy "interest_ratings_insert" on public.interest_ratings
+  for insert with check (
+    auth.uid() = user_id
+    and interest_id in (
+      select id from public.interests
+      where unit_id = (select unit_id from public.profiles where id = auth.uid())
+    )
+  );
+
+-- RLS: user can update only their own rating rows
+drop policy if exists "interest_ratings_update" on public.interest_ratings;
+create policy "interest_ratings_update" on public.interest_ratings
+  for update using (auth.uid() = user_id);
+
+-- RLS: user can delete only their own rating rows
+drop policy if exists "interest_ratings_delete" on public.interest_ratings;
+create policy "interest_ratings_delete" on public.interest_ratings
+  for delete using (auth.uid() = user_id);
+
+-- ──────────────────────────────────────────────────────────────
+-- Phase 1: DB Foundation — groceries table inventory columns
+-- ──────────────────────────────────────────────────────────────
+alter table public.groceries add column if not exists is_inventory boolean not null default false;
+alter table public.groceries add column if not exists stock_count integer not null default 1;

@@ -6,11 +6,11 @@ This milestone upgrades Roomy from a manual-entry app to a live-data-driven hous
 
 ## Phases
 
-- [ ] **Phase 1: DB Foundation** - Schema migrations for all new tables and columns (interests, inventory, ratings)
-- [ ] **Phase 2: Groceries — Icons & Inventory** - Emoji auto-assignment on grocery items plus a two-section Inventory workflow
-- [ ] **Phase 3: Movie & TV Watchlist** - TMDB search, shared watchlist, per-user ratings, rewatch flags, Currently Watching, and suggestions
-- [ ] **Phase 4: Places Search** - OSM Nominatim search, shared places list, auto-categorization, notes, filter, and remove
-- [ ] **Phase 5: Expense Analytics** - Per-user spending totals, category breakdown, and monthly summary card
+- [x] **Phase 1: DB Foundation** - Schema migrations for all new tables and columns (interests, inventory, ratings)
+- [x] **Phase 2: Groceries — Icons & Inventory** - Emoji auto-assignment on grocery items plus a two-section Inventory workflow
+- [x] **Phase 3: Movie & TV Watchlist** - TMDB search, shared watchlist, per-user ratings, rewatch flags, Currently Watching, and suggestions
+- [x] **Phase 4: Places Search** - OSM Nominatim search, shared places list, auto-categorization, notes, filter, and remove
+- [x] **Phase 5: Expense Analytics** - Per-user spending totals, category breakdown, and monthly summary card
 
 ## Phase Details
 
@@ -81,8 +81,8 @@ This milestone upgrades Roomy from a manual-entry app to a live-data-driven hous
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. DB Foundation | 0/TBD | Not started | - |
-| 2. Groceries — Icons & Inventory | 0/TBD | Not started | - |
-| 3. Movie & TV Watchlist | 0/TBD | Not started | - |
-| 4. Places Search | 0/TBD | Not started | - |
-| 5. Expense Analytics | 0/TBD | Not started | - |
+| 1. DB Foundation | 3/3 | Complete | 2026-05-21 |
+| 2. Groceries — Icons & Inventory | 3/3 | Complete | 2026-05-29 |
+| 3. Movie & TV Watchlist | 3/3 | Complete | 2026-05-21 |
+| 4. Places Search | 1/1 | Complete | 2026-05-29 |
+| 5. Expense Analytics | 1/1 | Complete | 2026-05-29 |
