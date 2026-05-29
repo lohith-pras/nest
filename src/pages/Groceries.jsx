@@ -89,23 +89,23 @@ function AddItemModal({ onClose, onSave, loading, initialData = null }) {
     background: 'transparent', border: 'none',
     borderBottom: '1px solid var(--input-border)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
-    fontSize: 20, color: 'var(--cream)', outline: 'none',
+    fontSize: 'var(--text-xl)', color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
   }
 
   return (
     <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
       <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 24 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 24 }}>
           {initialData ? 'Edit item.' : 'Add to pantry.'}
         </div>
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Item</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Item</div>
             <input ref={itemRef} style={fieldStyle} value={item} onChange={e => setItem(e.target.value)} placeholder="e.g. Oat milk" required />
           </div>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Quantity (optional)</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Quantity (optional)</div>
             <input style={fieldStyle} value={qty} onChange={e => setQty(e.target.value)} placeholder="e.g. ×2, 500g" />
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
@@ -137,29 +137,29 @@ function AddInventoryModal({ onClose, onSave, loading }) {
     background: 'transparent', border: 'none',
     borderBottom: '1px solid var(--input-border)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
-    fontSize: 20, color: 'var(--cream)', outline: 'none',
+    fontSize: 'var(--text-xl)', color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
   }
 
   return (
     <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
       <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 24 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 24 }}>
           Add to inventory.
         </div>
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Item</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Item</div>
             <input style={fieldStyle} value={item} onChange={e => setItem(e.target.value)} placeholder="e.g. Oat milk" autoFocus required />
           </div>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 10 }}>Quantity in stock</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 10 }}>Quantity in stock</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
               <button type="button" onClick={() => setCount(c => Math.max(1, c - 1))}
-                style={{ width: 36, height: 36, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-              <span style={{ fontFamily: 'var(--font-display)', fontSize: 28, color: 'var(--cream)', minWidth: 32, textAlign: 'center' }}>{count}</span>
+                style={{ width: 36, height: 36, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 'var(--text-xl)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+              <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', color: 'var(--cream)', minWidth: 32, textAlign: 'center' }}>{count}</span>
               <button type="button" onClick={() => setCount(c => c + 1)}
-                style={{ width: 36, height: 36, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                style={{ width: 36, height: 36, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 'var(--text-xl)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
             </div>
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
@@ -359,7 +359,7 @@ export default function Groceries() {
         ].map(s => (
           <button key={s.id} onClick={() => setActiveSection(s.id)} style={{
             padding: '8px 16px', borderRadius: 999,
-            fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600,
+            fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', fontWeight: 600,
             cursor: 'pointer', letterSpacing: '-0.01em',
             border: activeSection === s.id ? 'none' : '1px solid var(--border-rule)',
             background: activeSection === s.id ? 'var(--cream)' : 'transparent',
@@ -408,7 +408,7 @@ export default function Groceries() {
               ))}
 
               {unchecked.length === 0 && lowStockItems.length === 0 && (
-                <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: 'var(--cream-faint)', padding: '24px 0', textAlign: 'center' }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--text-lg)', color: 'var(--cream-faint)', padding: '24px 0', textAlign: 'center' }}>
                   Pantry's full. Nice work, you two.
                 </div>
               )}
@@ -438,19 +438,19 @@ export default function Groceries() {
                       {restocking[item.id] !== undefined ? (
                         <div key={`rs-${item.id}`} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0 10px', paddingLeft: 36, borderBottom: i < checked.length - 1 ? '1px solid var(--border)' : 'none' }}>
                           <button onClick={() => setRestocking(p => ({ ...p, [item.id]: Math.max(1, (p[item.id] || 1) - 1) }))}
-                            style={{ width: 26, height: 26, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
-                          <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)', minWidth: 20, textAlign: 'center' }}>{restocking[item.id] || 1}</span>
+                            style={{ width: 26, height: 26, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 'var(--text-base)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+                          <span style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', color: 'var(--cream)', minWidth: 20, textAlign: 'center' }}>{restocking[item.id] || 1}</span>
                           <button onClick={() => setRestocking(p => ({ ...p, [item.id]: (p[item.id] || 1) + 1 }))}
-                            style={{ width: 26, height: 26, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 16, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                            style={{ width: 26, height: 26, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 'var(--text-base)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
                           <button onClick={() => restockFromCart(item, restocking[item.id] || 1)} className="btn-primary"
-                            style={{ padding: '5px 14px', fontSize: 12 }}>Restock</button>
+                            style={{ padding: '5px 14px', fontSize: 'var(--text-xs)' }}>Restock</button>
                           <button onClick={() => setRestocking(p => { const n = { ...p }; delete n[item.id]; return n })}
-                            style={{ background: 'none', border: 'none', color: 'var(--cream-faint)', cursor: 'pointer', fontSize: 12, fontFamily: 'var(--font-body)' }}>✕</button>
+                            style={{ background: 'none', border: 'none', color: 'var(--cream-faint)', cursor: 'pointer', fontSize: 'var(--text-xs)', fontFamily: 'var(--font-body)' }}>✕</button>
                         </div>
                       ) : (
                         <div key={`rsbtn-${item.id}`} style={{ paddingLeft: 36, paddingBottom: 8, borderBottom: i < checked.length - 1 ? '1px solid var(--border)' : 'none', marginTop: -4 }}>
                           <button onClick={() => setRestocking(p => ({ ...p, [item.id]: 1 }))}
-                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)', padding: 0 }}>
+                            style={{ background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)', padding: 0 }}>
                             Restock →
                           </button>
                         </div>
@@ -463,7 +463,7 @@ export default function Groceries() {
           )}
 
           <div style={{
-            fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
+            fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.2em', textTransform: 'uppercase',
             color: 'var(--cream-faint)', marginTop: 28, paddingTop: 18,
             borderTop: '1px solid var(--border)', textAlign: 'center',
           }}>
@@ -486,7 +486,7 @@ export default function Groceries() {
               />
             ))}
             {inventoryItems.length === 0 && (
-              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: 'var(--cream-faint)', padding: '24px 0', textAlign: 'center' }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--text-lg)', color: 'var(--cream-faint)', padding: '24px 0', textAlign: 'center' }}>
                 No inventory yet. Add pantry stock.
               </div>
             )}
@@ -560,21 +560,21 @@ function GroceryRow({ item, isMe, onToggle, onDelete, onEdit, isLast, isLowStock
 
       <div>
         <div style={{
-          fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)',
+          fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', color: 'var(--cream)',
           lineHeight: 1.1, letterSpacing: '-0.01em',
           textDecoration: checked ? 'line-through' : 'none',
           opacity: checked ? 0.45 : 1, transition: 'opacity 180ms ease',
         }}>
-          <span style={{ marginRight: 6, fontSize: 16 }}>{getGroceryEmoji(item.item_name)}</span>
+          <span style={{ marginRight: 6, fontSize: 'var(--text-base)' }}>{getGroceryEmoji(item.item_name)}</span>
           {item.item_name}
         </div>
         {item.quantity && (
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--cream-faint)', marginTop: 2, letterSpacing: '0.1em' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', color: 'var(--cream-faint)', marginTop: 2, letterSpacing: '0.1em' }}>
             ×{item.quantity}
           </div>
         )}
         {isLowStock && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em', color: 'var(--accent-soft)' }}>· reorder</span>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.14em', color: 'var(--accent-soft)' }}>· reorder</span>
         )}
       </div>
 
@@ -603,18 +603,18 @@ function InventoryRow({ item, isLast, onIncrement, onDecrement, onDelete }) {
       borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
       <div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
-          <span style={{ marginRight: 6, fontSize: 16 }}>{getGroceryEmoji(item.item_name)}</span>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>
+          <span style={{ marginRight: 6, fontSize: 'var(--text-base)' }}>{getGroceryEmoji(item.item_name)}</span>
           {item.item_name}
         </div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: isLow ? 'var(--accent-soft)' : 'var(--cream-faint)', marginTop: 2, letterSpacing: '0.1em' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', color: isLow ? 'var(--accent-soft)' : 'var(--cream-faint)', marginTop: 2, letterSpacing: '0.1em' }}>
           {isLow ? 'Low stock — ' : ''}{count} in stock
         </div>
       </div>
       <button onClick={onDecrement} disabled={count <= 0}
-        style={{ width: 30, height: 30, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 18, cursor: count <= 0 ? 'not-allowed' : 'pointer', opacity: count <= 0 ? 0.3 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
+        style={{ width: 30, height: 30, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 'var(--text-lg)', cursor: count <= 0 ? 'not-allowed' : 'pointer', opacity: count <= 0 ? 0.3 : 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>−</button>
       <button onClick={onIncrement}
-        style={{ width: 30, height: 30, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 18, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+        style={{ width: 30, height: 30, borderRadius: 999, border: '1px solid var(--border-rule)', background: 'transparent', color: 'var(--cream)', fontSize: 'var(--text-lg)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
       <button onClick={onDelete}
         style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, opacity: 0.6 }}>
         <XIcon size={14} />

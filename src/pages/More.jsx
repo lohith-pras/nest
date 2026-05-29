@@ -31,10 +31,10 @@ export default function More() {
       }}>
         <InitialsAvatar initials={initials} isMe size={56} />
         <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'var(--cream)', lineHeight: 1.05, letterSpacing: '-0.02em' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', color: 'var(--cream)', lineHeight: 1.05, letterSpacing: '-0.02em' }}>
             {profile?.full_name || 'Loading…'}
           </div>
-          <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 3 }}>
+          <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', marginTop: 3 }}>
             Roommate
           </div>
         </div>
@@ -57,8 +57,8 @@ export default function More() {
             }}>
               <s.icon />
               <div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, lineHeight: 1.1, letterSpacing: '-0.01em' }}>{s.title}</div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 2 }}>{s.sub}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{s.title}</div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', marginTop: 2 }}>{s.sub}</div>
               </div>
               <ArrowRight size={16} stroke={1.7} />
             </Link>
@@ -71,13 +71,13 @@ export default function More() {
         marginTop: 28, width: '100%',
         background: 'transparent', border: '1px solid var(--border-rule)', borderRadius: 999,
         padding: 14, color: 'var(--cream)',
-        fontFamily: 'var(--font-body)', fontSize: 13, fontWeight: 500, cursor: 'pointer',
+        fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', fontWeight: 500, cursor: 'pointer',
       }}>
         Sign out
       </button>
 
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
+        fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--cream-faint)', marginTop: 28, textAlign: 'center', paddingBottom: 8,
       }}>
         Roomy · Issue 47

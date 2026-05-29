@@ -82,19 +82,19 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
     background: 'transparent', border: 'none',
     borderBottom: '1px solid var(--border-rule)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
-    fontSize: 20, color: 'var(--cream)', outline: 'none',
+    fontSize: 'var(--text-xl)', color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
     transition: 'border-color 200ms',
   }
   const labelStyle = {
-    fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em',
+    fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em',
     textTransform: 'uppercase', color: 'var(--cream-faint)', display: 'block', marginBottom: 6,
   }
 
   return (
     <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
       <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 24 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 24 }}>
           {initialData ? 'Edit expense.' : 'New expense.'}
         </div>
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
@@ -109,7 +109,7 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
           <div style={{ display: 'flex', gap: 8 }}>
             {['5050', 'custom'].map(s => (
               <button key={s} type="button" onClick={() => setSplitType(s)} style={{
-                flex: 1, padding: '8px', borderRadius: 999, fontSize: 12,
+                flex: 1, padding: '8px', borderRadius: 999, fontSize: 'var(--text-xs)',
                 fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
                 background: splitType === s ? 'var(--cream)' : 'transparent',
                 color: splitType === s ? 'var(--primary-fg)' : 'var(--cream-faint)',
@@ -128,9 +128,9 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
           <div>
             <label style={labelStyle}>Receipt (optional)</label>
             <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-              {receiptUrl && <a href={receiptUrl} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: 'var(--accent-soft)', textDecoration: 'underline' }}>View receipt</a>}
+              {receiptUrl && <a href={receiptUrl} target="_blank" rel="noreferrer" style={{ fontSize: 'var(--text-xs)', color: 'var(--accent-soft)', textDecoration: 'underline' }}>View receipt</a>}
               <input type="file" accept="image/*" ref={fileInputRef} onChange={handleFileUpload} style={{ display: 'none' }} />
-              <button type="button" onClick={() => fileInputRef.current.click()} disabled={uploading} className="btn-ghost" style={{ padding: '6px 14px', fontSize: 12 }}>
+              <button type="button" onClick={() => fileInputRef.current.click()} disabled={uploading} className="btn-ghost" style={{ padding: '6px 14px', fontSize: 'var(--text-xs)' }}>
                 {uploading ? 'Uploading…' : receiptUrl ? 'Replace' : 'Upload'}
               </button>
             </div>
@@ -360,22 +360,22 @@ export default function Expenses() {
                 marginTop: 12, padding: '16px', borderRadius: 12,
                 background: 'var(--surface-raised)', border: '1px solid var(--border)',
               }}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginBottom: 8 }}>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginBottom: 8 }}>
                   {prevMonthName} {prevYear} · Month wrapped
                 </div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 32, color: 'var(--cream)', letterSpacing: '-0.025em', lineHeight: 1 }}>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-3xl)', color: 'var(--cream)', letterSpacing: '-0.025em', lineHeight: 1 }}>
                   €{prevMonthTotal.toFixed(2)}
                 </div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 4 }}>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', marginTop: 4 }}>
                   Total unit spend
                 </div>
                 <div style={{ display: 'flex', gap: 16, marginTop: 14, flexWrap: 'wrap' }}>
                   {Object.entries(prevMonthByUser).map(([uid, amt]) => (
                     <div key={uid}>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>
                         {profiles[uid]?.split(' ')[0] || 'User'}
                       </div>
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 20, color: 'var(--cream)', letterSpacing: '-0.02em', marginTop: 2 }}>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', color: 'var(--cream)', letterSpacing: '-0.02em', marginTop: 2 }}>
                         €{amt.toFixed(2)}
                       </div>
                     </div>
@@ -383,10 +383,10 @@ export default function Expenses() {
                 </div>
                 {topPrevCat && (
                   <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontSize: 18 }}>{getExpenseCategory(topPrevCat[0]).emoji}</span>
+                    <span style={{ fontSize: 'var(--text-lg)' }}>{getExpenseCategory(topPrevCat[0]).emoji}</span>
                     <div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>Top category</div>
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 14, color: 'var(--cream)', marginTop: 1 }}>{topPrevCat[0]} · €{topPrevCat[1].toFixed(2)}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>Top category</div>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-sm)', color: 'var(--cream)', marginTop: 1 }}>{topPrevCat[0]} · €{topPrevCat[1].toFixed(2)}</div>
                     </div>
                   </div>
                 )}
@@ -415,19 +415,19 @@ export default function Expenses() {
                           width: 26, height: 26, borderRadius: 999,
                           background: isMe ? '#3B3B3B' : 'var(--accent)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          fontFamily: 'var(--font-body)', fontSize: 10, fontWeight: 700, color: 'var(--cream)',
+                          fontFamily: 'var(--font-body)', fontSize: 'var(--text-overline)', fontWeight: 700, color: 'var(--cream)',
                         }}>{initials}</div>
-                        <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream)', fontWeight: 600 }}>
+                        <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream)', fontWeight: 600 }}>
                           {isMe ? 'You' : name}
                         </div>
                       </div>
                       <div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>This month</div>
-                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--cream)', letterSpacing: '-0.02em', lineHeight: 1.1, marginTop: 2 }}>€{monthlyAmt.toFixed(2)}</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>This month</div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', color: 'var(--cream)', letterSpacing: '-0.02em', lineHeight: 1.1, marginTop: 2 }}>€{monthlyAmt.toFixed(2)}</div>
                       </div>
                       <div style={{ marginTop: 8 }}>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>All time</div>
-                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--cream-faint)', letterSpacing: '-0.02em', lineHeight: 1.1, marginTop: 2 }}>€{lifetimeAmt.toFixed(2)}</div>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>All time</div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-base)', color: 'var(--cream-faint)', letterSpacing: '-0.02em', lineHeight: 1.1, marginTop: 2 }}>€{lifetimeAmt.toFixed(2)}</div>
                       </div>
                     </div>
                   )
@@ -450,17 +450,17 @@ export default function Expenses() {
                       padding: '10px 0',
                       borderBottom: i === categoryList.length - 1 ? 'none' : '1px solid var(--border)',
                     }}>
-                      <span style={{ fontSize: 16 }}>{cat.emoji}</span>
+                      <span style={{ fontSize: 'var(--text-base)' }}>{cat.emoji}</span>
                       <div>
-                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 15, color: 'var(--cream)', lineHeight: 1.2 }}>{cat.label}</div>
+                        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-base)', color: 'var(--cream)', lineHeight: 1.2 }}>{cat.label}</div>
                         <div style={{ marginTop: 4, height: 3, borderRadius: 999, background: 'var(--border)', overflow: 'hidden' }}>
                           <div style={{ height: '100%', width: `${pct}%`, background: 'var(--accent-soft)', borderRadius: 999 }} />
                         </div>
-                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--cream-faint)', letterSpacing: '0.12em', marginTop: 3 }}>
+                        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', color: 'var(--cream-faint)', letterSpacing: '0.12em', marginTop: 3 }}>
                           {cat.count} expense{cat.count !== 1 ? 's' : ''} · {pct.toFixed(0)}%
                         </div>
                       </div>
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--cream)', letterSpacing: '-0.02em', textAlign: 'right' }}>
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-base)', color: 'var(--cream)', letterSpacing: '-0.02em', textAlign: 'right' }}>
                         €{cat.total.toFixed(2)}
                       </div>
                     </div>
@@ -475,7 +475,7 @@ export default function Expenses() {
 
           {dayOrder.map(day => (
             <div key={day} style={{ marginTop: 16 }}>
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 8 }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 8 }}>
                 {day}
               </div>
               <AnimatePresence initial={false}>
@@ -493,15 +493,15 @@ export default function Expenses() {
 
           {expenses.length === 0 && (
             <div style={{ textAlign: 'center', padding: '60px 0', color: 'var(--cream-faint)' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, marginBottom: 12 }}>No expenses yet.</div>
-              <p style={{ fontFamily: 'var(--font-body)', fontSize: 13 }}>Add your first shared expense above.</p>
+              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--text-xl)', marginBottom: 12 }}>No expenses yet.</div>
+              <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)' }}>Add your first shared expense above.</p>
             </div>
           )}
 
           {paid.length > 0 && dayOrder.filter(d => groups[d].every(e => e.status === 'paid')).length > 0 && (
             <div style={{
               fontFamily: 'var(--font-display)', fontStyle: 'italic',
-              fontSize: 15, color: 'var(--cream-faint)', textAlign: 'center', lineHeight: 1.3,
+              fontSize: 'var(--text-base)', color: 'var(--cream-faint)', textAlign: 'center', lineHeight: 1.3,
               padding: '18px 24px 8px', borderTop: '1px solid var(--border)', marginTop: 24,
             }}>
               &ldquo;Money rules ruin friendships. Clear receipts save them.&rdquo;
@@ -518,8 +518,8 @@ export default function Expenses() {
 function StatCell({ kicker, amount }) {
   return (
     <div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>{kicker}</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, color: 'var(--cream)', lineHeight: 1, marginTop: 4, letterSpacing: '-0.02em' }}>{amount}</div>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>{kicker}</div>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', color: 'var(--cream)', lineHeight: 1, marginTop: 4, letterSpacing: '-0.02em' }}>{amount}</div>
     </div>
   )
 }
@@ -547,38 +547,38 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, isLast 
     >
       <div style={{ position: 'relative' }}>
         <InitialsAvatar initials={payerInitials} isMe={paidByMe} size={34} />
-        <span style={{ position: 'absolute', bottom: -2, right: -4, fontSize: 12 }}>{emoji}</span>
+        <span style={{ position: 'absolute', bottom: -2, right: -4, fontSize: 'var(--text-xs)' }}>{emoji}</span>
       </div>
       <div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 17, color: 'var(--cream)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-base)', color: 'var(--cream)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
           {exp.description}
           {exp.receipt_url && (
-            <a href={exp.receipt_url} target="_blank" rel="noreferrer" style={{ marginLeft: 8, fontSize: 10, color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em' }}>
+            <a href={exp.receipt_url} target="_blank" rel="noreferrer" style={{ marginLeft: 8, fontSize: 'var(--text-overline)', color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', letterSpacing: '0.1em' }}>
               RECEIPT ↗
             </a>
           )}
         </div>
-        <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
           {paidByMe ? 'You paid' : `${payer.split(' ')[0]} paid`} · split 50/50
           {exp.status === 'paid' && (
-            <span style={{ padding: '1px 6px', borderRadius: 999, background: 'rgba(129,199,132,0.15)', fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#81c784' }}>Settled</span>
+            <span style={{ padding: '1px 6px', borderRadius: 999, background: 'rgba(129,199,132,0.15)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#81c784' }}>Settled</span>
           )}
         </div>
       </div>
       <div style={{ textAlign: 'right' }}>
         <div style={{
-          fontFamily: 'var(--font-display)', fontSize: 18,
+          fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)',
           color: youGet > 0 ? 'var(--accent-soft)' : 'var(--cream)',
           lineHeight: 1, letterSpacing: '-0.02em',
         }}>
           {youGet > 0 ? '+' : youGet < 0 ? '−' : ''}€{Math.abs(youGet).toFixed(2)}
         </div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.14em', color: 'var(--cream-faint)', marginTop: 2, textTransform: 'uppercase' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.14em', color: 'var(--cream-faint)', marginTop: 2, textTransform: 'uppercase' }}>
           €{exp.amount.toFixed(2)} total
         </div>
         {exp.status === 'pending' && (
           <div style={{ display: 'flex', gap: 6, marginTop: 6, justifyContent: 'flex-end' }}>
-            <button onClick={() => onMarkPaid(exp.id)} style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent-soft)', background: 'none', border: '1px solid var(--accent)', borderRadius: 999, padding: '3px 8px', cursor: 'pointer' }}>
+            <button onClick={() => onMarkPaid(exp.id)} style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.12em', textTransform: 'uppercase', color: 'var(--accent-soft)', background: 'none', border: '1px solid var(--accent)', borderRadius: 999, padding: '3px 8px', cursor: 'pointer' }}>
               Mark paid
             </button>
             <button onClick={onEdit} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2 }}>

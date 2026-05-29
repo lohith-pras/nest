@@ -99,7 +99,7 @@ export default function Dashboard() {
         </h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
           <AvatarStack items={[meAvatar, roommateAvatar]} size={26} />
-          <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--cream-dim)' }}>
+          <span style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-dim)' }}>
             with <strong style={{ color: 'var(--cream)' }}>{roomateName}</strong>
           </span>
         </div>
@@ -113,7 +113,7 @@ export default function Dashboard() {
         />
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', color: 'var(--cream-faint)', textTransform: 'uppercase', marginBottom: 4 }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', color: 'var(--cream-faint)', textTransform: 'uppercase', marginBottom: 4 }}>
               {owedToMe >= 0 ? 'Owed to you' : 'You owe'}
             </div>
             <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 14vw, 58px)', lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.035em' }}>
@@ -123,7 +123,7 @@ export default function Dashboard() {
           {roommateProfile && (
             <div style={{ textAlign: 'right', paddingBottom: 6 }}>
               <InitialsAvatar initials={roommateInitials} isMe={false} size={28} />
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.18em', color: 'var(--cream-dim)', marginTop: 4, textTransform: 'uppercase' }}>
+              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', color: 'var(--cream-dim)', marginTop: 4, textTransform: 'uppercase' }}>
                 from {roomateName}
               </div>
             </div>
@@ -157,10 +157,10 @@ export default function Dashboard() {
                     borderBottom: i < events.length - 1 ? '1px solid var(--border)' : 'none',
                   }}>
                     <div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>{dayLabel}</div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--cream)', marginTop: 1 }}>{e.time || '—'}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>{dayLabel}</div>
+                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', color: 'var(--cream)', marginTop: 1 }}>{e.time || '—'}</div>
                     </div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{e.title}</div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{e.title}</div>
                   </div>
                 )
               })}
@@ -171,7 +171,7 @@ export default function Dashboard() {
 
       {/* Footer */}
       <div className="enter-item" style={{
-        fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.2em', textTransform: 'uppercase',
+        fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--cream-faint)', padding: '20px 0 8px',
         textAlign: 'center', borderTop: '1px solid var(--border)', marginTop: 24,
       }}>
@@ -187,19 +187,19 @@ function PantryCard({ groceries, onOpen }) {
   return (
     <button onClick={onOpen} style={cardStyle}>
       <div style={cardKickerStyle}>02 — Pantry</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
         {total} things<br />
         <span style={{ fontStyle: 'italic', color: 'var(--cream-faint)' }}>left to grab.</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 12 }}>
         {shown.map((g, i) => (
-          <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 6 }}>
             <span style={{ width: 4, height: 4, borderRadius: 999, background: 'var(--accent)', flexShrink: 0 }} />
             {g.item_name}
-            {g.quantity && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--cream-faint)', marginLeft: 2 }}>×{g.quantity}</span>}
+            {g.quantity && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', color: 'var(--cream-faint)', marginLeft: 2 }}>×{g.quantity}</span>}
           </div>
         ))}
-        {total > 3 && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: 'var(--cream-faint)', marginLeft: 10 }}>+ {total - 3} more</div>}
+        {total > 3 && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', color: 'var(--cream-faint)', marginLeft: 10 }}>+ {total - 3} more</div>}
       </div>
       <div style={cardLinkStyle}>Open list <ArrowRight size={11} stroke={2} /></div>
     </button>
@@ -210,7 +210,7 @@ function InterestsCard({ watchlist, onOpen }) {
   return (
     <button onClick={onOpen} style={cardStyle}>
       <div style={cardKickerStyle}>03 — Interests</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
+      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
         {watchlist.length} picks<br />
         <span style={{ fontStyle: 'italic', color: 'var(--cream-faint)' }}>on the list.</span>
       </div>
@@ -224,7 +224,7 @@ function InterestsCard({ watchlist, onOpen }) {
               borderRadius: 4,
               display: 'flex', alignItems: 'flex-end', padding: 4,
               color: 'var(--cream-dim)',
-              fontFamily: 'var(--font-display)', fontSize: 10,
+              fontFamily: 'var(--font-display)', fontSize: 'var(--text-overline)',
               lineHeight: 1, letterSpacing: '-0.01em',
               boxShadow: '0 4px 10px -4px rgba(0,0,0,0.6)',
             }}>
@@ -251,13 +251,13 @@ const cardStyle = {
 }
 
 const cardKickerStyle = {
-  fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em',
+  fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em',
   textTransform: 'uppercase', color: 'var(--accent-soft)',
 }
 
 const cardLinkStyle = {
   marginTop: 'auto', paddingTop: 12,
-  fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', fontSize: 10,
+  fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', fontSize: 'var(--text-overline)',
   letterSpacing: '0.16em', textTransform: 'uppercase',
   color: 'var(--cream)', display: 'inline-flex', alignItems: 'center', gap: 6,
 }
