@@ -7,6 +7,38 @@ import { Masthead, SectionRule, Kicker, InitialsAvatar, PlusIcon, XIcon, posterC
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w300'
 const TMDB_API_BASE = 'https://api.themoviedb.org/3'
 
+// ─── OSM category mapping ─────────────────────────────────────────────────────
+
+const OSM_CATEGORY_MAP = {
+  restaurant: 'Restaurant', cafe: 'Café', bar: 'Bar', pub: 'Bar',
+  fast_food: 'Fast food', food_court: 'Food court',
+  supermarket: 'Supermarket', marketplace: 'Market',
+  museum: 'Museum', gallery: 'Gallery', theatre: 'Theatre', cinema: 'Cinema',
+  park: 'Park', garden: 'Garden', nature_reserve: 'Nature',
+  hiking: 'Hiking', viewpoint: 'Viewpoint', beach: 'Beach',
+  gym: 'Gym', sports_centre: 'Sports',
+  hotel: 'Hotel', hostel: 'Hostel',
+  pharmacy: 'Pharmacy', hospital: 'Hospital',
+  library: 'Library', university: 'University',
+  shop: 'Shop', mall: 'Mall',
+  attraction: 'Attraction', tourism: 'Tourism',
+  place_of_worship: 'Place of worship',
+}
+
+function getOsmCategory(result) {
+  const type = result.type || ''
+  const cls = result.class || ''
+  const tag = type || cls
+  return OSM_CATEGORY_MAP[tag] || OSM_CATEGORY_MAP[cls] || capitalize(tag) || 'Place'
+}
+
+function capitalize(s) {
+  if (!s) return ''
+  return s.charAt(0).toUpperCase() + s.slice(1).replace(/_/g, ' ')
+}
+
+// ─── Modals ───────────────────────────────────────────────────────────────────
+
 function TMDBSearchModal({ onClose, onSave, loading }) {
   const overlayRef = useRef(null)
   const panelRef = useRef(null)
@@ -25,7 +57,6 @@ function TMDBSearchModal({ onClose, onSave, loading }) {
           `${TMDB_API_BASE}/search/multi?query=${encodeURIComponent(query)}&api_key=${import.meta.env.VITE_TMDB_API_KEY}&include_adult=false`
         )
         const data = await res.json()
-        // Filter to only movie/tv, exclude items without a title/name
         const filtered = (data.results || [])
           .filter(r => (r.media_type === 'movie' || r.media_type === 'tv') && (r.title || r.name))
           .slice(0, 6)
@@ -134,74 +165,172 @@ function TMDBSearchModal({ onClose, onSave, loading }) {
   )
 }
 
-function Modal({ onClose, onSave, loading, defaultCategory, initialData = null }) {
+// PLAC-01, PLAC-02, PLAC-03: Nominatim search modal
+function NominatimSearchModal({ onClose, onSave, loading }) {
   const overlayRef = useRef(null)
   const panelRef = useRef(null)
   const { handleClose } = useModalAnimation(overlayRef, panelRef, onClose)
 
-  const [category, setCategory] = useState(initialData?.category || defaultCategory)
-  const [title, setTitle] = useState(initialData?.title || '')
-  const [description, setDescription] = useState(initialData?.description || '')
-  const [link, setLink] = useState(initialData?.link || '')
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [searching, setSearching] = useState(false)
+  const debounceRef = useRef(null)
+  const lastFetchRef = useRef(0)
 
-  function submit(e) {
-    e.preventDefault()
-    if (!title) return
-    const trimmedLink = link.trim()
-    if (trimmedLink && !/^https?:\/\//i.test(trimmedLink)) {
-      alert('Link must start with http:// or https://')
-      return
-    }
-    onSave({ category, title, description: description || null, link: trimmedLink || null }, initialData?.id, handleClose)
+  useEffect(() => {
+    if (!query.trim()) { setResults([]); return }
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      // enforce 1 req/sec rate limit
+      const now = Date.now()
+      const wait = Math.max(0, 1000 - (now - lastFetchRef.current))
+      await new Promise(r => setTimeout(r, wait))
+      lastFetchRef.current = Date.now()
+
+      setSearching(true)
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=6`,
+          { headers: { 'Accept-Language': 'en' } }
+        )
+        const data = await res.json()
+        setResults(data || [])
+      } catch (err) {
+        console.error('Nominatim search error:', err)
+      } finally {
+        setSearching(false)
+      }
+    }, 400)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  }, [query])
+
+  function handleSelect(r) {
+    const name = r.name || r.display_name.split(',')[0]
+    const address = r.display_name
+    const category = getOsmCategory(r)
+    onSave({
+      category: 'places',
+      title: name,
+      description: category,
+      link: null,
+      osm_id: String(r.osm_id),
+      osm_address: address,
+      osm_category: category,
+      osm_lat: r.lat,
+      osm_lon: r.lon,
+    }, null, handleClose)
   }
 
-  const fieldStyle = {
+  const inputStyle = {
     background: 'transparent', border: 'none',
     borderBottom: '1px solid var(--border-rule)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
     fontSize: 20, color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
   }
-  const labelStyle = {
-    fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em',
-    textTransform: 'uppercase', color: 'var(--cream-faint)', display: 'block', marginBottom: 6,
+
+  return (
+    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
+      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
+          Find a place.
+        </div>
+        <input
+          style={inputStyle}
+          value={query}
+          onChange={e => setQuery(e.target.value)}
+          placeholder="Restaurant, café, park…"
+          autoFocus
+        />
+        {searching && (
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '20px 0' }}>
+            <div className="animate-spin" style={{ width: 22, height: 22, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+          </div>
+        )}
+        {!searching && results.length > 0 && (
+          <div style={{ marginTop: 16, display: 'flex', flexDirection: 'column', gap: 2 }}>
+            {results.map(r => {
+              const name = r.name || r.display_name.split(',')[0]
+              const address = r.display_name
+              const category = getOsmCategory(r)
+              return (
+                <button
+                  key={r.osm_id}
+                  onClick={() => handleSelect(r)}
+                  disabled={loading}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    padding: '10px 0', borderBottom: '1px solid var(--border)',
+                    textAlign: 'left', width: '100%',
+                  }}
+                >
+                  <div style={{
+                    width: 36, height: 36, borderRadius: 999, flexShrink: 0,
+                    background: 'var(--surface-raised)', border: '1px solid var(--border)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    color: 'var(--accent-soft)', fontSize: 16,
+                  }}>📍</div>
+                  <div style={{ minWidth: 0 }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--cream)', lineHeight: 1.2 }}>{name}</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', color: 'var(--accent-soft)', marginTop: 2, textTransform: 'uppercase' }}>{category}</div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 2,
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%' }}>
+                      {address}
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        )}
+        {!searching && query.trim() && results.length === 0 && (
+          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--cream-faint)', padding: '20px 0' }}>
+            No results for &ldquo;{query}&rdquo;.
+          </div>
+        )}
+        <button type="button" className="btn-ghost" onClick={handleClose} style={{ marginTop: 20, width: '100%' }}>Cancel</button>
+      </div>
+    </div>
+  )
+}
+
+// Notes edit modal for places
+function PlaceNotesModal({ onClose, onSave, loading, initialNotes = '' }) {
+  const overlayRef = useRef(null)
+  const panelRef = useRef(null)
+  const { handleClose } = useModalAnimation(overlayRef, panelRef, onClose)
+  const [notes, setNotes] = useState(initialNotes)
+
+  function submit(e) {
+    e.preventDefault()
+    onSave(notes.trim(), handleClose)
+  }
+
+  const fieldStyle = {
+    background: 'transparent', border: 'none',
+    borderBottom: '1px solid var(--border-rule)',
+    padding: '10px 0', fontFamily: 'var(--font-display)',
+    fontSize: 18, color: 'var(--cream)', outline: 'none',
+    letterSpacing: '-0.01em', width: '100%',
+    resize: 'none',
   }
 
   return (
     <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
       <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
-          {initialData ? 'Edit entry.' : `Add to ${category === 'watchlist' ? 'watchlist' : 'places'}.`}
+          Personal notes.
         </div>
-        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {['watchlist', 'places'].map(c => (
-              <button key={c} type="button" onClick={() => setCategory(c)} style={{
-                flex: 1, padding: '8px', borderRadius: 999, fontSize: 12,
-                fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
-                background: category === c ? 'var(--cream)' : 'transparent',
-                color: category === c ? 'var(--primary-fg)' : 'var(--cream-faint)',
-                border: category === c ? 'none' : '1px solid var(--border-rule)',
-                textTransform: 'capitalize',
-              }}>{c}</button>
-            ))}
-          </div>
+        <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div>
-            <label style={labelStyle}>Title</label>
-            <input style={fieldStyle} value={title} onChange={e => setTitle(e.target.value)} placeholder={category === 'watchlist' ? 'e.g. Dune: Part Two' : 'e.g. Balthazar'} required />
-          </div>
-          <div>
-            <label style={labelStyle}>Description (optional)</label>
-            <input style={fieldStyle} value={description} onChange={e => setDescription(e.target.value)} placeholder="Genre, vibe, notes…" />
-          </div>
-          <div>
-            <label style={labelStyle}>Link (optional)</label>
-            <input style={fieldStyle} value={link} onChange={e => setLink(e.target.value)} placeholder="https://…" />
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Notes</div>
+            <textarea style={{ ...fieldStyle, minHeight: 80 }} value={notes} onChange={e => setNotes(e.target.value)} placeholder="e.g. Great for date night, book ahead…" autoFocus />
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
             <button type="button" className="btn-ghost" onClick={handleClose} style={{ flex: 1 }}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1, justifyContent: 'center' }}>
-              {loading ? '…' : 'Save'}
+              {loading ? '…' : 'Save notes'}
             </button>
           </div>
         </form>
@@ -210,18 +339,24 @@ function Modal({ onClose, onSave, loading, defaultCategory, initialData = null }
   )
 }
 
+// ─── Main page ────────────────────────────────────────────────────────────────
+
 export default function Interests() {
   const { session, profile } = useAuth()
   const [items, setItems] = useState([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState('watchlist')
   const [showModal, setShowModal] = useState(false)
-  const [editData, setEditData] = useState(null)
+  const [, setEditData] = useState(null)
   const [adding, setAdding] = useState(false)
   const [profiles, setProfiles] = useState({})
   const [ratingsMap, setRatingsMap] = useState({})
   const [allRatings, setAllRatings] = useState([])
   const [suggestions, setSuggestions] = useState([])
+  // Phase 4: places filter + notes editing
+  const [placeFilter, setPlaceFilter] = useState('All')
+  const [notesItem, setNotesItem] = useState(null) // item being notes-edited
+  const [savingNotes, setSavingNotes] = useState(false)
 
   useEffect(() => { load() }, [])
 
@@ -242,7 +377,6 @@ export default function Interests() {
       const rMap = {}
       ;(ratRes.data || []).forEach(r => { rMap[r.interest_id] = r })
       setRatingsMap(rMap)
-      // Fetch all unit members' ratings (RLS scopes to unit via interest_id policy)
       const { data: allRatData } = await supabase
         .from('interest_ratings')
         .select('id, interest_id, user_id, rating, would_rewatch, is_currently_watching')
@@ -329,26 +463,6 @@ export default function Interests() {
     })
   }
 
-  async function saveItem(data, id, handleClose) {
-    try {
-      setAdding(true)
-      if (id) {
-        const { error } = await supabase.from('interests').update(data).eq('id', id)
-        if (error) throw error
-      } else {
-        const { error } = await supabase.from('interests').insert({ ...data, added_by: session.user.id, unit_id: profile?.unit_id || null })
-        if (error) throw error
-      }
-      handleClose()
-      load()
-    } catch (err) {
-      console.error('Error saving interest:', err)
-      alert(`Failed to save: ${err.message}`)
-    } finally {
-      setAdding(false)
-    }
-  }
-
   async function saveWatchlistItem(data, _id, handleClose) {
     try {
       setAdding(true)
@@ -367,6 +481,55 @@ export default function Interests() {
     }
   }
 
+  // PLAC-02, PLAC-03: Save place from Nominatim search result
+  async function savePlaceItem(data, _id, handleClose) {
+    try {
+      setAdding(true)
+      const { error } = await supabase.from('interests').insert({
+        category: 'places',
+        title: data.title,
+        description: data.osm_category || data.description || null,
+        link: null,
+        added_by: session.user.id,
+        unit_id: profile?.unit_id || null,
+        // Store OSM data in description and overview fields
+        overview: JSON.stringify({
+          address: data.osm_address,
+          category: data.osm_category,
+          lat: data.osm_lat,
+          lon: data.osm_lon,
+          osm_id: data.osm_id,
+        }),
+      })
+      if (error) throw error
+      handleClose()
+      load()
+    } catch (err) {
+      console.error('Error saving place:', err)
+      alert(`Failed to save: ${err.message}`)
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  // PLAC-05: Save personal notes on a place
+  async function savePlaceNotes(itemId, notes, handleClose) {
+    try {
+      setSavingNotes(true)
+      // Store notes in the `link` field (repurposed for notes in places context)
+      const { error } = await supabase.from('interests').update({
+        link: notes || null,
+      }).eq('id', itemId)
+      if (error) throw error
+      setItems(prev => prev.map(i => i.id === itemId ? { ...i, link: notes || null } : i))
+      handleClose()
+    } catch (err) {
+      console.error('Error saving notes:', err)
+    } finally {
+      setSavingNotes(false)
+    }
+  }
+
   async function deleteItem(id) {
     await supabase.from('interests').delete().eq('id', id)
     setItems(prev => prev.filter(i => i.id !== id))
@@ -374,13 +537,29 @@ export default function Interests() {
 
   const filtered = items.filter(i => i.category === tab)
 
+  // PLAC-07: category filter for places
+  const placeCategories = ['All', ...Array.from(new Set(
+    items.filter(i => i.category === 'places').map(i => i.description).filter(Boolean)
+  ))]
+  const filteredPlaces = tab === 'places'
+    ? filtered.filter(i => placeFilter === 'All' || i.description === placeFilter)
+    : filtered
+
   return (
     <div style={{ paddingTop: 16 }}>
       {showModal && tab === 'watchlist' && (
         <TMDBSearchModal onClose={() => setShowModal(false)} onSave={saveWatchlistItem} loading={adding} />
       )}
       {showModal && tab === 'places' && (
-        <Modal onClose={() => setShowModal(false)} onSave={saveItem} loading={adding} defaultCategory="places" initialData={editData} />
+        <NominatimSearchModal onClose={() => setShowModal(false)} onSave={savePlaceItem} loading={adding} />
+      )}
+      {notesItem && (
+        <PlaceNotesModal
+          onClose={() => setNotesItem(null)}
+          onSave={(notes, handleClose) => savePlaceNotes(notesItem.id, notes, handleClose)}
+          loading={savingNotes}
+          initialNotes={notesItem.link || ''}
+        />
       )}
 
       <Masthead title="Interests" meta="Shared · 2 hosts" />
@@ -416,6 +595,25 @@ export default function Interests() {
         ))}
       </div>
 
+      {/* PLAC-07: Category filter for places */}
+      {tab === 'places' && placeCategories.length > 1 && (
+        <div style={{ display: 'flex', gap: 6, marginTop: 12, overflowX: 'auto', paddingBottom: 4 }}>
+          {placeCategories.map(cat => (
+            <button key={cat} onClick={() => setPlaceFilter(cat)} style={{
+              padding: '5px 12px', borderRadius: 999, flexShrink: 0,
+              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase',
+              cursor: 'pointer',
+              border: placeFilter === cat ? 'none' : '1px solid var(--border-rule)',
+              background: placeFilter === cat ? 'var(--accent-soft)' : 'transparent',
+              color: placeFilter === cat ? 'var(--primary-fg)' : 'var(--cream-faint)',
+            }}>
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Currently Watching (watchlist only) */}
       {(() => {
         const cwItems = tab === 'watchlist'
           ? allRatings
@@ -468,7 +666,7 @@ export default function Interests() {
         <div style={{ marginTop: 24 }}>
           <SectionRule label={`01 — ${tab === 'watchlist' ? 'On the watchlist' : 'On the map'}`} />
 
-          {filtered.length === 0 ? (
+          {filteredPlaces.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '50px 0' }}>
               <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--cream-faint)', marginBottom: 16 }}>
                 Nothing here yet.
@@ -479,7 +677,7 @@ export default function Interests() {
             </div>
           ) : (
             <div style={{ marginTop: 14 }}>
-              {filtered.map((item, i) => (
+              {filteredPlaces.map((item, i) => (
                 tab === 'watchlist'
                   ? <WatchRow
                       key={item.id}
@@ -491,11 +689,18 @@ export default function Interests() {
                       onToggleRewatch={() => upsertRating(item.id, { would_rewatch: !(ratingsMap[item.id]?.would_rewatch ?? false) })}
                       isCW={ratingsMap[item.id]?.is_currently_watching ?? false}
                       onToggleCW={() => toggleCurrentlyWatching(item.id)}
-                      isLast={i === filtered.length - 1}
+                      isLast={i === filteredPlaces.length - 1}
                       onDelete={() => deleteItem(item.id)}
                     />
-                  : <PlaceRow key={item.id} item={item} profiles={profiles} myId={session?.user?.id} isLast={i === filtered.length - 1}
-                      onEdit={() => { setEditData(item); setShowModal(true) }} onDelete={() => deleteItem(item.id)} />
+                  : <PlaceRow
+                      key={item.id}
+                      item={item}
+                      profiles={profiles}
+                      myId={session?.user?.id}
+                      isLast={i === filteredPlaces.length - 1}
+                      onEditNotes={() => setNotesItem(item)}
+                      onDelete={() => deleteItem(item.id)}
+                    />
               ))}
             </div>
           )}
@@ -534,7 +739,7 @@ export default function Interests() {
         </div>
       )}
 
-      {/* FAB — add interest */}
+      {/* FAB */}
       <button
         onClick={() => { setEditData(null); setShowModal(true) }}
         onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
@@ -563,6 +768,8 @@ export default function Interests() {
     </div>
   )
 }
+
+// ─── Row components ───────────────────────────────────────────────────────────
 
 function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, onToggleRewatch, isCW, onToggleCW }) {
   const addedByMe = item.added_by === myId
@@ -654,44 +861,81 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
   )
 }
 
-function PlaceRow({ item, profiles, myId, isLast, onEdit, onDelete }) {
+// PLAC-04, PLAC-05, PLAC-06: Enhanced PlaceRow with OSM data, notes, delete
+function PlaceRow({ item, profiles, myId, isLast, onEditNotes, onDelete }) {
   const addedByMe = item.added_by === myId
   const adderName = profiles[item.added_by]?.split(' ')[0] || '?'
   const initials = adderName[0]?.toUpperCase() || '?'
 
+  // Parse OSM data stored in overview field
+  let osmData = null
+  try {
+    if (item.overview) osmData = JSON.parse(item.overview)
+  } catch { /* not JSON — ignore */ }
+
+  const category = item.description || 'Place'
+  const address = osmData?.address || null
+  const notes = item.link || null // notes stored in link field
+
   return (
     <div style={{
-      display: 'grid', gridTemplateColumns: '44px 1fr auto auto auto', gap: 12, alignItems: 'center',
       padding: '12px 0', borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
       <div style={{
-        width: 44, height: 44, borderRadius: 999,
-        background: 'var(--surface-raised)',
-        border: '1px solid var(--border)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        color: 'var(--accent-soft)',
+        display: 'grid', gridTemplateColumns: '44px 1fr auto auto', gap: 12, alignItems: 'start',
       }}>
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M12 22s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z"/>
-          <circle cx="12" cy="9" r="2.5"/>
-        </svg>
-      </div>
-      <div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
-          {item.title}
+        <div style={{
+          width: 44, height: 44, borderRadius: 999,
+          background: 'var(--surface-raised)',
+          border: '1px solid var(--border)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: 'var(--accent-soft)',
+          flexShrink: 0,
+        }}>
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 22s7-7.5 7-13a7 7 0 1 0-14 0c0 5.5 7 13 7 13z"/>
+            <circle cx="12" cy="9" r="2.5"/>
+          </svg>
         </div>
-        <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 2 }}>
-          {item.description || 'Place to visit'}
-          {item.link && /^https?:\/\//i.test(item.link) && <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ marginLeft: 8, color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Link ↗</a>}
+        <div>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
+            {item.title}
+          </div>
+          {/* PLAC-03: category tag */}
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginTop: 2 }}>
+            {category}
+          </div>
+          {/* PLAC-04: address */}
+          {address && (
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 3, lineHeight: 1.4 }}>
+              {address.length > 80 ? address.slice(0, 80) + '…' : address}
+            </div>
+          )}
+          {/* PLAC-04: personal notes */}
+          {notes && (
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream)', marginTop: 5, fontStyle: 'italic', lineHeight: 1.4,
+              padding: '4px 8px', background: 'var(--surface-raised)', borderRadius: 6, borderLeft: '2px solid var(--accent-soft)' }}>
+              {notes}
+            </div>
+          )}
         </div>
+        <InitialsAvatar initials={initials} isMe={addedByMe} size={22} />
+        {addedByMe && (
+          <button onClick={onDelete} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, opacity: 0.6 }}>
+            <XIcon size={13} />
+          </button>
+        )}
       </div>
-      <InitialsAvatar initials={initials} isMe={addedByMe} size={22} />
-      <button onClick={onEdit} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, opacity: 0.7 }}>
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 4l6 6L9 21H3v-6L14 4z"/></svg>
-      </button>
-      <button onClick={onDelete} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, opacity: 0.6 }}>
-        <XIcon size={13} />
-      </button>
+      {/* PLAC-05: notes edit button */}
+      <div style={{ paddingLeft: 56, marginTop: 6 }}>
+        <button onClick={onEditNotes} style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase',
+          color: 'var(--cream-faint)', padding: 0,
+        }}>
+          {notes ? 'Edit notes →' : '+ Add notes'}
+        </button>
+      </div>
     </div>
   )
 }
