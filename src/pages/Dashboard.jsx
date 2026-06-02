@@ -1,50 +1,74 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { usePageEntrance } from '../hooks/usePageEntrance'
+import { motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { InitialsAvatar, AvatarStack, SectionRule, Kicker, ArrowRight } from '../components/RoomyUI'
+import { InitialsAvatar } from '../components/RoomyUI'
 
-function getTimeOfDay() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Morning'
-  if (h < 17) return 'Afternoon'
-  return 'Evening'
+// ── Nav pill config ──────────────────────────────────────────────────────────
+const NAV_PILLS = [
+  { label: 'Overview', to: null },       // active state = current page
+  { label: 'Balance',  to: '/expenses' },
+  { label: 'Groceries', to: '/groceries' },
+  { label: 'Calendar', to: '/calendar' },
+  { label: 'Interests', to: '/interests' },
+  { label: 'More',     to: '/more' },
+]
+
+// ── Icons ────────────────────────────────────────────────────────────────────
+function StarIcon() {
+  return (
+    <svg width={28} height={28} viewBox="0 0 24 24" fill="none"
+      stroke="var(--accent)" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3v6M12 15v6M3 12h6M15 12h6M5.5 5.5l3.5 3.5M14.5 14.5l3.5 3.5M18.5 5.5l-3.5 3.5M9.5 14.5l-3.5 3.5"/>
+    </svg>
+  )
 }
 
-function formatTime() {
-  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+function GridIcon() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+      <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+      <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+      <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+    </svg>
+  )
 }
 
-function formatDate() {
-  return new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
-    .replace(',', ' ·')
+function CheckCircleIcon({ checked }) {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none"
+      stroke={checked ? 'var(--accent)' : 'rgba(255,255,255,0.3)'}
+      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      {checked && <path d="M8 12.5l3 3 5-5"/>}
+    </svg>
+  )
 }
 
+// ── Main component ───────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { profile } = useAuth()
   const navigate = useNavigate()
-  const containerRef = usePageEntrance()
   const [owedToMe, setOwedToMe] = useState(0)
   const [groceries, setGroceries] = useState([])
-  const [watchlist, setWatchlist] = useState([])
   const [events, setEvents] = useState([])
   const [roommateProfile, setRoommateProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
-  const greeting = `Good ${getTimeOfDay()}`
 
   useEffect(() => {
     async function load() {
       setLoading(true)
       const userId = (await supabase.auth.getUser()).data.user?.id
 
-      const [expRes, grocRes, intRes, evtRes, profRes] = await Promise.all([
+      const [expRes, grocRes, evtRes, profRes] = await Promise.all([
         supabase.from('expenses').select('amount, paid_by, split_amount, status').eq('status', 'pending'),
-        supabase.from('groceries').select('id, item_name, quantity, is_checked').eq('is_checked', false).limit(5),
-        supabase.from('interests').select('id, title, category').eq('category', 'watchlist').order('created_at', { ascending: false }).limit(3),
-        supabase.from('events').select('id, title, date, time').gte('date', new Date().toISOString().split('T')[0]).order('date').limit(3),
+        supabase.from('groceries').select('id, item_name, is_checked').eq('is_inventory', false).order('updated_at', { ascending: false }).limit(4),
+        supabase.from('events').select('id, title, date, time').gte('date', new Date().toISOString().split('T')[0]).order('date').limit(1),
         supabase.from('profiles').select('id, full_name'),
       ])
 
@@ -54,9 +78,7 @@ export default function Dashboard() {
 
       setOwedToMe(owed)
       setGroceries(grocRes.data || [])
-      setWatchlist(intRes.data || [])
       setEvents(evtRes.data || [])
-
       const roommate = (profRes.data || []).find(p => p.id !== userId)
       setRoommateProfile(roommate || null)
       setLoading(false)
@@ -66,193 +88,242 @@ export default function Dashboard() {
 
   const wholeStr = Math.floor(Math.abs(owedToMe)).toString()
   const centsStr = (Math.abs(owedToMe) % 1).toFixed(2).slice(1)
-  const roomateName = roommateProfile?.full_name?.split(' ')[0] || 'your roommate'
-  const myInitials = profile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
+  const roomateName = roommateProfile?.full_name?.split(' ')[0] || 'roommate'
   const roommateInitials = roommateProfile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
 
-  const meAvatar = { initials: myInitials, isMe: true }
-  const roommateAvatar = { initials: roommateInitials, isMe: false }
-
-  if (loading) return (
-    <div style={{ paddingTop: 16 }}>
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
-        <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
-      </div>
-    </div>
-  )
+  const nextEvent = events[0] || null
 
   return (
-    <div ref={containerRef} style={{ paddingTop: 16, paddingBottom: 8 }}>
+    <div style={{ paddingTop: 4, paddingBottom: 24 }}>
 
-      {/* Hero */}
-      <div className="enter-item" style={{ paddingTop: 18, paddingBottom: 20 }}>
-        <Kicker>{getTimeOfDay()} Edition · {formatTime()}</Kicker>
-        <h1 style={{
-          fontFamily: 'var(--font-display)', fontSize: 'clamp(42px, 12vw, 52px)',
-          lineHeight: 0.92, margin: '10px 0 0', letterSpacing: '-0.025em', color: 'var(--cream)',
+      {/* ── Header row ─────────────────────────────────────────── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <StarIcon />
+        <button
+          onClick={() => navigate('/more')}
+          style={{
+            width: 40, height: 40, borderRadius: 999,
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.12)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--cream)', cursor: 'pointer',
+          }}
+        >
+          <GridIcon />
+        </button>
+      </div>
+
+      {/* ── Greeting ───────────────────────────────────────────── */}
+      <div style={{ marginBottom: 22 }}>
+        <p style={{
+          fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
+          color: 'var(--cream-dim)', margin: 0, letterSpacing: '0.01em',
         }}>
-          {greeting},<br />
-          <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>{firstName}</span>.
+          Welcome home,
+        </p>
+        <h1 style={{
+          fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 12vw, 56px)',
+          fontWeight: 600, lineHeight: 1, margin: '4px 0 0',
+          color: 'var(--cream)', letterSpacing: '-0.03em',
+        }}>
+          {firstName}
         </h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
-          <AvatarStack items={[meAvatar, roommateAvatar]} size={26} />
-          <span style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-dim)' }}>
-            with <strong style={{ color: 'var(--cream)' }}>{roomateName}</strong>
-          </span>
-        </div>
       </div>
 
-      {/* 01 — Ledger */}
-      <div className="enter-item">
-        <SectionRule
-          label="01 — Ledger"
-          right={<span onClick={() => navigate('/expenses')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>View all <ArrowRight size={11} /></span>}
-        />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
-          <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', color: 'var(--cream-faint)', textTransform: 'uppercase', marginBottom: 4 }}>
-              {owedToMe >= 0 ? 'Owed to you' : 'You owe'}
-            </div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 14vw, 58px)', lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.035em' }}>
-              €{wholeStr}<span style={{ color: 'var(--accent-soft)' }}>{centsStr}</span>
-            </div>
-          </div>
-          {roommateProfile && (
-            <div style={{ textAlign: 'right', paddingBottom: 6 }}>
-              <InitialsAvatar initials={roommateInitials} isMe={false} size={28} />
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', color: 'var(--cream-dim)', marginTop: 4, textTransform: 'uppercase' }}>
-                from {roomateName}
-              </div>
-            </div>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-          <button onClick={() => navigate('/expenses')} className="btn-primary">Settle up</button>
-          <button className="btn-ghost">Remind {roomateName}</button>
-        </div>
-      </div>
-
-      {/* 02/03 — Quick access cards */}
-      <div className="enter-item" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 24 }}>
-        <PantryCard groceries={groceries} onOpen={() => navigate('/groceries')} />
-        <InterestsCard watchlist={watchlist} onOpen={() => navigate('/interests')} />
-      </div>
-
-      {/* 04 — Agenda */}
-      <div className="enter-item">
-        {events.length > 0 && (
-          <div style={{ marginTop: 26 }}>
-            <SectionRule label="04 — On the agenda" right={<span onClick={() => navigate('/calendar')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>{events.length} ahead</span>} />
-            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {events.map((e, i) => {
-                const d = new Date(e.date + 'T12:00:00')
-                const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
-                return (
-                  <div key={e.id} style={{
-                    display: 'grid', gridTemplateColumns: '54px 1fr',
-                    alignItems: 'center', gap: 12, paddingBottom: 10,
-                    borderBottom: i < events.length - 1 ? '1px solid var(--border)' : 'none',
-                  }}>
-                    <div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>{dayLabel}</div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', color: 'var(--cream)', marginTop: 1 }}>{e.time || '—'}</div>
-                    </div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{e.title}</div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Footer */}
-      <div className="enter-item" style={{
-        fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.2em', textTransform: 'uppercase',
-        color: 'var(--cream-faint)', padding: '20px 0 8px',
-        textAlign: 'center', borderTop: '1px solid var(--border)', marginTop: 24,
+      {/* ── Pill nav bar ───────────────────────────────────────── */}
+      <div style={{
+        display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 20,
+        scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
       }}>
-        End of edition · pull to refresh ↓
-      </div>
-    </div>
-  )
-}
-
-function PantryCard({ groceries, onOpen }) {
-  const shown = groceries.slice(0, 3)
-  const total = groceries.length
-  return (
-    <button onClick={onOpen} style={cardStyle}>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
-        {total} things<br />
-        <span style={{ fontStyle: 'italic', color: 'var(--cream-faint)' }}>left to grab.</span>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 12 }}>
-        {shown.map((g, i) => (
-          <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 4, height: 4, borderRadius: 999, background: 'var(--accent)', flexShrink: 0 }} />
-            {g.item_name}
-            {g.quantity && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', color: 'var(--cream-faint)', marginLeft: 2 }}>×{g.quantity}</span>}
-          </div>
-        ))}
-        {total > 3 && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', color: 'var(--cream-faint)', marginLeft: 10 }}>+ {total - 3} more</div>}
-      </div>
-      <div style={cardLinkStyle}>Open list <ArrowRight size={11} stroke={2} /></div>
-    </button>
-  )
-}
-
-function InterestsCard({ watchlist, onOpen }) {
-  return (
-    <button onClick={onOpen} style={cardStyle}>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
-        {watchlist.length} picks<br />
-        <span style={{ fontStyle: 'italic', color: 'var(--cream-faint)' }}>on the list.</span>
-      </div>
-      <div style={{ display: 'flex', gap: 4, marginTop: 12 }}>
-        {watchlist.slice(0, 3).map((w, i) => {
-          const colors = ['#5a3e2b', '#2b3a4a', '#4a3a2b']
+        {NAV_PILLS.map((pill) => {
+          const isActive = pill.to === null
           return (
-            <div key={i} style={{
-              flex: 1, aspectRatio: '2 / 3',
-              background: colors[i % colors.length],
-              borderRadius: 4,
-              display: 'flex', alignItems: 'flex-end', padding: 4,
-              color: 'var(--cream-dim)',
-              fontFamily: 'var(--font-display)', fontSize: 'var(--text-overline)',
-              lineHeight: 1, letterSpacing: '-0.01em',
-              boxShadow: '0 4px 10px -4px rgba(0,0,0,0.6)',
-            }}>
-              {w.title?.slice(0, 2).toUpperCase()}
-            </div>
+            <button
+              key={pill.label}
+              onClick={() => pill.to && navigate(pill.to)}
+              style={{
+                flexShrink: 0,
+                padding: '9px 18px',
+                borderRadius: 999,
+                border: isActive ? 'none' : '1px solid rgba(255,255,255,0.18)',
+                background: isActive ? 'var(--accent)' : 'transparent',
+                color: isActive ? '#fff' : 'var(--cream-dim)',
+                fontFamily: 'var(--font-body)',
+                fontSize: 'var(--text-sm)',
+                fontWeight: isActive ? 600 : 400,
+                cursor: pill.to ? 'pointer' : 'default',
+                letterSpacing: '-0.01em',
+                transition: 'all 200ms ease',
+                WebkitTapHighlightColor: 'transparent',
+              }}
+            >
+              {pill.label}
+            </button>
           )
         })}
       </div>
-      <div style={cardLinkStyle}>Open list <ArrowRight size={11} stroke={2} /></div>
-    </button>
+
+      {/* ── Balance card ───────────────────────────────────────── */}
+      <motion.div
+        className="glass-card"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        style={{ padding: '20px 20px 18px', marginBottom: 14, position: 'relative', borderRadius: 20 }}
+      >
+        {/* Roommate avatar */}
+        {roommateProfile && (
+          <div style={{ position: 'absolute', top: 18, right: 18 }}>
+            <InitialsAvatar initials={roommateInitials} isMe={false} size={42} />
+          </div>
+        )}
+
+        <p style={{
+          fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)',
+          letterSpacing: '0.2em', textTransform: 'uppercase',
+          color: 'var(--cream-faint)', margin: '0 0 10px',
+        }}>
+          {owedToMe >= 0 ? 'Owed to you' : 'You owe'}
+        </p>
+
+        <div style={{
+          fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 13vw, 60px)',
+          fontWeight: 600, lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.04em',
+          marginBottom: 6,
+        }}>
+          {loading ? '—' : <>€{wholeStr}<span style={{ fontSize: '0.55em', color: 'var(--cream-dim)', verticalAlign: 'super', lineHeight: 0 }}>{centsStr}</span></>}
+        </div>
+
+        <p style={{
+          fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
+          color: 'var(--cream-dim)', margin: '0 0 18px',
+        }}>
+          {roomateName} owes you · settled weekly
+        </p>
+
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={() => navigate('/expenses')}
+            className="btn-primary"
+            style={{ flex: 1, justifyContent: 'center', borderRadius: 999, padding: '11px 16px' }}
+          >
+            Settle up
+          </button>
+          <button
+            className="btn-ghost"
+            style={{ flex: 1, justifyContent: 'center', borderRadius: 999, padding: '11px 16px' }}
+          >
+            Remind {roomateName}
+          </button>
+        </div>
+      </motion.div>
+
+      {/* ── Two-col cards ──────────────────────────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: 14 }}>
+
+        {/* Shopping list card */}
+        <motion.button
+          className="glass-card"
+          onClick={() => navigate('/groceries')}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
+          style={{
+            padding: '16px 14px', borderRadius: 20, textAlign: 'left',
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            minHeight: 200, color: 'var(--cream)',
+          }}
+        >
+          <p style={{
+            fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)',
+            fontWeight: 600, lineHeight: 1.15, letterSpacing: '-0.025em',
+            color: 'var(--cream)', margin: '0 0 14px',
+          }}>
+            Shopping<br />List
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
+            {loading
+              ? <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)' }}>Loading…</p>
+              : groceries.length === 0
+                ? <p style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)' }}>All clear!</p>
+                : groceries.map(g => (
+                  <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <CheckCircleIcon checked={g.is_checked} />
+                    <span style={{
+                      fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
+                      color: g.is_checked ? 'var(--cream-faint)' : 'var(--cream)',
+                      textDecoration: g.is_checked ? 'line-through' : 'none',
+                      letterSpacing: '-0.01em',
+                    }}>
+                      {g.item_name}
+                    </span>
+                  </div>
+                ))
+            }
+          </div>
+
+          <p style={{
+            fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)',
+            letterSpacing: '0.14em', textTransform: 'uppercase',
+            color: 'var(--cream-faint)', margin: '12px 0 0',
+          }}>
+            {groceries.filter(g => !g.is_checked).length} of {groceries.length} left
+          </p>
+        </motion.button>
+
+        {/* Next event card */}
+        <motion.button
+          className="glass-card"
+          onClick={() => navigate('/calendar')}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.14, ease: [0.23, 1, 0.32, 1] }}
+          style={{
+            padding: '16px 14px', borderRadius: 20, textAlign: 'left',
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            minHeight: 200, color: 'var(--cream)',
+          }}
+        >
+          <p style={{
+            fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)',
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: 'var(--cream-faint)', margin: '0 0 10px',
+          }}>
+            {nextEvent ? 'On tonight' : 'Calendar'}
+          </p>
+
+          {nextEvent ? (
+            <>
+              <p style={{
+                fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 6vw, 30px)',
+                fontWeight: 600, lineHeight: 1.1, letterSpacing: '-0.025em',
+                color: 'var(--accent)', margin: '0 0 12px', flex: 1,
+              }}>
+                {nextEvent.title}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 6, height: 6, borderRadius: 999, background: 'var(--accent)', flexShrink: 0 }} />
+                <span style={{
+                  fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)',
+                  color: 'var(--cream-dim)',
+                }}>
+                  {nextEvent.time || 'All day'} · your turn
+                </span>
+              </div>
+            </>
+          ) : (
+            <p style={{
+              fontFamily: 'var(--font-display)', fontStyle: 'italic',
+              fontSize: 'var(--text-lg)', color: 'var(--cream-faint)',
+              margin: 0, flex: 1,
+            }}>
+              {loading ? '…' : 'Nothing yet.'}
+            </p>
+          )}
+        </motion.button>
+
+      </div>
+    </div>
   )
-}
-
-const cardStyle = {
-  background: 'var(--surface-raised)',
-  border: '1px solid var(--border)',
-  borderRadius: 16, padding: '14px 14px 12px',
-  textAlign: 'left', color: 'inherit', cursor: 'pointer',
-  display: 'flex', flexDirection: 'column',
-  minHeight: 190,
-  fontFamily: 'var(--font-body)',
-  transition: 'transform 150ms ease, background 200ms',
-  width: '100%',
-}
-
-const cardKickerStyle = {
-  fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em',
-  textTransform: 'uppercase', color: 'var(--accent-soft)',
-}
-
-const cardLinkStyle = {
-  marginTop: 'auto', paddingTop: 12,
-  fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', fontSize: 'var(--text-overline)',
-  letterSpacing: '0.16em', textTransform: 'uppercase',
-  color: 'var(--cream)', display: 'inline-flex', alignItems: 'center', gap: 6,
 }

@@ -159,6 +159,10 @@ body {
   overflow-x: hidden;
 }
 
+/* ── Utility: hide scrollbar while keeping scroll ─── */
+.hide-scrollbar { scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
 /* ── Font Utilities ─────────────────────────────────────────────── */
 /* SF Pro Display / SF Pro Text / SF Mono — all system fonts, no external load.
    On non-Apple platforms these gracefully fall back to system-ui / monospace. */
