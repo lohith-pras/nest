@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { usePageEntrance } from '../hooks/usePageEntrance'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { InitialsAvatar, AvatarStack, SectionRule, Masthead, Kicker, ArrowRight } from '../components/RoomyUI'
+import { InitialsAvatar, AvatarStack, SectionRule, Kicker, ArrowRight } from '../components/RoomyUI'
 
 function getTimeOfDay() {
   const h = new Date().getHours()
@@ -75,7 +75,6 @@ export default function Dashboard() {
 
   if (loading) return (
     <div style={{ paddingTop: 16 }}>
-      <Masthead title="Roomy" meta={formatDate()} />
       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
         <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
       </div>
@@ -84,8 +83,6 @@ export default function Dashboard() {
 
   return (
     <div ref={containerRef} style={{ paddingTop: 16, paddingBottom: 8 }}>
-      {/* Masthead */}
-      <div className="enter-item"><Masthead title="Roomy" meta={`№ 47 · ${formatDate()}`} /></div>
 
       {/* Hero */}
       <div className="enter-item" style={{ paddingTop: 18, paddingBottom: 20 }}>
@@ -186,7 +183,6 @@ function PantryCard({ groceries, onOpen }) {
   const total = groceries.length
   return (
     <button onClick={onOpen} style={cardStyle}>
-      <div style={cardKickerStyle}>02 — Pantry</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
         {total} things<br />
         <span style={{ fontStyle: 'italic', color: 'var(--cream-faint)' }}>left to grab.</span>
@@ -209,7 +205,6 @@ function PantryCard({ groceries, onOpen }) {
 function InterestsCard({ watchlist, onOpen }) {
   return (
     <button onClick={onOpen} style={cardStyle}>
-      <div style={cardKickerStyle}>03 — Interests</div>
       <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
         {watchlist.length} picks<br />
         <span style={{ fontStyle: 'italic', color: 'var(--cream-faint)' }}>on the list.</span>
