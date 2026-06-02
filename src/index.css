@@ -78,6 +78,13 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* ── Transitions & Blur ─── */
+  --transition-fast: 120ms;
+  --transition-normal: 160ms;
+  --transition-slow: 200ms;
+  --transition-theme: 250ms;
+  --glass-blur-sm: 8px;
 }
 
 /* ── Dark palette ───────────────────────────────────────────── */
@@ -127,7 +134,7 @@
 
 html {
   height: 100%;
-  transition: background-color 250ms ease, color 250ms ease;
+  transition: background-color var(--transition-theme) ease, color var(--transition-theme) ease;
 }
 
 body {
@@ -192,7 +199,7 @@ button {
   background: none;
   font-family: inherit;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 160ms var(--ease-out);
+  transition: transform var(--transition-normal) var(--ease-out);
 }
 
 button:active {
@@ -217,7 +224,7 @@ input, textarea, select {
   -webkit-backdrop-filter: blur(var(--glass-blur));
   border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
-  transition: transform 160ms var(--ease-out), background 160ms var(--ease-out);
+  transition: transform var(--transition-normal) var(--ease-out), background var(--transition-normal) var(--ease-out);
 }
 
 .glass-card:active {
@@ -245,7 +252,7 @@ input, textarea, select {
   gap: 12px;
   padding: 12px;
   border-radius: 12px;
-  transition: color 160ms var(--ease-out), background 160ms var(--ease-out);
+  transition: color var(--transition-normal) var(--ease-out), background var(--transition-normal) var(--ease-out);
   color: var(--cream-faint);
   font-family: var(--font-mono);
   font-size: var(--text-overline);
@@ -268,7 +275,7 @@ input, textarea, select {
   font-family: var(--font-body);
   font-size: var(--text-sm);
   letter-spacing: -0.01em;
-  transition: transform 120ms ease, opacity 120ms;
+  transition: transform var(--transition-fast) ease, opacity var(--transition-fast);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -293,7 +300,7 @@ input, textarea, select {
   font-family: var(--font-body);
   font-size: var(--text-sm);
   font-weight: 500;
-  transition: transform 120ms ease, background 120ms;
+  transition: transform var(--transition-fast) ease, background var(--transition-fast);
 }
 
 .btn-ghost:active {
@@ -307,7 +314,7 @@ input, textarea, select {
   padding: 10px 18px;
   font-weight: 600;
   font-size: var(--text-sm);
-  transition: transform 120ms ease;
+  transition: transform var(--transition-fast) ease;
 }
 
 /* ── Inputs ─────────────────────────────────────────────────── */
@@ -322,7 +329,7 @@ input, textarea, select {
   color: var(--cream);
   outline: none;
   letter-spacing: -0.01em;
-  transition: border-color 200ms;
+  transition: border-color var(--transition-slow);
   border-radius: 0;
 }
 
@@ -374,8 +381,8 @@ input, textarea, select {
   position: absolute;
   inset: 0;
   background: var(--overlay-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(var(--glass-blur-sm));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -450,12 +457,12 @@ input, textarea, select {
 /* ── Mobile Performance ─────────────────────────────────────── */
 @media (max-width: 767px) {
   .glass, .bottom-nav, .modal-overlay {
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+    backdrop-filter: blur(var(--glass-blur-sm)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur-sm)) !important;
   }
 }
 
-/* ── Responsive Typography ──────────────────────────────────── */
+/* ── Responsive Typography & Spacing ──────────────────────── */
 @media (min-width: 481px) {
   :root {
     --spacing-h: 28px;
@@ -463,6 +470,9 @@ input, textarea, select {
     --font-h2: 26px;
     --font-h3: 20px;
     --font-body-font: 15px;
+  }
+  .section-title {
+    font-size: 20px;
   }
 }
 
@@ -475,61 +485,23 @@ input, textarea, select {
     --font-body-font: 16px;
     --max-content-width: 480px;
   }
-
   #root {
     margin: 0 auto;
     max-width: var(--max-content-width, 100%);
   }
-}
-
-/* ─── Responsive Typography & Spacing ──────────────────────── */
-
-/* Tablet (481px+) */
-@media (min-width: 481px) {
-  :root {
-    --spacing-h: 32px;
-    --font-h1: 32px;
-    --font-h2: 24px;
-    --font-h3: 20px;
-    --font-body-font: 15px;
-  }
-
   .section-title {
-    font-size: 1.25rem;
+    font-size: 22px;
   }
 }
 
-/* Desktop (769px+) */
-@media (min-width: 769px) {
-  :root {
-    --spacing-h: 48px;
-    --font-h1: 36px;
-    --font-h2: 28px;
-    --font-h3: 22px;
-    --font-body-font: 16px;
-    --max-content-width: 900px;
-  }
-
-  #root {
-    margin: 0 auto;
-    max-width: var(--max-content-width, 100%);
-  }
-
-  .section-title {
-    font-size: 1.35rem;
-  }
-}
-
-/* Large Desktop (1024px+) */
 @media (min-width: 1024px) {
   :root {
-    --font-h1: 40px;
-    --font-h2: 32px;
-    --font-h3: 24px;
+    --font-h1: 68px;
+    --font-h2: 40px;
+    --font-h3: 28px;
     --font-body-font: 17px;
   }
-
   .section-title {
-    font-size: 1.45rem;
+    font-size: 24px;
   }
 }
