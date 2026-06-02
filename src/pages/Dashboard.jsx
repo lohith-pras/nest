@@ -1,50 +1,139 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { usePageEntrance } from '../hooks/usePageEntrance'
+import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { InitialsAvatar, AvatarStack, SectionRule, Masthead, Kicker, ArrowRight } from '../components/RoomyUI'
+import { useModalAnimation } from '../hooks/useModalAnimation'
+import { InitialsAvatar } from '../components/RoomyUI'
+import PillNav from '../components/PillNav'
 
-function getTimeOfDay() {
-  const h = new Date().getHours()
-  if (h < 12) return 'Morning'
-  if (h < 17) return 'Afternoon'
-  return 'Evening'
+
+// ── Icons ────────────────────────────────────────────────────────────────────
+function StarIcon() {
+  return (
+    <svg width={28} height={28} viewBox="0 0 24 24" fill="none"
+      stroke="var(--accent)" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M12 3v6M12 15v6M3 12h6M15 12h6M5.5 5.5l3.5 3.5M14.5 14.5l3.5 3.5M18.5 5.5l-3.5 3.5M9.5 14.5l-3.5 3.5"/>
+    </svg>
+  )
 }
 
-function formatTime() {
-  return new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
+function GridIcon() {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none"
+      stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+      <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+      <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+      <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+    </svg>
+  )
 }
 
-function formatDate() {
-  return new Date().toLocaleDateString('en-US', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
-    .replace(',', ' ·')
+function CheckCircleIcon({ checked }) {
+  return (
+    <svg width={20} height={20} viewBox="0 0 24 24" fill="none"
+      stroke={checked ? 'var(--accent)' : 'var(--cream-faint)'}
+      strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="9"/>
+      <motion.path 
+        d="M8 12.5l3 3 5-5"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
+        transition={{ type: 'spring', bounce: 0.4, duration: 0.5 }}
+      />
+    </svg>
+  )
 }
 
+// ── Modals ───────────────────────────────────────────────────────────────────
+function GroceriesModal({ onClose, groceries, onToggle }) {
+  const overlayRef = useRef(null)
+  const panelRef = useRef(null)
+  const { handleClose } = useModalAnimation(overlayRef, panelRef, onClose)
+
+  return (
+    <motion.div 
+      className="modal-overlay" 
+      onClick={handleClose} 
+      ref={overlayRef}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div 
+        className="modal" 
+        onClick={e => e.stopPropagation()} 
+        ref={panelRef} 
+        style={{ padding: '24px 20px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
+        initial={{ opacity: 0, y: 16, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 12, scale: 0.98 }}
+        transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexShrink: 0 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)' }}>
+            Shopping List
+          </div>
+          <button onClick={handleClose} style={{ background: 'none', border: 'none', color: 'var(--cream-faint)', cursor: 'pointer', padding: 4 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        
+        <div style={{ overflowY: 'auto', flex: 1, paddingRight: 8, margin: '0 -8px', paddingLeft: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {groceries.length === 0 && (
+              <p style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 'var(--text-sm)', color: 'var(--cream-faint)' }}>All clear!</p>
+            )}
+            {groceries.map(g => (
+              <button
+                key={g.id}
+                onClick={() => onToggle(g.id, g.is_checked)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+                  background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0', textAlign: 'left'
+                }}
+              >
+                <CheckCircleIcon checked={g.is_checked} />
+                <span style={{
+                  fontFamily: 'var(--font-body)', fontSize: 'var(--text-lg)',
+                  color: g.is_checked ? 'var(--cream-faint)' : 'var(--cream)',
+                  textDecoration: g.is_checked ? 'line-through' : 'none',
+                  letterSpacing: '-0.01em',
+                }}>
+                  {g.item_name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// ── Main component ───────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { profile } = useAuth()
   const navigate = useNavigate()
-  const containerRef = usePageEntrance()
   const [owedToMe, setOwedToMe] = useState(0)
   const [groceries, setGroceries] = useState([])
-  const [watchlist, setWatchlist] = useState([])
   const [events, setEvents] = useState([])
   const [roommateProfile, setRoommateProfile] = useState(null)
   const [loading, setLoading] = useState(true)
 
   const firstName = profile?.full_name?.split(' ')[0] || 'there'
-  const greeting = `Good ${getTimeOfDay()}`
 
   useEffect(() => {
     async function load() {
       setLoading(true)
       const userId = (await supabase.auth.getUser()).data.user?.id
 
-      const [expRes, grocRes, intRes, evtRes, profRes] = await Promise.all([
+      const [expRes, grocRes, evtRes, profRes] = await Promise.all([
         supabase.from('expenses').select('amount, paid_by, split_amount, status').eq('status', 'pending'),
-        supabase.from('groceries').select('id, item_name, quantity, is_checked').eq('is_checked', false).limit(5),
-        supabase.from('interests').select('id, title, category').eq('category', 'watchlist').order('created_at', { ascending: false }).limit(3),
-        supabase.from('events').select('id, title, date, time').gte('date', new Date().toISOString().split('T')[0]).order('date').limit(3),
+        supabase.from('groceries').select('id, item_name, is_checked').eq('is_inventory', false).order('updated_at', { ascending: false }).limit(30),
+        supabase.from('events').select('id, title, date, time').gte('date', new Date().toISOString().split('T')[0]).order('date').limit(1),
         supabase.from('profiles').select('id, full_name'),
       ])
 
@@ -54,9 +143,7 @@ export default function Dashboard() {
 
       setOwedToMe(owed)
       setGroceries(grocRes.data || [])
-      setWatchlist(intRes.data || [])
       setEvents(evtRes.data || [])
-
       const roommate = (profRes.data || []).find(p => p.id !== userId)
       setRoommateProfile(roommate || null)
       setLoading(false)
@@ -64,200 +151,283 @@ export default function Dashboard() {
     load()
   }, [])
 
+  async function toggleGrocery(id, currentStatus) {
+    setGroceries(prev => prev.map(g => g.id === id ? { ...g, is_checked: !currentStatus } : g))
+    await supabase.from('groceries').update({ is_checked: !currentStatus }).eq('id', id)
+  }
+
+  const [showGroceriesModal, setShowGroceriesModal] = useState(false)
+
   const wholeStr = Math.floor(Math.abs(owedToMe)).toString()
   const centsStr = (Math.abs(owedToMe) % 1).toFixed(2).slice(1)
-  const roomateName = roommateProfile?.full_name?.split(' ')[0] || 'your roommate'
-  const myInitials = profile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
+  const roomateName = roommateProfile?.full_name?.split(' ')[0] || 'roommate'
   const roommateInitials = roommateProfile?.full_name?.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() || '?'
 
-  const meAvatar = { initials: myInitials, isMe: true }
-  const roommateAvatar = { initials: roommateInitials, isMe: false }
-
-  if (loading) return (
-    <div style={{ paddingTop: 16 }}>
-      <Masthead title="Roomy" meta={formatDate()} />
-      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 80 }}>
-        <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
-      </div>
-    </div>
-  )
+  const nextEvent = events[0] || null
 
   return (
-    <div ref={containerRef} style={{ paddingTop: 16, paddingBottom: 8 }}>
-      {/* Masthead */}
-      <div className="enter-item"><Masthead title="Roomy" meta={`№ 47 · ${formatDate()}`} /></div>
+    <div style={{ paddingTop: 4, paddingBottom: 24 }}>
 
-      {/* Hero */}
-      <div className="enter-item" style={{ paddingTop: 18, paddingBottom: 20 }}>
-        <Kicker>{getTimeOfDay()} Edition · {formatTime()}</Kicker>
-        <h1 style={{
-          fontFamily: 'var(--font-display)', fontSize: 'clamp(42px, 12vw, 52px)',
-          lineHeight: 0.92, margin: '10px 0 0', letterSpacing: '-0.025em', color: 'var(--cream)',
+      <AnimatePresence>
+        {showGroceriesModal && (
+          <GroceriesModal 
+            onClose={() => setShowGroceriesModal(false)} 
+            groceries={groceries} 
+            onToggle={toggleGrocery} 
+          />
+        )}
+      </AnimatePresence>
+
+      {/* ── Header row ─────────────────────────────────────────── */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+        <StarIcon />
+        <button
+          onClick={() => navigate('/more')}
+          style={{
+            width: 40, height: 40, borderRadius: 999,
+            background: 'var(--input-bg)',
+            border: '1px solid var(--border-rule)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'var(--cream)', cursor: 'pointer',
+          }}
+        >
+          <GridIcon />
+        </button>
+      </div>
+
+      {/* ── Greeting ───────────────────────────────────────────── */}
+      <div style={{ marginBottom: 22 }}>
+        <p style={{
+          fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
+          color: 'var(--cream-dim)', margin: 0, letterSpacing: '0.01em',
         }}>
-          {greeting},<br />
-          <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>{firstName}</span>.
+          Welcome home,
+        </p>
+        <h1 style={{
+          fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 12vw, 56px)',
+          fontWeight: 600, lineHeight: 1, margin: '4px 0 0',
+          color: 'var(--cream)', letterSpacing: '-0.03em',
+        }}>
+          {firstName}
         </h1>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: 14 }}>
-          <AvatarStack items={[meAvatar, roommateAvatar]} size={26} />
-          <span style={{ fontFamily: 'var(--font-body)', fontSize: 12, color: 'var(--cream-dim)' }}>
-            with <strong style={{ color: 'var(--cream)' }}>{roomateName}</strong>
-          </span>
-        </div>
       </div>
 
-      {/* 01 — Ledger */}
-      <div className="enter-item">
-        <SectionRule
-          label="01 — Ledger"
-          right={<span onClick={() => navigate('/expenses')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>View all <ArrowRight size={11} /></span>}
-        />
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', alignItems: 'flex-end', gap: 12, marginTop: 14 }}>
-          <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', color: 'var(--cream-faint)', textTransform: 'uppercase', marginBottom: 4 }}>
-              {owedToMe >= 0 ? 'Owed to you' : 'You owe'}
-            </div>
-            <div style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 14vw, 58px)', lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.035em' }}>
-              €{wholeStr}<span style={{ color: 'var(--accent-soft)' }}>{centsStr}</span>
-            </div>
-          </div>
-          {roommateProfile && (
-            <div style={{ textAlign: 'right', paddingBottom: 6 }}>
-              <InitialsAvatar initials={roommateInitials} isMe={false} size={28} />
-              <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', color: 'var(--cream-dim)', marginTop: 4, textTransform: 'uppercase' }}>
-                from {roomateName}
-              </div>
-            </div>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: 8, marginTop: 16 }}>
-          <button onClick={() => navigate('/expenses')} className="btn-primary">Settle up</button>
-          <button className="btn-ghost">Remind {roomateName}</button>
-        </div>
-      </div>
+      <PillNav />
 
-      {/* 02/03 — Quick access cards */}
-      <div className="enter-item" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 24 }}>
-        <PantryCard groceries={groceries} onOpen={() => navigate('/groceries')} />
-        <InterestsCard watchlist={watchlist} onOpen={() => navigate('/interests')} />
-      </div>
-
-      {/* 04 — Agenda */}
-      <div className="enter-item">
-        {events.length > 0 && (
-          <div style={{ marginTop: 26 }}>
-            <SectionRule label="04 — On the agenda" right={<span onClick={() => navigate('/calendar')} style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4 }}>{events.length} ahead</span>} />
-            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {events.map((e, i) => {
-                const d = new Date(e.date + 'T12:00:00')
-                const dayLabel = d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()
-                return (
-                  <div key={e.id} style={{
-                    display: 'grid', gridTemplateColumns: '54px 1fr',
-                    alignItems: 'center', gap: 12, paddingBottom: 10,
-                    borderBottom: i < events.length - 1 ? '1px solid var(--border)' : 'none',
-                  }}>
-                    <div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>{dayLabel}</div>
-                      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--cream)', marginTop: 1 }}>{e.time || '—'}</div>
-                    </div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 19, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{e.title}</div>
-                  </div>
-                )
-              })}
-            </div>
+      {/* ── Balance card ───────────────────────────────────────── */}
+      <motion.div
+        className="glass-card"
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
+        style={{ padding: '20px 20px 18px', marginBottom: 14, position: 'relative', borderRadius: 20 }}
+      >
+        {/* Roommate avatar */}
+        {roommateProfile && (
+          <div style={{ position: 'absolute', top: 18, right: 18 }}>
+            <InitialsAvatar initials={roommateInitials} isMe={false} size={42} />
           </div>
         )}
-      </div>
 
-      {/* Footer */}
-      <div className="enter-item" style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
-        color: 'var(--cream-faint)', padding: '20px 0 8px',
-        textAlign: 'center', borderTop: '1px solid var(--border)', marginTop: 24,
-      }}>
-        End of edition · pull to refresh ↓
+        <p style={{
+          fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)',
+          letterSpacing: '0.2em', textTransform: 'uppercase',
+          color: 'var(--cream-faint)', margin: '0 0 10px',
+        }}>
+          {owedToMe >= 0 ? 'Owed to you' : 'You owe'}
+        </p>
+
+        <div style={{
+          fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 13vw, 60px)',
+          fontWeight: 600, lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.04em',
+          marginBottom: 6, display: 'flex', alignItems: 'center'
+        }}>
+          <AnimatePresence mode="popLayout">
+            {loading ? (
+              <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>—</motion.span>
+            ) : (
+              <motion.div 
+                key={`${wholeStr}-${centsStr}`}
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ type: 'spring', bounce: 0.5, duration: 0.5 }}
+                style={{ display: 'flex', alignItems: 'baseline' }}
+              >
+                €{wholeStr}<span style={{ fontSize: '0.55em', color: 'var(--cream-dim)', verticalAlign: 'super', lineHeight: 0, marginLeft: 2 }}>{centsStr}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        <p style={{
+          fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
+          color: 'var(--cream-dim)', margin: '0 0 18px',
+        }}>
+          {roomateName} owes you · settled weekly
+        </p>
+
+        <div style={{ display: 'flex', gap: 10 }}>
+          <button
+            onClick={() => navigate('/expenses')}
+            className="btn-primary"
+            style={{ flex: 1, justifyContent: 'center', borderRadius: 999, padding: '11px 16px' }}
+          >
+            Settle up
+          </button>
+          <button
+            className="btn-ghost"
+            style={{ flex: 1, justifyContent: 'center', borderRadius: 999, padding: '11px 16px' }}
+          >
+            Remind {roomateName}
+          </button>
+        </div>
+      </motion.div>
+
+      {/* ── Two-col cards ──────────────────────────────────────── */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: 14 }}>
+
+        {/* Shopping list card */}
+        <motion.div
+          className="glass-card"
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
+          style={{
+            padding: '16px 14px', borderRadius: 20, textAlign: 'left',
+            display: 'flex', flexDirection: 'column',
+            minHeight: 200, color: 'var(--cream)',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', margin: '0 0 14px' }}>
+            <p style={{
+              fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)',
+              fontWeight: 600, lineHeight: 1.15, letterSpacing: '-0.025em',
+              color: 'var(--cream)', margin: 0,
+            }}>
+              Shopping<br />List
+            </p>
+            {groceries.length > 4 && (
+              <button 
+                onClick={() => setShowGroceriesModal(true)}
+                style={{ 
+                  background: 'var(--input-bg)', border: 'none', borderRadius: 999, 
+                  padding: '4px 8px', color: 'var(--cream)', fontSize: 'var(--text-xs)', 
+                  cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 500 
+                }}
+              >
+                Expand
+              </button>
+            )}
+          </div>
+
+          <motion.div 
+            initial="hidden" 
+            animate="show" 
+            variants={{ show: { transition: { staggerChildren: 0.05 } } }} 
+            style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}
+          >
+            <AnimatePresence mode="wait">
+              {loading
+                ? <motion.p key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', margin: 0 }}>Loading…</motion.p>
+                : groceries.length === 0
+                  ? <motion.p key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', margin: 0 }}>All clear!</motion.p>
+                  : groceries.slice(0, 4).map(g => (
+                    <motion.button
+                      key={g.id}
+                      variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.2 } } }}
+                      onClick={() => toggleGrocery(g.id, g.is_checked)}
+                      style={{ 
+                        display: 'flex', alignItems: 'center', gap: 8, 
+                        background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0', textAlign: 'left'
+                      }}
+                    >
+                      <CheckCircleIcon checked={g.is_checked} />
+                      <span style={{
+                        fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
+                        color: g.is_checked ? 'var(--cream-faint)' : 'var(--cream)',
+                        textDecoration: g.is_checked ? 'line-through' : 'none',
+                        letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 100
+                      }}>
+                        {g.item_name}
+                      </span>
+                    </motion.button>
+                  ))
+              }
+            </AnimatePresence>
+          </motion.div>
+
+          <button
+            onClick={() => navigate('/groceries')}
+            style={{
+              fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)',
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: 'var(--cream-faint)', margin: '12px 0 0',
+              background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0
+            }}
+          >
+            {groceries.filter(g => !g.is_checked).length} of {groceries.length} left →
+          </button>
+        </motion.div>
+
+        {/* Next event card */}
+        <motion.button
+          className="glass-card"
+          onClick={() => navigate('/calendar')}
+          initial={{ opacity: 0, y: 16 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25, delay: 0.14, ease: [0.23, 1, 0.32, 1] }}
+          style={{
+            padding: '16px 14px', borderRadius: 20, textAlign: 'left',
+            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            minHeight: 200, color: 'var(--cream)',
+          }}
+        >
+          <p style={{
+            fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)',
+            letterSpacing: '0.2em', textTransform: 'uppercase',
+            color: 'var(--cream-faint)', margin: '0 0 10px',
+          }}>
+            {nextEvent ? 'On tonight' : 'Calendar'}
+          </p>
+
+          {nextEvent ? (
+            <>
+              <p style={{
+                fontFamily: 'var(--font-display)', fontSize: 'clamp(22px, 6vw, 30px)',
+                fontWeight: 600, lineHeight: 1.1, letterSpacing: '-0.025em',
+                color: 'var(--accent)', margin: '0 0 12px', flex: 1,
+              }}>
+                {nextEvent.title}
+              </p>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 6, height: 6, borderRadius: 999, background: 'var(--accent)', flexShrink: 0 }} />
+                <span style={{
+                  fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)',
+                  color: 'var(--cream-dim)',
+                }}>
+                  {nextEvent.time || 'All day'} · your turn
+                </span>
+              </div>
+            </>
+          ) : (
+            <div style={{
+              fontFamily: 'var(--font-display)', fontStyle: 'italic',
+              fontSize: 'var(--text-lg)', color: 'var(--cream-faint)',
+              margin: 0, flex: 1,
+            }}>
+              <AnimatePresence mode="popLayout">
+                {loading ? (
+                  <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>…</motion.span>
+                ) : (
+                  <motion.span key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>Nothing yet.</motion.span>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+        </motion.button>
+
       </div>
     </div>
   )
-}
-
-function PantryCard({ groceries, onOpen }) {
-  const shown = groceries.slice(0, 3)
-  const total = groceries.length
-  return (
-    <button onClick={onOpen} style={cardStyle}>
-      <div style={cardKickerStyle}>02 — Pantry</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
-        {total} things<br />
-        <span style={{ fontStyle: 'italic', color: 'var(--cream-faint)' }}>left to grab.</span>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 12 }}>
-        {shown.map((g, i) => (
-          <div key={i} style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ width: 4, height: 4, borderRadius: 999, background: 'var(--accent)', flexShrink: 0 }} />
-            {g.item_name}
-            {g.quantity && <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', marginLeft: 2 }}>×{g.quantity}</span>}
-          </div>
-        ))}
-        {total > 3 && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', marginLeft: 10 }}>+ {total - 3} more</div>}
-      </div>
-      <div style={cardLinkStyle}>Open list <ArrowRight size={11} stroke={2} /></div>
-    </button>
-  )
-}
-
-function InterestsCard({ watchlist, onOpen }) {
-  return (
-    <button onClick={onOpen} style={cardStyle}>
-      <div style={cardKickerStyle}>03 — Interests</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, lineHeight: 1.05, color: 'var(--cream)', marginTop: 6, letterSpacing: '-0.02em' }}>
-        {watchlist.length} picks<br />
-        <span style={{ fontStyle: 'italic', color: 'var(--cream-faint)' }}>on the list.</span>
-      </div>
-      <div style={{ display: 'flex', gap: 4, marginTop: 12 }}>
-        {watchlist.slice(0, 3).map((w, i) => {
-          const colors = ['#5a3e2b', '#2b3a4a', '#4a3a2b']
-          return (
-            <div key={i} style={{
-              flex: 1, aspectRatio: '2 / 3',
-              background: colors[i % colors.length],
-              borderRadius: 4,
-              display: 'flex', alignItems: 'flex-end', padding: 4,
-              color: 'var(--cream-dim)',
-              fontFamily: 'var(--font-display)', fontSize: 9,
-              lineHeight: 1, letterSpacing: '-0.01em',
-              boxShadow: '0 4px 10px -4px rgba(0,0,0,0.6)',
-            }}>
-              {w.title?.slice(0, 2).toUpperCase()}
-            </div>
-          )
-        })}
-      </div>
-      <div style={cardLinkStyle}>Open list <ArrowRight size={11} stroke={2} /></div>
-    </button>
-  )
-}
-
-const cardStyle = {
-  background: 'var(--surface-raised)',
-  border: '1px solid var(--border)',
-  borderRadius: 16, padding: '14px 14px 12px',
-  textAlign: 'left', color: 'inherit', cursor: 'pointer',
-  display: 'flex', flexDirection: 'column',
-  minHeight: 190,
-  fontFamily: 'var(--font-body)',
-  transition: 'transform 150ms ease, background 200ms',
-  width: '100%',
-}
-
-const cardKickerStyle = {
-  fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em',
-  textTransform: 'uppercase', color: 'var(--accent-soft)',
-}
-
-const cardLinkStyle = {
-  marginTop: 'auto', paddingTop: 12,
-  fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', fontSize: 10,
-  letterSpacing: '0.16em', textTransform: 'uppercase',
-  color: 'var(--cream)', display: 'inline-flex', alignItems: 'center', gap: 6,
 }

@@ -14,11 +14,10 @@ gsap.registerPlugin(ScrollTrigger, useGSAP)
 // Sensible project defaults
 gsap.defaults({ ease: 'power2.out', duration: 0.55 })
 
-// Respect reduced motion globally
-const mm = gsap.matchMedia()
-mm.add('(prefers-reduced-motion: reduce)', () => {
-  gsap.globalTimeline.timeScale(0)
-})
+// Respect reduced motion: skip the animation entirely so elements render at
+// their natural (final) state. Freezing globalTimeline.timeScale(0) used to
+// leave entrance tweens stuck at opacity:0, hiding content. Per-hook guards
+// (usePageEntrance, useModalAnimation) handle GSAP; CSS is handled in index.css.
 
 // Initialize theme
 const savedTheme = localStorage.getItem('theme')

@@ -1,7 +1,9 @@
 import { useEffect, useState, useRef } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { Masthead, SectionRule, Kicker, PlusIcon, XIcon } from '../components/RoomyUI'
+import { SectionRule, Kicker, PlusIcon, XIcon } from '../components/RoomyUI'
+import PillNav from '../components/PillNav'
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -22,18 +24,18 @@ function Modal({ onClose, onSave, loading, selected, initialData = null }) {
     background: 'transparent', border: 'none',
     borderBottom: '1px solid var(--border-rule)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
-    fontSize: 20, color: 'var(--cream)', outline: 'none',
+    fontSize: 'var(--text-xl)', color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
   }
   const labelStyle = {
-    fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em',
+    fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em',
     textTransform: 'uppercase', color: 'var(--cream-faint)', display: 'block', marginBottom: 6,
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 22 }}>
+    <motion.div className="modal-overlay" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 22 }}>
           {initialData ? 'Edit event.' : 'New event.'}
         </div>
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
@@ -51,12 +53,18 @@ function Modal({ onClose, onSave, loading, selected, initialData = null }) {
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
             <button type="button" className="btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1, justifyContent: 'center' }}>
-              {loading ? '…' : 'Save event'}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {loading ? (
+                  <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>…</motion.span>
+                ) : (
+                  <motion.span key="save" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>Save event</motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -121,9 +129,9 @@ export default function Calendar() {
 
   return (
     <div style={{ paddingTop: 16 }}>
-      {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveEvent} loading={adding} selected={selectedDate} initialData={editData} />}
-
-      <Masthead title="Calendar" meta={`${upcomingEvents.length} events`} />
+      <AnimatePresence>
+        {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveEvent} loading={adding} selected={selectedDate} initialData={editData} />}
+      </AnimatePresence>
 
       <div style={{ marginTop: 18 }}>
         <Kicker>The agenda</Kicker>
@@ -136,6 +144,8 @@ export default function Calendar() {
         </h1>
       </div>
 
+      <PillNav />
+
       {/* Month nav + grid */}
       <div style={{ marginTop: 22 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -145,7 +155,7 @@ export default function Calendar() {
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           </button>
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>{monthLabel}</div>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>{monthLabel}</div>
           <button
             onClick={() => { if (viewMonth === 11) { setViewMonth(0); setViewYear(y => y + 1) } else setViewMonth(m => m + 1) }}
             style={{ width: 32, height: 32, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer' }}
@@ -158,7 +168,7 @@ export default function Calendar() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', rowGap: 4 }}>
           {DAYS.map((d, i) => (
             <div key={i} style={{
-              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.16em',
+              fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.16em',
               color: 'var(--cream-faint)', textAlign: 'center', paddingBottom: 6,
               borderBottom: '1px solid var(--border)',
             }}>{d}</div>
@@ -207,11 +217,11 @@ export default function Calendar() {
         <div style={{ marginTop: 22 }}>
           <SectionRule
             label={new Date(selectedDate + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-            right={<button onClick={() => { setEditData(null); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' }}><PlusIcon size={10} stroke={2} /> Add</button>}
+            right={<button onClick={() => { setEditData(null); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase' }}><PlusIcon size={10} stroke={2} /> Add</button>}
           />
           {selectedEvents.length === 0 ? (
-            <div style={{ padding: '16px 0', fontFamily: 'var(--font-body)', fontSize: 13, color: 'var(--cream-faint)' }}>
-              No events — <button onClick={() => { setEditData(null); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-soft)', fontFamily: 'var(--font-body)', fontSize: 13 }}>add one</button>
+            <div style={{ padding: '16px 0', fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', color: 'var(--cream-faint)' }}>
+              No events — <button onClick={() => { setEditData(null); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-soft)', fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)' }}>add one</button>
             </div>
           ) : (
             <div style={{ marginTop: 12 }}>
@@ -227,7 +237,7 @@ export default function Calendar() {
       <div style={{ marginTop: 26 }}>
         <SectionRule
           label="01 — Coming up"
-          right={<button onClick={() => { setEditData(null); setSelectedDate(todayStr); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' }}><PlusIcon size={10} stroke={2} /> Add event</button>}
+          right={<button onClick={() => { setEditData(null); setSelectedDate(todayStr); setShowModal(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--cream-faint)', display: 'flex', alignItems: 'center', gap: 4, fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase' }}><PlusIcon size={10} stroke={2} /> Add event</button>}
         />
 
         {loading ? (
@@ -235,7 +245,7 @@ export default function Calendar() {
             <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
           </div>
         ) : upcomingEvents.length === 0 ? (
-          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 18, color: 'var(--cream-faint)', padding: '24px 0' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--text-lg)', color: 'var(--cream-faint)', padding: '24px 0' }}>
             Nothing scheduled yet.
           </div>
         ) : (
@@ -248,7 +258,7 @@ export default function Calendar() {
       </div>
 
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase',
+        fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--cream-faint)', marginTop: 28, paddingTop: 18,
         borderTop: '1px solid var(--border)', textAlign: 'center',
       }}>
@@ -258,11 +268,6 @@ export default function Calendar() {
       {/* FAB — add event */}
       <button
         onClick={() => { setEditData(null); setShowModal(true) }}
-        onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
         style={{
           position: 'fixed',
           bottom: 'calc(92px + env(safe-area-inset-bottom))',
@@ -294,16 +299,16 @@ function EventRow({ ev, onDelete, onEdit, isLast }) {
       borderBottom: isLast ? 'none' : '1px solid var(--border)',
     }}>
       <div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.16em', color: 'var(--cream-faint)', textTransform: 'uppercase' }}>
           {d.toLocaleDateString('en-US', { weekday: 'short' })}
         </div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 13, color: 'var(--cream)', marginTop: 1 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-sm)', color: 'var(--cream)', marginTop: 1 }}>
           {ev.time || '—'}
         </div>
       </div>
       <div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{ev.title}</div>
-        {ev.note && <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 2 }}>{ev.note}</div>}
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', color: 'var(--cream)', lineHeight: 1.1, letterSpacing: '-0.01em' }}>{ev.title}</div>
+        {ev.note && <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', marginTop: 2 }}>{ev.note}</div>}
       </div>
       <button onClick={onEdit} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: 'pointer', padding: 2, opacity: 0.7 }}>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 4l6 6L9 21H3v-6L14 4z"/></svg>

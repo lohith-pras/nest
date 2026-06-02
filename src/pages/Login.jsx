@@ -78,19 +78,19 @@ export default function Login() {
       {/* Masthead */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        borderBottom: '1px solid rgba(255,255,255,0.18)', paddingBottom: 10,
+        borderBottom: '1px solid var(--border-rule)', paddingBottom: 10,
       }}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 24, letterSpacing: '-0.01em' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.01em' }}>
           Roomy
         </div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>
           № 47 · since 2024
         </div>
       </div>
 
       {/* Hero */}
       <div style={{ marginTop: 22 }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginBottom: 10 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginBottom: 10 }}>
           {mode === 'login' ? "Editor's note" : 'New edition'}
         </div>
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 10vw, 52px)', lineHeight: 0.95, letterSpacing: '-0.025em', margin: 0 }}>
@@ -104,17 +104,17 @@ export default function Login() {
 
       {mode === 'login' && (
         <>
-          <p style={{ fontFamily: 'var(--font-body)', fontSize: 14, lineHeight: 1.5, color: 'var(--cream-dim)', marginTop: 16, maxWidth: 340 }}>
+          <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)', lineHeight: 1.5, color: 'var(--cream-dim)', marginTop: 16, maxWidth: 340 }}>
             The quiet little app that keeps you and your roommate{' '}
             <em style={{ fontFamily: 'var(--font-display)', color: 'var(--cream)' }}>squared up</em>, well-fed,
             and reminded the trash goes out on Tuesdays.
           </p>
 
           <div style={{ marginTop: 22, paddingLeft: 14, borderLeft: '2px solid var(--accent)' }}>
-            <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, lineHeight: 1.3, color: 'var(--cream)' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--text-base)', lineHeight: 1.3, color: 'var(--cream)' }}>
               "Living together is mostly logistics. Roomy handles the logistics so you can get back to the living."
             </div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', color: 'var(--cream-faint)', marginTop: 8, textTransform: 'uppercase' }}>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.2em', color: 'var(--cream-faint)', marginTop: 8, textTransform: 'uppercase' }}>
               — From the README
             </div>
           </div>
@@ -123,17 +123,17 @@ export default function Login() {
 
       {/* Form */}
       <div style={{ marginTop: 32 }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.18)', marginBottom: 4 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', paddingBottom: 8, borderBottom: '1px solid var(--border-rule)', marginBottom: 4 }}>
           01 — {mode === 'login' ? 'Sign in' : 'Create account'}
         </div>
 
         {error && (
-          <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(229,115,115,0.12)', border: '1px solid rgba(229,115,115,0.25)', borderRadius: 10, color: '#e57373', fontSize: 13, fontFamily: 'var(--font-body)' }}>
+          <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(229,115,115,0.12)', border: '1px solid rgba(229,115,115,0.25)', borderRadius: 10, color: '#e57373', fontSize: 'var(--text-sm)', fontFamily: 'var(--font-body)' }}>
             {error}
           </div>
         )}
         {message && (
-          <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(129,199,132,0.12)', border: '1px solid rgba(129,199,132,0.2)', borderRadius: 10, color: '#81c784', fontSize: 13, fontFamily: 'var(--font-body)' }}>
+          <div style={{ marginTop: 16, padding: '12px 16px', background: 'rgba(129,199,132,0.12)', border: '1px solid rgba(129,199,132,0.2)', borderRadius: 10, color: '#81c784', fontSize: 'var(--text-sm)', fontFamily: 'var(--font-body)' }}>
             {message}
           </div>
         )}
@@ -144,16 +144,16 @@ export default function Login() {
               <EditorialField label="Full Name" value={name} onChange={setName} placeholder="Lohith Kumar" />
               <div style={{ marginTop: 20, display: 'flex', gap: 8 }}>
                 <button type="button" onClick={() => setSignupType('create')} style={{
-                  flex: 1, padding: '9px', borderRadius: 999, fontSize: 12, fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
+                  flex: 1, padding: '9px', borderRadius: 999, fontSize: 'var(--text-xs)', fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
                   background: signupType === 'create' ? 'var(--cream)' : 'transparent',
                   color: signupType === 'create' ? 'var(--primary-fg)' : 'var(--cream-faint)',
-                  border: signupType === 'create' ? 'none' : '1px solid rgba(255,255,255,0.22)',
+                  border: signupType === 'create' ? 'none' : '1px solid var(--input-border)',
                 }}>Create Unit</button>
                 <button type="button" onClick={() => setSignupType('join')} style={{
-                  flex: 1, padding: '9px', borderRadius: 999, fontSize: 12, fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
+                  flex: 1, padding: '9px', borderRadius: 999, fontSize: 'var(--text-xs)', fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
                   background: signupType === 'join' ? 'var(--cream)' : 'transparent',
                   color: signupType === 'join' ? 'var(--primary-fg)' : 'var(--cream-faint)',
-                  border: signupType === 'join' ? 'none' : '1px solid rgba(255,255,255,0.22)',
+                  border: signupType === 'join' ? 'none' : '1px solid var(--input-border)',
                 }}>Join Unit</button>
               </div>
               {signupType === 'create' ? (
@@ -172,7 +172,7 @@ export default function Login() {
             background: 'var(--cream)', color: 'var(--primary-fg)',
             border: 'none', padding: '16px',
             borderRadius: 999,
-            fontFamily: 'var(--font-body)', fontSize: 15, fontWeight: 600,
+            fontFamily: 'var(--font-body)', fontSize: 'var(--text-base)', fontWeight: 600,
             letterSpacing: '-0.01em', cursor: loading ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             opacity: loading ? 0.7 : 1,
@@ -184,12 +184,12 @@ export default function Login() {
             }
           </button>
 
-          <div style={{ marginTop: 18, display: 'flex', justifyContent: 'center', gap: 6, fontSize: 13, color: 'var(--cream-faint)', fontFamily: 'var(--font-body)' }}>
+          <div style={{ marginTop: 18, display: 'flex', justifyContent: 'center', gap: 6, fontSize: 'var(--text-sm)', color: 'var(--cream-faint)', fontFamily: 'var(--font-body)' }}>
             <span>{mode === 'login' ? 'New to Roomy?' : 'Already have an account?'}</span>
             <button type="button" onClick={() => { setMode(mode === 'login' ? 'signup' : 'login'); setError(null); setMessage(null) }} style={{
               color: 'var(--cream)', fontWeight: 600, background: 'none', border: 'none',
               textDecoration: 'underline', textDecorationColor: 'var(--accent)', textUnderlineOffset: 3,
-              fontSize: 13, fontFamily: 'var(--font-body)', cursor: 'pointer',
+              fontSize: 'var(--text-sm)', fontFamily: 'var(--font-body)', cursor: 'pointer',
             }}>
               {mode === 'login' ? 'Sign up' : 'Sign in'}
             </button>
@@ -203,7 +203,7 @@ export default function Login() {
           <div style={{
             marginTop: 'auto', paddingTop: 32,
             display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14,
-            borderTop: '1px solid rgba(255,255,255,0.12)',
+            borderTop: '1px solid var(--border)',
           }}>
             {[
               { k: '01', t: 'Split bills', s: 'Without the math' },
@@ -211,14 +211,14 @@ export default function Login() {
               { k: '03', t: 'Stay in sync', s: 'With one tap' },
             ].map(f => (
               <div key={f.k}>
-                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', color: 'var(--accent-soft)', textTransform: 'uppercase' }}>{f.k}</div>
-                <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, lineHeight: 1.1, color: 'var(--cream)', marginTop: 4 }}>{f.t}</div>
-                <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--cream-faint)', marginTop: 2 }}>{f.s}</div>
+                <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', color: 'var(--accent-soft)', textTransform: 'uppercase' }}>{f.k}</div>
+                <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-base)', lineHeight: 1.1, color: 'var(--cream)', marginTop: 4 }}>{f.t}</div>
+                <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-overline)', color: 'var(--cream-faint)', marginTop: 2 }}>{f.s}</div>
               </div>
             ))}
           </div>
 
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginTop: 22, textAlign: 'center' }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginTop: 22, textAlign: 'center' }}>
             Made with care · Issue 47
           </div>
         </>
@@ -232,7 +232,7 @@ function EditorialField({ label, value, onChange, type = 'text', placeholder }) 
   return (
     <div style={{ marginTop: 22 }}>
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase',
+        fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase',
         color: focus ? 'var(--accent-soft)' : 'var(--cream-faint)', marginBottom: 6, transition: 'color 200ms',
       }}>{label}</div>
       <input
@@ -246,9 +246,9 @@ function EditorialField({ label, value, onChange, type = 'text', placeholder }) 
         style={{
           width: '100%', boxSizing: 'border-box',
           background: 'transparent', border: 'none',
-          borderBottom: `1px solid ${focus ? 'var(--cream)' : 'rgba(255,255,255,0.22)'}`,
+          borderBottom: `1px solid ${focus ? 'var(--cream)' : 'var(--input-border)'}`,
           padding: '10px 0',
-          fontFamily: 'var(--font-display)', fontSize: 22, color: 'var(--cream)',
+          fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', color: 'var(--cream)',
           outline: 'none', letterSpacing: '-0.01em',
           transition: 'border-color 200ms',
         }}

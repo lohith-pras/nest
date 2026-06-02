@@ -26,16 +26,16 @@ export const AvatarStack = ({ items, size = 26, ring = 'var(--bg)' }) => (
 export const SectionRule = ({ label, right }) => (
   <div style={{
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    borderTop: '1px solid rgba(255,255,255,0.14)',
+    borderTop: '1px solid var(--border-rule)',
     paddingTop: 10,
   }}>
     <div style={{
-      fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em',
+      fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em',
       color: 'var(--cream)', textTransform: 'uppercase', whiteSpace: 'nowrap',
     }}>{label}</div>
     {right && (
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em',
+        fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em',
         color: 'var(--cream-faint)', textTransform: 'uppercase',
         display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer',
         whiteSpace: 'nowrap',
@@ -47,16 +47,16 @@ export const SectionRule = ({ label, right }) => (
 export const Masthead = ({ title, meta }) => (
   <div style={{
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    borderBottom: '1px solid rgba(255,255,255,0.18)',
+    borderBottom: '1px solid var(--border-rule)',
     paddingBottom: 10,
   }}>
     <div style={{
-      fontFamily: 'var(--font-display)', fontSize: 22,
+      fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)',
       letterSpacing: '-0.01em', color: 'var(--cream)',
     }}>{title}</div>
     {meta && (
       <div style={{
-        fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.2em',
+        fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.2em',
         textTransform: 'uppercase', color: 'var(--cream-faint)',
       }}>{meta}</div>
     )}
@@ -65,7 +65,7 @@ export const Masthead = ({ title, meta }) => (
 
 export const Kicker = ({ children, color = 'var(--accent-soft)' }) => (
   <div style={{
-    fontFamily: 'var(--font-mono)', fontSize: 10, letterSpacing: '0.22em',
+    fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em',
     textTransform: 'uppercase', color,
   }}>{children}</div>
 )

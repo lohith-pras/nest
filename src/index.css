@@ -40,10 +40,26 @@
   --overlay-bg: rgba(245,242,238,0.82);
   --scrollbar-thumb: rgba(0,0,0,0.15);
 
-  /* ── Typography ─────────────── */
-  --font-display: "Newsreader", Georgia, serif;
-  --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", monospace;
+  /* ── Glass Tokens (Light) ─── */
+  --glass-surface: rgba(255, 255, 255, 0.65);
+  --glass-nav: rgba(250, 248, 245, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-blur: 16px;
+
+  /* ── Typography ───────────── */
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body:    "Sora",     -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    "SF Mono",  ui-monospace, "SFMono-Regular", "Menlo", monospace;
+
+  /* Type scale — single source for all font sizes. Snap to the nearest step. */
+  --text-overline: 10px;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 16px;
+  --text-lg: 18px;
+  --text-xl: 20px;
+  --text-2xl: 26px;
+  --text-3xl: 32px;
 
   /* ── Spacing ─────────────────── */
   --spacing-h: 20px;
@@ -62,6 +78,20 @@
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
   --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
   --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* ── Transitions & Blur ─── */
+  --transition-fast: 120ms;
+  --transition-normal: 160ms;
+  --transition-slow: 200ms;
+  --transition-theme: 250ms;
+  --glass-blur-sm: 8px;
+
+  /* ── Root Gradient (Light) ─── */
+  --root-gradient:
+    radial-gradient(ellipse 70% 50% at 85% 5%,  rgba(154, 129, 116, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 10% 95%, rgba(90,  80,  110, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    var(--bg);
 }
 
 /* ── Dark palette ───────────────────────────────────────────── */
@@ -94,6 +124,19 @@
   --input-border: rgba(255,255,255,0.22);
   --overlay-bg: rgba(5,2,6,0.78);
   --scrollbar-thumb: rgba(255,255,255,0.12);
+
+  /* ── Glass Tokens (Dark) ─── */
+  --glass-surface: rgba(28, 25, 26, 0.65);
+  --glass-nav: rgba(5, 2, 6, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: 16px;
+
+  /* ── Root Gradient (Dark) ─── */
+  --root-gradient:
+    radial-gradient(ellipse 70% 50% at 85% 5%,  rgba(154, 129, 116, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 10% 95%, rgba(90,  80,  110, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(28,  22,  30,  0.9)  0%, transparent 100%),
+    #050206;
 }
 
 /* ── Reset & Base ───────────────────────────────────────────── */
@@ -105,7 +148,7 @@
 
 html {
   height: 100%;
-  transition: background-color 250ms ease, color 250ms ease;
+  transition: background-color var(--transition-theme) ease, color var(--transition-theme) ease;
 }
 
 body {
@@ -116,6 +159,8 @@ body {
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Money app: align digits in amounts/columns. Inherited by inline styles. */
+  font-variant-numeric: tabular-nums;
   display: flex;
   justify-content: center;
 }
@@ -123,33 +168,41 @@ body {
 #root {
   width: 100%;
   min-height: 100vh;
-  background-color: var(--bg);
+  /* Background gradient adapted by theme */
+  background: var(--root-gradient);
   position: relative;
   overflow-x: hidden;
 }
 
-/* ── Font Utilities ─────────────────────────────────────────── */
+/* ── Utility: hide scrollbar while keeping scroll ─── */
+.hide-scrollbar { scrollbar-width: none; }
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+
+/* ── Font Utilities ─────────────────────────────────────────────── */
+/* SF Pro Display / SF Pro Text / SF Mono — all system fonts, no external load.
+   On non-Apple platforms these gracefully fall back to system-ui / monospace. */
 .font-serif {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
   font-style: normal;
 }
 .font-serif-italic {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
   font-style: italic;
 }
 .font-sans {
-  font-family: "Geist", "Geist Sans", -apple-system, sans-serif;
+  font-family: var(--font-body);
 }
 .font-mono {
-  font-family: "JetBrains Mono", ui-monospace, monospace;
+  font-family: var(--font-mono);
 }
 .font-display {
-  font-family: "Instrument Serif", Georgia, serif;
+  font-family: var(--font-display);
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display);
   font-weight: 400;
+  text-wrap: balance;
 }
 
 /* ── Links ──────────────────────────────────────────────────── */
@@ -165,7 +218,7 @@ button {
   background: none;
   font-family: inherit;
   -webkit-tap-highlight-color: transparent;
-  transition: transform 160ms var(--ease-out);
+  transition: transform var(--transition-normal) var(--ease-out);
 }
 
 button:active {
@@ -178,17 +231,21 @@ input, textarea, select {
 
 /* ── Cards ──────────────────────────────────────────────────── */
 .glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
+  background: var(--glass-surface);
+  backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
+  -webkit-backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
 }
 
 .glass-card {
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
+  background: var(--glass-surface);
+  backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
+  -webkit-backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
   border-radius: var(--radius-lg);
-  transition: transform 160ms var(--ease-out), background 160ms var(--ease-out);
+  transition: transform var(--transition-normal) var(--ease-out), background-color var(--transition-theme) ease, border-color var(--transition-theme) ease;
 }
 
 .glass-card:active {
@@ -197,10 +254,11 @@ input, textarea, select {
 
 /* ── Bottom Nav ─────────────────────────────────────────────── */
 .bottom-nav {
-  background: var(--nav-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border-rule);
+  background: var(--glass-nav);
+  backdrop-filter: url(#liquid-glass) brightness(1.1) contrast(1.05);
+  -webkit-backdrop-filter: url(#liquid-glass) brightness(1.1) contrast(1.05);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* ── Sidebar ────────────────────────────────────────────────── */
@@ -216,10 +274,10 @@ input, textarea, select {
   gap: 12px;
   padding: 12px;
   border-radius: 12px;
-  transition: all 160ms var(--ease-out);
+  transition: color var(--transition-normal) var(--ease-out), background var(--transition-normal) var(--ease-out);
   color: var(--cream-faint);
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--text-overline);
   font-weight: 500;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -237,9 +295,9 @@ input, textarea, select {
   padding: 11px 20px;
   font-weight: 600;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-sm);
   letter-spacing: -0.01em;
-  transition: transform 120ms ease, opacity 120ms;
+  transition: transform var(--transition-fast) ease, opacity var(--transition-fast);
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -262,9 +320,9 @@ input, textarea, select {
   border-radius: 999px;
   padding: 10px 18px;
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: var(--text-sm);
   font-weight: 500;
-  transition: transform 120ms ease, background 120ms;
+  transition: transform var(--transition-fast) ease, background var(--transition-fast);
 }
 
 .btn-ghost:active {
@@ -277,8 +335,8 @@ input, textarea, select {
   border-radius: 999px;
   padding: 10px 18px;
   font-weight: 600;
-  font-size: 13px;
-  transition: transform 120ms ease;
+  font-size: var(--text-sm);
+  transition: transform var(--transition-fast) ease;
 }
 
 /* ── Inputs ─────────────────────────────────────────────────── */
@@ -289,11 +347,11 @@ input, textarea, select {
   border-bottom: 1px solid var(--input-border);
   padding: 10px 0;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: var(--text-xl);
   color: var(--cream);
   outline: none;
   letter-spacing: -0.01em;
-  transition: border-color 200ms;
+  transition: border-color var(--transition-slow);
   border-radius: 0;
 }
 
@@ -304,7 +362,7 @@ input, textarea, select {
 .input::placeholder {
   color: var(--cream-faint);
   font-family: var(--font-body);
-  font-size: 14px;
+  font-size: var(--text-base);
 }
 
 /* ── Badges ─────────────────────────────────────────────────── */
@@ -314,7 +372,7 @@ input, textarea, select {
   padding: 2px 8px;
   border-radius: 999px;
   font-family: var(--font-mono);
-  font-size: 9px;
+  font-size: var(--text-overline);
   font-weight: 500;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -345,8 +403,8 @@ input, textarea, select {
   position: absolute;
   inset: 0;
   background: var(--overlay-bg);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(var(--glass-blur-sm));
+  -webkit-backdrop-filter: blur(var(--glass-blur-sm));
   display: flex;
   align-items: flex-end;
   justify-content: center;
@@ -354,11 +412,13 @@ input, textarea, select {
 }
 
 .modal {
-  background: var(--surface-raised);
+  background: var(--glass-surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border-radius: 20px 20px 0 0;
   padding: 32px 24px calc(32px + env(safe-area-inset-bottom));
   width: 100%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-bottom: none;
   will-change: transform, opacity;
 }
@@ -366,7 +426,7 @@ input, textarea, select {
 /* ── Section Title (legacy) ─────────────────────────────────── */
 .section-title {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--text-overline);
   font-weight: 500;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -391,6 +451,19 @@ input, textarea, select {
   50% { opacity: 0.4; }
 }
 
+/* ── Reduced motion ─────────────────────────────────────────── */
+/* GSAP motion is guarded per-hook (see usePageEntrance/useModalAnimation).
+   This neutralizes CSS transitions + infinite keyframes (spin/pulse) while
+   preserving final states so layout never breaks. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* ── Scrollbar ──────────────────────────────────────────────── */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -406,12 +479,12 @@ input, textarea, select {
 /* ── Mobile Performance ─────────────────────────────────────── */
 @media (max-width: 767px) {
   .glass, .bottom-nav, .modal-overlay {
-    backdrop-filter: blur(8px) !important;
-    -webkit-backdrop-filter: blur(8px) !important;
+    backdrop-filter: blur(var(--glass-blur-sm)) !important;
+    -webkit-backdrop-filter: blur(var(--glass-blur-sm)) !important;
   }
 }
 
-/* ── Responsive Typography ──────────────────────────────────── */
+/* ── Responsive Typography & Spacing ──────────────────────── */
 @media (min-width: 481px) {
   :root {
     --spacing-h: 28px;
@@ -419,6 +492,9 @@ input, textarea, select {
     --font-h2: 26px;
     --font-h3: 20px;
     --font-body-font: 15px;
+  }
+  .section-title {
+    font-size: 20px;
   }
 }
 
@@ -431,61 +507,23 @@ input, textarea, select {
     --font-body-font: 16px;
     --max-content-width: 480px;
   }
-
   #root {
     margin: 0 auto;
     max-width: var(--max-content-width, 100%);
   }
-}
-
-/* ─── Responsive Typography & Spacing ──────────────────────── */
-
-/* Tablet (481px+) */
-@media (min-width: 481px) {
-  :root {
-    --spacing-h: 32px;
-    --font-h1: 32px;
-    --font-h2: 24px;
-    --font-h3: 20px;
-    --font-body-font: 15px;
-  }
-
   .section-title {
-    font-size: 1.25rem;
+    font-size: 22px;
   }
 }
 
-/* Desktop (769px+) */
-@media (min-width: 769px) {
-  :root {
-    --spacing-h: 48px;
-    --font-h1: 36px;
-    --font-h2: 28px;
-    --font-h3: 22px;
-    --font-body-font: 16px;
-    --max-content-width: 900px;
-  }
-
-  #root {
-    margin: 0 auto;
-    max-width: var(--max-content-width, 100%);
-  }
-
-  .section-title {
-    font-size: 1.35rem;
-  }
-}
-
-/* Large Desktop (1024px+) */
 @media (min-width: 1024px) {
   :root {
-    --font-h1: 40px;
-    --font-h2: 32px;
-    --font-h3: 24px;
+    --font-h1: 68px;
+    --font-h2: 40px;
+    --font-h3: 28px;
     --font-body-font: 17px;
   }
-
   .section-title {
-    font-size: 1.45rem;
+    font-size: 24px;
   }
 }

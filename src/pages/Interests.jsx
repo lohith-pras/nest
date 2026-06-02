@@ -1,8 +1,10 @@
 import { useEffect, useState, useRef } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useModalAnimation } from '../hooks/useModalAnimation'
 import { Masthead, SectionRule, Kicker, InitialsAvatar, PlusIcon, XIcon, posterColor } from '../components/RoomyUI'
+import PillNav from '../components/PillNav'
 
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w300'
 const TMDB_API_BASE = 'https://api.themoviedb.org/3'
@@ -90,14 +92,14 @@ function TMDBSearchModal({ onClose, onSave, loading }) {
     background: 'transparent', border: 'none',
     borderBottom: '1px solid var(--border-rule)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
-    fontSize: 20, color: 'var(--cream)', outline: 'none',
+    fontSize: 'var(--text-xl)', color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
   }
 
   return (
-    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
-      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
+    <motion.div className="modal-overlay" onClick={handleClose} ref={overlayRef} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
           Search to add.
         </div>
         <input
@@ -139,13 +141,13 @@ function TMDBSearchModal({ onClose, onSave, loading }) {
                   ) : (
                     <div style={{ width: 40, height: 60, borderRadius: 3, background: color, flexShrink: 0,
                       display: 'flex', alignItems: 'flex-end', padding: 3,
-                      fontFamily: 'var(--font-display)', fontSize: 9, color: 'var(--cream-dim)', lineHeight: 1 }}>
+                      fontFamily: 'var(--font-display)', fontSize: 'var(--text-overline)', color: 'var(--cream-dim)', lineHeight: 1 }}>
                       {title.slice(0, 2).toUpperCase()}
                     </div>
                   )}
                   <div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--cream)', lineHeight: 1.2 }}>{title}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', color: 'var(--cream-faint)', marginTop: 3, textTransform: 'uppercase' }}>
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-base)', color: 'var(--cream)', lineHeight: 1.2 }}>{title}</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', color: 'var(--cream-faint)', marginTop: 3, textTransform: 'uppercase' }}>
                       {r.media_type === 'tv' ? 'TV' : 'Film'}{year ? ` · ${year}` : ''}
                     </div>
                   </div>
@@ -155,13 +157,13 @@ function TMDBSearchModal({ onClose, onSave, loading }) {
           </div>
         )}
         {!searching && query.trim() && results.length === 0 && (
-          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--cream-faint)', padding: '20px 0' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--text-base)', color: 'var(--cream-faint)', padding: '20px 0' }}>
             No results for &ldquo;{query}&rdquo;.
           </div>
         )}
         <button type="button" className="btn-ghost" onClick={handleClose} style={{ marginTop: 20, width: '100%' }}>Cancel</button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -225,14 +227,14 @@ function NominatimSearchModal({ onClose, onSave, loading }) {
     background: 'transparent', border: 'none',
     borderBottom: '1px solid var(--border-rule)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
-    fontSize: 20, color: 'var(--cream)', outline: 'none',
+    fontSize: 'var(--text-xl)', color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
   }
 
   return (
-    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
-      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
+    <motion.div className="modal-overlay" onClick={handleClose} ref={overlayRef} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
           Find a place.
         </div>
         <input
@@ -269,12 +271,12 @@ function NominatimSearchModal({ onClose, onSave, loading }) {
                     width: 36, height: 36, borderRadius: 999, flexShrink: 0,
                     background: 'var(--surface-raised)', border: '1px solid var(--border)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    color: 'var(--accent-soft)', fontSize: 16,
+                    color: 'var(--accent-soft)', fontSize: 'var(--text-base)',
                   }}>📍</div>
                   <div style={{ minWidth: 0 }}>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 16, color: 'var(--cream)', lineHeight: 1.2 }}>{name}</div>
-                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', color: 'var(--accent-soft)', marginTop: 2, textTransform: 'uppercase' }}>{category}</div>
-                    <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 2,
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-base)', color: 'var(--cream)', lineHeight: 1.2 }}>{name}</div>
+                    <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.14em', color: 'var(--accent-soft)', marginTop: 2, textTransform: 'uppercase' }}>{category}</div>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', marginTop: 2,
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%' }}>
                       {address}
                     </div>
@@ -285,13 +287,13 @@ function NominatimSearchModal({ onClose, onSave, loading }) {
           </div>
         )}
         {!searching && query.trim() && results.length === 0 && (
-          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 16, color: 'var(--cream-faint)', padding: '20px 0' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--text-base)', color: 'var(--cream-faint)', padding: '20px 0' }}>
             No results for &ldquo;{query}&rdquo;.
           </div>
         )}
         <button type="button" className="btn-ghost" onClick={handleClose} style={{ marginTop: 20, width: '100%' }}>Cancel</button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -311,20 +313,20 @@ function PlaceNotesModal({ onClose, onSave, loading, initialNotes = '' }) {
     background: 'transparent', border: 'none',
     borderBottom: '1px solid var(--border-rule)',
     padding: '10px 0', fontFamily: 'var(--font-display)',
-    fontSize: 18, color: 'var(--cream)', outline: 'none',
+    fontSize: 'var(--text-lg)', color: 'var(--cream)', outline: 'none',
     letterSpacing: '-0.01em', width: '100%',
     resize: 'none',
   }
 
   return (
-    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
-      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 26, letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
+    <motion.div className="modal-overlay" onClick={handleClose} ref={overlayRef} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
           Personal notes.
         </div>
         <form onSubmit={submit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Notes</div>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', marginBottom: 6 }}>Notes</div>
             <textarea style={{ ...fieldStyle, minHeight: 80 }} value={notes} onChange={e => setNotes(e.target.value)} placeholder="e.g. Great for date night, book ahead…" autoFocus />
           </div>
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
@@ -334,8 +336,8 @@ function PlaceNotesModal({ onClose, onSave, loading, initialNotes = '' }) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -547,20 +549,26 @@ export default function Interests() {
 
   return (
     <div style={{ paddingTop: 16 }}>
-      {showModal && tab === 'watchlist' && (
-        <TMDBSearchModal onClose={() => setShowModal(false)} onSave={saveWatchlistItem} loading={adding} />
-      )}
-      {showModal && tab === 'places' && (
-        <NominatimSearchModal onClose={() => setShowModal(false)} onSave={savePlaceItem} loading={adding} />
-      )}
-      {notesItem && (
-        <PlaceNotesModal
-          onClose={() => setNotesItem(null)}
-          onSave={(notes, handleClose) => savePlaceNotes(notesItem.id, notes, handleClose)}
-          loading={savingNotes}
-          initialNotes={notesItem.link || ''}
-        />
-      )}
+      <AnimatePresence>
+        {showModal && tab === 'watchlist' && (
+          <TMDBSearchModal onClose={() => setShowModal(false)} onSave={saveWatchlistItem} loading={adding} />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showModal && tab === 'places' && (
+          <NominatimSearchModal onClose={() => setShowModal(false)} onSave={savePlaceItem} loading={adding} />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {notesItem && (
+          <PlaceNotesModal
+            onClose={() => setNotesItem(null)}
+            onSave={(notes, handleClose) => savePlaceNotes(notesItem.id, notes, handleClose)}
+            loading={savingNotes}
+            initialNotes={notesItem.link || ''}
+          />
+        )}
+      </AnimatePresence>
 
       <Masthead title="Interests" meta="Shared · 2 hosts" />
 
@@ -575,6 +583,8 @@ export default function Interests() {
         </h1>
       </div>
 
+      <PillNav />
+
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 8, marginTop: 22 }}>
         {[
@@ -583,14 +593,14 @@ export default function Interests() {
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             padding: '8px 16px', borderRadius: 999,
-            fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 600,
+            fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', fontWeight: 600,
             cursor: 'pointer', letterSpacing: '-0.01em',
             border: tab === t.id ? 'none' : '1px solid var(--border-rule)',
             background: tab === t.id ? 'var(--cream)' : 'transparent',
             color: tab === t.id ? 'var(--primary-fg)' : 'var(--cream)',
           }}>
             {t.label}{' '}
-            <span style={{ fontFamily: 'var(--font-mono)', opacity: 0.5, fontSize: 10 }}>({t.count})</span>
+            <span style={{ fontFamily: 'var(--font-mono)', opacity: 0.5, fontSize: 'var(--text-overline)' }}>({t.count})</span>
           </button>
         ))}
       </div>
@@ -601,7 +611,7 @@ export default function Interests() {
           {placeCategories.map(cat => (
             <button key={cat} onClick={() => setPlaceFilter(cat)} style={{
               padding: '5px 12px', borderRadius: 999, flexShrink: 0,
-              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em', textTransform: 'uppercase',
+              fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.14em', textTransform: 'uppercase',
               cursor: 'pointer',
               border: placeFilter === cat ? 'none' : '1px solid var(--border-rule)',
               background: placeFilter === cat ? 'var(--accent-soft)' : 'transparent',
@@ -639,14 +649,14 @@ export default function Interests() {
                     ) : (
                       <div style={{ width: 72, height: 108, background: color, borderRadius: 6, boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
                         display: 'flex', alignItems: 'flex-end', padding: 5,
-                        fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1 }}>
+                        fontFamily: 'var(--font-display)', fontSize: 'var(--text-xs)', color: 'var(--cream-dim)', lineHeight: 1 }}>
                         {cw.title?.slice(0, 2).toUpperCase()}
                       </div>
                     )}
-                    <div style={{ fontFamily: 'var(--font-body)', fontSize: 10, color: 'var(--cream)', fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>
+                    <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-overline)', color: 'var(--cream)', fontWeight: 600, textAlign: 'center', lineHeight: 1.2 }}>
                       {cw.watcherName}
                     </div>
-                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--cream-faint)', textAlign: 'center', lineHeight: 1.2,
+                    <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', textAlign: 'center', lineHeight: 1.2,
                       display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                       {cw.title}
                     </div>
@@ -658,17 +668,18 @@ export default function Interests() {
         ) : null
       })()}
 
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
-        </div>
-      ) : (
-        <div style={{ marginTop: 24 }}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        {loading ? (
+          <motion.div key="spinner" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
+            <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+          </motion.div>
+        ) : (
+          <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ marginTop: 24 }}>
           <SectionRule label={`01 — ${tab === 'watchlist' ? 'On the watchlist' : 'On the map'}`} />
 
           {filteredPlaces.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '50px 0' }}>
-              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 20, color: 'var(--cream-faint)', marginBottom: 16 }}>
+              <div style={{ fontFamily: 'var(--font-display)', fontStyle: 'italic', fontSize: 'var(--text-xl)', color: 'var(--cream-faint)', marginBottom: 16 }}>
                 Nothing here yet.
               </div>
               <button className="btn-primary" onClick={() => { setEditData(null); setShowModal(true) }}>
@@ -721,32 +732,28 @@ export default function Interests() {
                       ) : (
                         <div style={{ width: 72, height: 108, background: color, borderRadius: 6, boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
                           display: 'flex', alignItems: 'flex-end', padding: 5,
-                          fontFamily: 'var(--font-display)', fontSize: 11, color: 'var(--cream-dim)', lineHeight: 1 }}>
+                          fontFamily: 'var(--font-display)', fontSize: 'var(--text-xs)', color: 'var(--cream-dim)', lineHeight: 1 }}>
                           {title?.slice(0, 2).toUpperCase()}
                         </div>
                       )}
-                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 12, color: 'var(--cream)', lineHeight: 1.2, marginTop: 6,
+                      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-xs)', color: 'var(--cream)', lineHeight: 1.2, marginTop: 6,
                         display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
                         {title}
                       </div>
-                      {year && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, color: 'var(--cream-faint)', letterSpacing: '0.12em', marginTop: 2 }}>{year}</div>}
+                      {year && <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', color: 'var(--cream-faint)', letterSpacing: '0.12em', marginTop: 2 }}>{year}</div>}
                     </div>
                   )
                 })}
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* FAB */}
       <button
         onClick={() => { setEditData(null); setShowModal(true) }}
-        onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
-        onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.90)' }}
-        onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
         style={{
           position: 'fixed',
           bottom: 'calc(92px + env(safe-area-inset-bottom))',
@@ -793,7 +800,7 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
           width: 52, aspectRatio: '2 / 3',
           background: color, borderRadius: 4,
           display: 'flex', alignItems: 'flex-end', padding: 4,
-          color: 'var(--cream-dim)', fontFamily: 'var(--font-display)', fontSize: 10,
+          color: 'var(--cream-dim)', fontFamily: 'var(--font-display)', fontSize: 'var(--text-overline)',
           letterSpacing: '-0.01em', lineHeight: 1,
           boxShadow: '0 4px 10px -4px rgba(0,0,0,0.5)',
         }}>
@@ -801,17 +808,17 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
         </div>
       )}
       <div>
-        <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
+        <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', color: 'var(--cream)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
           {item.title}
         </div>
-        <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 8 }}>
           {item.media_type && (
-            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase' }}>
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase' }}>
               {item.media_type === 'tv' ? 'TV' : 'Film'}{item.release_year ? ` · ${item.release_year}` : ''}
             </span>
           )}
           {!item.media_type && item.description && <span>{item.description}</span>}
-          {item.link && /^https?:\/\//i.test(item.link) && <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.1em', textTransform: 'uppercase' }}>Link ↗</a>}
+          {item.link && /^https?:\/\//i.test(item.link) && <a href={item.link} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent-soft)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Link ↗</a>}
         </div>
         {/* Star rating row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
@@ -822,7 +829,7 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
               style={{
                 background: 'none', border: 'none', cursor: 'pointer', padding: 1,
                 color: (myRating?.rating ?? 0) >= star ? 'var(--accent-soft)' : 'var(--border)',
-                fontSize: 14, lineHeight: 1,
+                fontSize: 'var(--text-sm)', lineHeight: 1,
               }}
             >★</button>
           ))}
@@ -830,7 +837,7 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
             onClick={onToggleRewatch}
             style={{
               border: 'none', cursor: 'pointer', padding: '2px 7px',
-              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.14em',
+              fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.14em',
               textTransform: 'uppercase', borderRadius: 999,
               marginLeft: 4,
               color: myRating?.would_rewatch ? 'var(--accent-soft)' : 'var(--cream-faint)',
@@ -843,7 +850,7 @@ function WatchRow({ item, profiles, myId, isLast, onDelete, myRating, onRate, on
             onClick={onToggleCW}
             style={{
               background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0',
-              fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.12em',
+              fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.12em',
               textTransform: 'uppercase',
               color: isCW ? 'var(--accent)' : 'var(--cream-faint)',
               borderLeft: '1px solid var(--border)', paddingLeft: 6, marginLeft: 2,
@@ -898,22 +905,22 @@ function PlaceRow({ item, profiles, myId, isLast, onEditNotes, onDelete }) {
           </svg>
         </div>
         <div>
-          <div style={{ fontFamily: 'var(--font-display)', fontSize: 18, color: 'var(--cream)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-lg)', color: 'var(--cream)', lineHeight: 1.15, letterSpacing: '-0.01em' }}>
             {item.title}
           </div>
           {/* PLAC-03: category tag */}
-          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginTop: 2 }}>
+          <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--accent-soft)', marginTop: 2 }}>
             {category}
           </div>
           {/* PLAC-04: address */}
           {address && (
-            <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream-faint)', marginTop: 3, lineHeight: 1.4 }}>
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', marginTop: 3, lineHeight: 1.4 }}>
               {address.length > 80 ? address.slice(0, 80) + '…' : address}
             </div>
           )}
           {/* PLAC-04: personal notes */}
           {notes && (
-            <div style={{ fontFamily: 'var(--font-body)', fontSize: 11, color: 'var(--cream)', marginTop: 5, fontStyle: 'italic', lineHeight: 1.4,
+            <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream)', marginTop: 5, fontStyle: 'italic', lineHeight: 1.4,
               padding: '4px 8px', background: 'var(--surface-raised)', borderRadius: 6, borderLeft: '2px solid var(--accent-soft)' }}>
               {notes}
             </div>
@@ -930,7 +937,7 @@ function PlaceRow({ item, profiles, myId, isLast, onEditNotes, onDelete }) {
       <div style={{ paddingLeft: 56, marginTop: 6 }}>
         <button onClick={onEditNotes} style={{
           background: 'none', border: 'none', cursor: 'pointer',
-          fontFamily: 'var(--font-mono)', fontSize: 9, letterSpacing: '0.16em', textTransform: 'uppercase',
+          fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.16em', textTransform: 'uppercase',
           color: 'var(--cream-faint)', padding: 0,
         }}>
           {notes ? 'Edit notes →' : '+ Add notes'}
