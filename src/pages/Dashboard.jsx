@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
+import { useModalAnimation } from '../hooks/useModalAnimation'
 import { InitialsAvatar } from '../components/RoomyUI'
 import PillNav from '../components/PillNav'
 
@@ -40,6 +41,56 @@ function CheckCircleIcon({ checked }) {
   )
 }
 
+// ── Modals ───────────────────────────────────────────────────────────────────
+function GroceriesModal({ onClose, groceries, onToggle }) {
+  const overlayRef = useRef(null)
+  const panelRef = useRef(null)
+  const { handleClose } = useModalAnimation(overlayRef, panelRef, onClose)
+
+  return (
+    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
+      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} style={{ padding: '24px 20px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexShrink: 0 }}>
+          <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)' }}>
+            Shopping List
+          </div>
+          <button onClick={handleClose} style={{ background: 'none', border: 'none', color: 'var(--cream-faint)', cursor: 'pointer', padding: 4 }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        
+        <div style={{ overflowY: 'auto', flex: 1, paddingRight: 8, margin: '0 -8px', paddingLeft: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {groceries.length === 0 && (
+              <p style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 'var(--text-sm)', color: 'var(--cream-faint)' }}>All clear!</p>
+            )}
+            {groceries.map(g => (
+              <button
+                key={g.id}
+                onClick={() => onToggle(g.id, g.is_checked)}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 12, width: '100%',
+                  background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0', textAlign: 'left'
+                }}
+              >
+                <CheckCircleIcon checked={g.is_checked} />
+                <span style={{
+                  fontFamily: 'var(--font-body)', fontSize: 'var(--text-lg)',
+                  color: g.is_checked ? 'var(--cream-faint)' : 'var(--cream)',
+                  textDecoration: g.is_checked ? 'line-through' : 'none',
+                  letterSpacing: '-0.01em',
+                }}>
+                  {g.item_name}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main component ───────────────────────────────────────────────────────────
 export default function Dashboard() {
   const { profile } = useAuth()
@@ -59,7 +110,7 @@ export default function Dashboard() {
 
       const [expRes, grocRes, evtRes, profRes] = await Promise.all([
         supabase.from('expenses').select('amount, paid_by, split_amount, status').eq('status', 'pending'),
-        supabase.from('groceries').select('id, item_name, is_checked').eq('is_inventory', false).order('updated_at', { ascending: false }).limit(4),
+        supabase.from('groceries').select('id, item_name, is_checked').eq('is_inventory', false).order('updated_at', { ascending: false }).limit(30),
         supabase.from('events').select('id, title, date, time').gte('date', new Date().toISOString().split('T')[0]).order('date').limit(1),
         supabase.from('profiles').select('id, full_name'),
       ])
@@ -78,6 +129,13 @@ export default function Dashboard() {
     load()
   }, [])
 
+  async function toggleGrocery(id, currentStatus) {
+    setGroceries(prev => prev.map(g => g.id === id ? { ...g, is_checked: !currentStatus } : g))
+    await supabase.from('groceries').update({ is_checked: !currentStatus }).eq('id', id)
+  }
+
+  const [showGroceriesModal, setShowGroceriesModal] = useState(false)
+
   const wholeStr = Math.floor(Math.abs(owedToMe)).toString()
   const centsStr = (Math.abs(owedToMe) % 1).toFixed(2).slice(1)
   const roomateName = roommateProfile?.full_name?.split(' ')[0] || 'roommate'
@@ -87,6 +145,14 @@ export default function Dashboard() {
 
   return (
     <div style={{ paddingTop: 4, paddingBottom: 24 }}>
+
+      {showGroceriesModal && (
+        <GroceriesModal 
+          onClose={() => setShowGroceriesModal(false)} 
+          groceries={groceries} 
+          onToggle={toggleGrocery} 
+        />
+      )}
 
       {/* ── Header row ─────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -183,55 +249,79 @@ export default function Dashboard() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.15fr', gap: 14 }}>
 
         {/* Shopping list card */}
-        <motion.button
+        <motion.div
           className="glass-card"
-          onClick={() => navigate('/groceries')}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
           style={{
             padding: '16px 14px', borderRadius: 20, textAlign: 'left',
-            cursor: 'pointer', display: 'flex', flexDirection: 'column',
+            display: 'flex', flexDirection: 'column',
             minHeight: 200, color: 'var(--cream)',
           }}
         >
-          <p style={{
-            fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)',
-            fontWeight: 600, lineHeight: 1.15, letterSpacing: '-0.025em',
-            color: 'var(--cream)', margin: '0 0 14px',
-          }}>
-            Shopping<br />List
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', margin: '0 0 14px' }}>
+            <p style={{
+              fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)',
+              fontWeight: 600, lineHeight: 1.15, letterSpacing: '-0.025em',
+              color: 'var(--cream)', margin: 0,
+            }}>
+              Shopping<br />List
+            </p>
+            {groceries.length > 4 && (
+              <button 
+                onClick={() => setShowGroceriesModal(true)}
+                style={{ 
+                  background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 999, 
+                  padding: '4px 8px', color: 'var(--cream)', fontSize: 'var(--text-xs)', 
+                  cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 500 
+                }}
+              >
+                Expand
+              </button>
+            )}
+          </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
             {loading
               ? <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)' }}>Loading…</p>
               : groceries.length === 0
                 ? <p style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)' }}>All clear!</p>
-                : groceries.map(g => (
-                  <div key={g.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                : groceries.slice(0, 4).map(g => (
+                  <button
+                    key={g.id}
+                    onClick={() => toggleGrocery(g.id, g.is_checked)}
+                    style={{ 
+                      display: 'flex', alignItems: 'center', gap: 8, 
+                      background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0', textAlign: 'left'
+                    }}
+                  >
                     <CheckCircleIcon checked={g.is_checked} />
                     <span style={{
                       fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
                       color: g.is_checked ? 'var(--cream-faint)' : 'var(--cream)',
                       textDecoration: g.is_checked ? 'line-through' : 'none',
-                      letterSpacing: '-0.01em',
+                      letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 100
                     }}>
                       {g.item_name}
                     </span>
-                  </div>
+                  </button>
                 ))
             }
           </div>
 
-          <p style={{
-            fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)',
-            letterSpacing: '0.14em', textTransform: 'uppercase',
-            color: 'var(--cream-faint)', margin: '12px 0 0',
-          }}>
-            {groceries.filter(g => !g.is_checked).length} of {groceries.length} left
-          </p>
-        </motion.button>
+          <button
+            onClick={() => navigate('/groceries')}
+            style={{
+              fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)',
+              letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: 'var(--cream-faint)', margin: '12px 0 0',
+              background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', padding: 0
+            }}
+          >
+            {groceries.filter(g => !g.is_checked).length} of {groceries.length} left →
+          </button>
+        </motion.div>
 
         {/* Next event card */}
         <motion.button
