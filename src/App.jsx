@@ -11,6 +11,7 @@ import Apartment from './pages/Apartment'
 import Settings from './pages/Settings'
 import More from './pages/More'
 import Landing from './pages/Landing'
+import AmbientBackground from './components/AmbientBackground'
 
 function ProtectedRoute({ children }) {
   const { session, loading } = useAuth()
@@ -27,23 +28,26 @@ function ProtectedRoute({ children }) {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/welcome" element={<Landing />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/" element={
-        <ProtectedRoute>
-          <Layout />
-        </ProtectedRoute>
-      }>
-        <Route index element={<Dashboard />} />
-        <Route path="expenses" element={<Expenses />} />
-        <Route path="groceries" element={<Groceries />} />
-        <Route path="calendar" element={<Calendar />} />
-        <Route path="interests" element={<Interests />} />
-        <Route path="apartment" element={<Apartment />} />
-        <Route path="settings" element={<Settings />} />
-        <Route path="more" element={<More />} />
-      </Route>
-    </Routes>
+    <>
+      <AmbientBackground />
+      <Routes>
+        <Route path="/welcome" element={<Landing />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={
+          <ProtectedRoute>
+            <Layout />
+          </ProtectedRoute>
+        }>
+          <Route index element={<Dashboard />} />
+          <Route path="expenses" element={<Expenses />} />
+          <Route path="groceries" element={<Groceries />} />
+          <Route path="calendar" element={<Calendar />} />
+          <Route path="interests" element={<Interests />} />
+          <Route path="apartment" element={<Apartment />} />
+          <Route path="settings" element={<Settings />} />
+          <Route path="more" element={<More />} />
+        </Route>
+      </Routes>
+    </>
   )
 }
