@@ -5,15 +5,6 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { InitialsAvatar } from '../components/RoomyUI'
 
-// ── Nav pill config ──────────────────────────────────────────────────────────
-const NAV_PILLS = [
-  { label: 'Overview', to: null },       // active state = current page
-  { label: 'Balance',  to: '/expenses' },
-  { label: 'Groceries', to: '/groceries' },
-  { label: 'Calendar', to: '/calendar' },
-  { label: 'Interests', to: '/interests' },
-  { label: 'More',     to: '/more' },
-]
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 function StarIcon() {
@@ -128,39 +119,6 @@ export default function Dashboard() {
         }}>
           {firstName}
         </h1>
-      </div>
-
-      {/* ── Pill nav bar ───────────────────────────────────────── */}
-      <div style={{
-        display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4, marginBottom: 20,
-        scrollbarWidth: 'none', WebkitOverflowScrolling: 'touch',
-      }}>
-        {NAV_PILLS.map((pill) => {
-          const isActive = pill.to === null
-          return (
-            <button
-              key={pill.label}
-              onClick={() => pill.to && navigate(pill.to)}
-              style={{
-                flexShrink: 0,
-                padding: '9px 18px',
-                borderRadius: 999,
-                border: isActive ? 'none' : '1px solid rgba(255,255,255,0.18)',
-                background: isActive ? 'var(--accent)' : 'transparent',
-                color: isActive ? '#fff' : 'var(--cream-dim)',
-                fontFamily: 'var(--font-body)',
-                fontSize: 'var(--text-sm)',
-                fontWeight: isActive ? 600 : 400,
-                cursor: pill.to ? 'pointer' : 'default',
-                letterSpacing: '-0.01em',
-                transition: 'all 200ms ease',
-                WebkitTapHighlightColor: 'transparent',
-              }}
-            >
-              {pill.label}
-            </button>
-          )
-        })}
       </div>
 
       {/* ── Balance card ───────────────────────────────────────── */}
