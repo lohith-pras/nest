@@ -3,7 +3,8 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useModalAnimation } from '../hooks/useModalAnimation'
-import { Masthead, SectionRule, Kicker, InitialsAvatar, PlusIcon, CheckIcon, XIcon } from '../components/RoomyUI'
+import { SectionRule, Kicker, InitialsAvatar, PlusIcon, CheckIcon, XIcon } from '../components/RoomyUI'
+import PillNav from '../components/PillNav'
 
 // ─── Emoji dictionary ────────────────────────────────────────────────────────
 
@@ -330,16 +331,6 @@ export default function Groceries() {
         />
       )}
 
-      <Masthead
-        title="Pantry"
-        meta={
-          <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
-            <span style={{ width: 6, height: 6, borderRadius: 999, background: '#7AC57E' }} />
-            Live · {unchecked.length} left
-          </span>
-        }
-      />
-
       <div style={{ marginTop: 18 }}>
         <Kicker>The pantry</Kicker>
         <h1 style={{
@@ -350,6 +341,8 @@ export default function Groceries() {
           <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>still need.</span>
         </h1>
       </div>
+
+      <PillNav />
 
       {/* Section tabs */}
       <div style={{ display: 'flex', gap: 8, marginTop: 22 }}>

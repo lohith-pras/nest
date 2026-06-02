@@ -1,7 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
-import { Masthead, SectionRule, Kicker, PlusIcon, XIcon } from '../components/RoomyUI'
+import { SectionRule, Kicker, PlusIcon, XIcon } from '../components/RoomyUI'
+import PillNav from '../components/PillNav'
 
 const DAYS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December']
@@ -123,8 +124,6 @@ export default function Calendar() {
     <div style={{ paddingTop: 16 }}>
       {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveEvent} loading={adding} selected={selectedDate} initialData={editData} />}
 
-      <Masthead title="Calendar" meta={`${upcomingEvents.length} events`} />
-
       <div style={{ marginTop: 18 }}>
         <Kicker>The agenda</Kicker>
         <h1 style={{
@@ -135,6 +134,8 @@ export default function Calendar() {
           <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>{viewYear}</span>
         </h1>
       </div>
+
+      <PillNav />
 
       {/* Month nav + grid */}
       <div style={{ marginTop: 22 }}>

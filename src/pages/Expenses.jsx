@@ -3,8 +3,9 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useModalAnimation } from '../hooks/useModalAnimation'
-import { Masthead, SectionRule, Kicker, InitialsAvatar, PlusIcon, ArrowRight } from '../components/RoomyUI'
+import { SectionRule, Kicker, InitialsAvatar, PlusIcon, ArrowRight } from '../components/RoomyUI'
 import { SuccessOverlay } from '../components/SuccessOverlay'
+import PillNav from '../components/PillNav'
 
 // ─── Expense category detector ────────────────────────────────────────────────
 
@@ -300,7 +301,6 @@ export default function Expenses() {
       <SuccessOverlay show={showSuccess} onComplete={() => setShowSuccess(false)} />
       {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveExpense} loading={saving} initialData={editData} />}
 
-      <Masthead title="Ledger" meta={now.toLocaleString('default', { month: 'long', year: 'numeric' })} />
 
       <div style={{ marginTop: 18 }}>
         <Kicker>The ledger</Kicker>
@@ -315,6 +315,8 @@ export default function Expenses() {
           {net >= 0 ? ' ahead.' : '.'}
         </h1>
       </div>
+
+      <PillNav />
 
       {/* Stat row */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginTop: 22, borderTop: '1px solid var(--border-rule)', paddingTop: 14 }}>

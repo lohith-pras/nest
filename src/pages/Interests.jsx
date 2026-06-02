@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useModalAnimation } from '../hooks/useModalAnimation'
 import { Masthead, SectionRule, Kicker, InitialsAvatar, PlusIcon, XIcon, posterColor } from '../components/RoomyUI'
+import PillNav from '../components/PillNav'
 
 const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/w300'
 const TMDB_API_BASE = 'https://api.themoviedb.org/3'
@@ -574,6 +575,8 @@ export default function Interests() {
           places to <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>go.</span>
         </h1>
       </div>
+
+      <PillNav />
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 8, marginTop: 22 }}>
