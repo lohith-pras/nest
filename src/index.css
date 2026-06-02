@@ -40,6 +40,12 @@
   --overlay-bg: rgba(245,242,238,0.82);
   --scrollbar-thumb: rgba(0,0,0,0.15);
 
+  /* ── Glass Tokens (Light) ─── */
+  --glass-surface: rgba(255, 255, 255, 0.65);
+  --glass-nav: rgba(250, 248, 245, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.5);
+  --glass-blur: 16px;
+
   /* ── Typography ─────────────── */
   --font-display: "Newsreader", Georgia, serif;
   --font-body: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
@@ -104,6 +110,12 @@
   --input-border: rgba(255,255,255,0.22);
   --overlay-bg: rgba(5,2,6,0.78);
   --scrollbar-thumb: rgba(255,255,255,0.12);
+
+  /* ── Glass Tokens (Dark) ─── */
+  --glass-surface: rgba(28, 25, 26, 0.65);
+  --glass-nav: rgba(5, 2, 6, 0.75);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-blur: 16px;
 }
 
 /* ── Reset & Base ───────────────────────────────────────────── */
@@ -193,15 +205,17 @@ input, textarea, select {
 
 /* ── Cards ──────────────────────────────────────────────────── */
 .glass {
-  background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid var(--border);
+  background: var(--glass-surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
 }
 
 .glass-card {
-  background: var(--surface-raised);
-  border: 1px solid var(--border);
+  background: var(--glass-surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   transition: transform 160ms var(--ease-out), background 160ms var(--ease-out);
 }
@@ -212,10 +226,10 @@ input, textarea, select {
 
 /* ── Bottom Nav ─────────────────────────────────────────────── */
 .bottom-nav {
-  background: var(--nav-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border-rule);
+  background: var(--glass-nav);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
 }
 
 /* ── Sidebar ────────────────────────────────────────────────── */
@@ -369,11 +383,13 @@ input, textarea, select {
 }
 
 .modal {
-  background: var(--surface-raised);
+  background: var(--glass-surface);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
   border-radius: 20px 20px 0 0;
   padding: 32px 24px calc(32px + env(safe-area-inset-bottom));
   width: 100%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--glass-border);
   border-bottom: none;
   will-change: transform, opacity;
 }
