@@ -154,7 +154,12 @@ body {
 #root {
   width: 100%;
   min-height: 100vh;
-  background-color: var(--bg);
+  /* Warm dark gradient — deep charcoal base with subtle taupe warmth top-right and a hint of muted teal bottom-left */
+  background:
+    radial-gradient(ellipse 70% 50% at 85% 5%,  rgba(154, 129, 116, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 10% 95%, rgba(90,  80,  110, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(28,  22,  30,  0.9)  0%, transparent 100%),
+    #050206;
   position: relative;
   overflow-x: hidden;
 }
@@ -216,25 +221,19 @@ input, textarea, select {
 
 /* ── Cards ──────────────────────────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
   -webkit-backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
-  border: none;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 4px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(154, 129, 116, 0.15);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
   -webkit-backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
-  border: none;
-  box-shadow:
-    inset 0 0 0 1px rgba(255, 255, 255, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.8),
-    0 4px 24px rgba(0, 0, 0, 0.12);
+  border: 1px solid rgba(154, 129, 116, 0.15);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
   border-radius: var(--radius-lg);
   transition: transform var(--transition-normal) var(--ease-out);
 }
@@ -245,14 +244,11 @@ input, textarea, select {
 
 /* ── Bottom Nav ─────────────────────────────────────────────── */
 .bottom-nav {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: url(#liquid-glass) brightness(1.2) contrast(1.08);
-  -webkit-backdrop-filter: url(#liquid-glass) brightness(1.2) contrast(1.08);
-  border: none;
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, 0.7),
-    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
-    0 -2px 20px rgba(0, 0, 0, 0.08);
+  background: rgba(10, 8, 12, 0.7);
+  backdrop-filter: url(#liquid-glass) brightness(1.1) contrast(1.05);
+  -webkit-backdrop-filter: url(#liquid-glass) brightness(1.1) contrast(1.05);
+  border: 1px solid rgba(154, 129, 116, 0.12);
+  box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3);
 }
 
 /* ── Sidebar ────────────────────────────────────────────────── */
