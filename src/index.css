@@ -47,9 +47,9 @@
   --glass-blur: 16px;
 
   /* ── Typography ───────────── */
-  --font-display: "Helvetica Neue", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-  --font-body:    "Helvetica Neue", -apple-system, BlinkMacSystemFont, Arial, sans-serif;
-  --font-mono:    "SF Mono",        ui-monospace, "SFMono-Regular", "Menlo", monospace;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body:    "Sora",     -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:    "SF Mono",  ui-monospace, "SFMono-Regular", "Menlo", monospace;
 
   /* Type scale — single source for all font sizes. Snap to the nearest step. */
   --text-overline: 10px;
