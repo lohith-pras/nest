@@ -13,13 +13,19 @@ export function useModalAnimation(overlayRef, panelRef, onClose) {
     tl.current = gsap.timeline({
       defaults: { ease: 'expo.out', duration: 0.25 }
     })
-      .from(overlayRef.current, { 
+      .fromTo(overlayRef.current, { 
         autoAlpha: 0, 
+      }, {
+        autoAlpha: 1,
       })
-      .from(panelRef.current, { 
+      .fromTo(panelRef.current, { 
         scale: 0.98, 
         y: 8, 
         autoAlpha: 0, 
+      }, {
+        scale: 1,
+        y: 0,
+        autoAlpha: 1,
         duration: 0.3,
         force3D: true
       }, '<0.05')

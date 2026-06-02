@@ -80,3 +80,4 @@ docs/superpowers/
 .parcel-cache
 .eslintcache
 *.tsbuildinfo
+.vercel
