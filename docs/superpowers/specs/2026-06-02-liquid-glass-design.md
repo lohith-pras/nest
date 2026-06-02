@@ -1,40 +1,28 @@
-# Liquid Glass Architecture Design
+# WWDC iOS 26 Liquid Glass Redesign
 
-## Purpose
-To implement an Apple-style "liquid glass" aesthetic across the application for both dark and light modes. The design relies on an ambient, organic background mesh to provide the visual complexity needed for the frosted glass elements to stand out, while keeping the content area clean and readable.
+## Goal
+Implement a "pure liquid glass" visual aesthetic across the application. This replaces all frosted/matte "glassmorphism" with a highly transparent, glossy, liquid-refraction look that distorts the underlying UI dynamically as if viewed through a sheet of moving water or syrup.
 
-## Visual Direction
-- **Style:** Subtle iOS Glass (opaque but blurred surfaces, softer borders).
-- **Background:** Ambient Mesh Gradient (slowly moving color blobs mapped to theme accents).
-- **Behavior:** Ensures sufficient contrast for typography while giving the app a premium, layered spatial feel.
+## 1. Architecture & Global Liquid Layer
 
-## Architecture & Components
+*   **LiquidOverlay Component:** A new React component `<LiquidOverlay />` will be created and mounted at the root level (likely inside `App.jsx` or `Layout.jsx`), sitting on top of the UI with `pointer-events: none` and a high `z-index`.
+*   **SVG Filters:** The overlay will utilize an inline SVG containing `<filter id="liquid">`. This filter will combine:
+    *   `<feTurbulence>` to generate organic noise.
+    *   `<feDisplacementMap>` to use the noise to warp and refract the pixels underneath the overlay.
+*   **CSS Application:** The SVG filter will be applied to the overlay's CSS via `backdrop-filter: url(#liquid)`.
 
-### 1. AmbientBackground Component
-- **Location:** `src/components/AmbientBackground.jsx` (or similar shared component directory).
-- **Purpose:** Renders 2-3 large, heavily blurred DOM elements that drift slowly across the screen using `framer-motion` or CSS animations.
-- **Placement:** Positioned fixed at the back of `#root` or `App.jsx`, taking up `100vw` and `100vh` with `z-index: -1`.
-- **Theming:** Colors will map to existing CSS variables (`--accent`, `--accent-soft`, etc.) and automatically adjust opacity/brightness for light vs. dark mode.
+## 2. Specular Highlights & Gloss
 
-### 2. Design Tokens (`src/index.css`)
-Introduces new CSS variables to separate solid backgrounds from glass backgrounds.
+*   **Removal of Matte Blur:** All standard `blur()` and semi-opaque background colors will be removed from `.glass` and `.glass-card` classes to eliminate the frosted look.
+*   **Gloss Animations:** The `<LiquidOverlay />` will include animated CSS radial/linear gradients simulating specular light reflections moving across the surface of the "liquid." These will be highly transparent white/bright flashes overlaying the refracted UI.
+*   **Card Boundaries:** With backgrounds fully transparent, individual cards and UI elements will be delineated entirely by thin, sharp, high-contrast borders (e.g., `box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4)` or similar) and their typography.
 
-**New Variables:**
-- `--glass-surface`: For cards and modals (e.g., `rgba(255,255,255,0.65)` in light, `rgba(28,25,26,0.65)` in dark).
-- `--glass-nav`: For structural navigation like bottom bars and sidebars.
-- `--glass-border`: A lighter, semi-transparent color for simulating specular edge highlights.
-- `--glass-blur`: Standardized blur amount (e.g., `12px`).
+## 3. Animation Strategy
 
-### 3. Component Updates
-Existing UI components will be updated to consume the new glass tokens:
-- **Cards & Modals (`.glass`, `.glass-card`, `.modal`)**: Replace `var(--surface-raised)` with `var(--glass-surface)` and add `backdrop-filter: blur(var(--glass-blur))`.
-- **Navigation (`.bottom-nav`, `.sidebar`)**: Apply `--glass-nav` and the standard blur.
-- **Borders**: Update standard `1px solid var(--border)` to include a subtle inset shadow or lighter top/left border to simulate physical glass thickness.
+*   The `baseFrequency` or `numOctaves` of the `<feTurbulence>` primitive will be animated using GSAP or CSS to create a slow, continuous flowing liquid motion without the performance penalty of WebGL.
+*   The specular gradients will orbit or pan slowly across the screen.
 
-## Error Handling & Edge Cases
-- **Reduced Motion:** If `prefers-reduced-motion` is active, the ambient background blobs will remain static.
-- **Performance:** CSS `backdrop-filter` can be expensive on lower-end devices. Will ensure hardware acceleration (`transform: translateZ(0)`) is used on the blur layers.
+## Verification
 
-## Testing Strategy
-- Manual visual QA in both Light and Dark mode to ensure text contrast on top of the glass remains accessible.
-- Verify `prefers-reduced-motion` stops the ambient background animation.
+*   Check performance on both desktop and simulated mobile environments to ensure the SVG displacement map does not cause severe frame drops.
+*   Verify that clicking and interacting with buttons/inputs still works perfectly (i.e., `pointer-events: none` is correctly applied to the overlay).
