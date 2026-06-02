@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { SectionRule, Kicker, PlusIcon, XIcon } from '../components/RoomyUI'
@@ -32,8 +33,8 @@ function Modal({ onClose, onSave, loading, selected, initialData = null }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal" onClick={e => e.stopPropagation()}>
+    <motion.div className="modal-overlay" onClick={onClose} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 22 }}>
           {initialData ? 'Edit event.' : 'New event.'}
         </div>
@@ -52,12 +53,18 @@ function Modal({ onClose, onSave, loading, selected, initialData = null }) {
           <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
             <button type="button" className="btn-ghost" onClick={onClose} style={{ flex: 1 }}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={loading} style={{ flex: 1, justifyContent: 'center' }}>
-              {loading ? '…' : 'Save event'}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {loading ? (
+                  <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>…</motion.span>
+                ) : (
+                  <motion.span key="save" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>Save event</motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -122,7 +129,9 @@ export default function Calendar() {
 
   return (
     <div style={{ paddingTop: 16 }}>
-      {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveEvent} loading={adding} selected={selectedDate} initialData={editData} />}
+      <AnimatePresence>
+        {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveEvent} loading={adding} selected={selectedDate} initialData={editData} />}
+      </AnimatePresence>
 
       <div style={{ marginTop: 18 }}>
         <Kicker>The agenda</Kicker>

@@ -33,10 +33,15 @@ function GridIcon() {
 function CheckCircleIcon({ checked }) {
   return (
     <svg width={20} height={20} viewBox="0 0 24 24" fill="none"
-      stroke={checked ? 'var(--accent)' : 'rgba(255,255,255,0.3)'}
+      stroke={checked ? 'var(--accent)' : 'var(--cream-faint)'}
       strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
       <circle cx="12" cy="12" r="9"/>
-      {checked && <path d="M8 12.5l3 3 5-5"/>}
+      <motion.path 
+        d="M8 12.5l3 3 5-5"
+        initial={{ pathLength: 0, opacity: 0 }}
+        animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
+        transition={{ type: 'spring', bounce: 0.4, duration: 0.5 }}
+      />
     </svg>
   )
 }
@@ -48,8 +53,25 @@ function GroceriesModal({ onClose, groceries, onToggle }) {
   const { handleClose } = useModalAnimation(overlayRef, panelRef, onClose)
 
   return (
-    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
-      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} style={{ padding: '24px 20px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}>
+    <motion.div 
+      className="modal-overlay" 
+      onClick={handleClose} 
+      ref={overlayRef}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.2 }}
+    >
+      <motion.div 
+        className="modal" 
+        onClick={e => e.stopPropagation()} 
+        ref={panelRef} 
+        style={{ padding: '24px 20px', maxHeight: '80vh', display: 'flex', flexDirection: 'column' }}
+        initial={{ opacity: 0, y: 16, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        exit={{ opacity: 0, y: 12, scale: 0.98 }}
+        transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}
+      >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexShrink: 0 }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)' }}>
             Shopping List
@@ -86,8 +108,8 @@ function GroceriesModal({ onClose, groceries, onToggle }) {
             ))}
           </div>
         </div>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -146,13 +168,15 @@ export default function Dashboard() {
   return (
     <div style={{ paddingTop: 4, paddingBottom: 24 }}>
 
-      {showGroceriesModal && (
-        <GroceriesModal 
-          onClose={() => setShowGroceriesModal(false)} 
-          groceries={groceries} 
-          onToggle={toggleGrocery} 
-        />
-      )}
+      <AnimatePresence>
+        {showGroceriesModal && (
+          <GroceriesModal 
+            onClose={() => setShowGroceriesModal(false)} 
+            groceries={groceries} 
+            onToggle={toggleGrocery} 
+          />
+        )}
+      </AnimatePresence>
 
       {/* ── Header row ─────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
@@ -161,8 +185,8 @@ export default function Dashboard() {
           onClick={() => navigate('/more')}
           style={{
             width: 40, height: 40, borderRadius: 999,
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.12)',
+            background: 'var(--input-bg)',
+            border: '1px solid var(--border-rule)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: 'var(--cream)', cursor: 'pointer',
           }}
@@ -195,7 +219,7 @@ export default function Dashboard() {
         className="glass-card"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
+        transition={{ duration: 0.25, ease: [0.23, 1, 0.32, 1] }}
         style={{ padding: '20px 20px 18px', marginBottom: 14, position: 'relative', borderRadius: 20 }}
       >
         {/* Roommate avatar */}
@@ -216,9 +240,24 @@ export default function Dashboard() {
         <div style={{
           fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 13vw, 60px)',
           fontWeight: 600, lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.04em',
-          marginBottom: 6,
+          marginBottom: 6, display: 'flex', alignItems: 'center'
         }}>
-          {loading ? '—' : <>€{wholeStr}<span style={{ fontSize: '0.55em', color: 'var(--cream-dim)', verticalAlign: 'super', lineHeight: 0 }}>{centsStr}</span></>}
+          <AnimatePresence mode="popLayout">
+            {loading ? (
+              <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>—</motion.span>
+            ) : (
+              <motion.div 
+                key={`${wholeStr}-${centsStr}`}
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                transition={{ type: 'spring', bounce: 0.5, duration: 0.5 }}
+                style={{ display: 'flex', alignItems: 'baseline' }}
+              >
+                €{wholeStr}<span style={{ fontSize: '0.55em', color: 'var(--cream-dim)', verticalAlign: 'super', lineHeight: 0, marginLeft: 2 }}>{centsStr}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
 
         <p style={{
@@ -253,7 +292,7 @@ export default function Dashboard() {
           className="glass-card"
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
+          transition={{ duration: 0.25, delay: 0.08, ease: [0.23, 1, 0.32, 1] }}
           style={{
             padding: '16px 14px', borderRadius: 20, textAlign: 'left',
             display: 'flex', flexDirection: 'column',
@@ -272,7 +311,7 @@ export default function Dashboard() {
               <button 
                 onClick={() => setShowGroceriesModal(true)}
                 style={{ 
-                  background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 999, 
+                  background: 'var(--input-bg)', border: 'none', borderRadius: 999, 
                   padding: '4px 8px', color: 'var(--cream)', fontSize: 'var(--text-xs)', 
                   cursor: 'pointer', fontFamily: 'var(--font-body)', fontWeight: 500 
                 }}
@@ -282,33 +321,41 @@ export default function Dashboard() {
             )}
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}>
-            {loading
-              ? <p style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)' }}>Loading…</p>
-              : groceries.length === 0
-                ? <p style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)' }}>All clear!</p>
-                : groceries.slice(0, 4).map(g => (
-                  <button
-                    key={g.id}
-                    onClick={() => toggleGrocery(g.id, g.is_checked)}
-                    style={{ 
-                      display: 'flex', alignItems: 'center', gap: 8, 
-                      background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0', textAlign: 'left'
-                    }}
-                  >
-                    <CheckCircleIcon checked={g.is_checked} />
-                    <span style={{
-                      fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
-                      color: g.is_checked ? 'var(--cream-faint)' : 'var(--cream)',
-                      textDecoration: g.is_checked ? 'line-through' : 'none',
-                      letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 100
-                    }}>
-                      {g.item_name}
-                    </span>
-                  </button>
-                ))
-            }
-          </div>
+          <motion.div 
+            initial="hidden" 
+            animate="show" 
+            variants={{ show: { transition: { staggerChildren: 0.05 } } }} 
+            style={{ display: 'flex', flexDirection: 'column', gap: 8, flex: 1 }}
+          >
+            <AnimatePresence mode="wait">
+              {loading
+                ? <motion.p key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', margin: 0 }}>Loading…</motion.p>
+                : groceries.length === 0
+                  ? <motion.p key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ fontFamily: 'var(--font-body)', fontStyle: 'italic', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', margin: 0 }}>All clear!</motion.p>
+                  : groceries.slice(0, 4).map(g => (
+                    <motion.button
+                      key={g.id}
+                      variants={{ hidden: { opacity: 0, y: 8 }, show: { opacity: 1, y: 0, transition: { duration: 0.2 } } }}
+                      onClick={() => toggleGrocery(g.id, g.is_checked)}
+                      style={{ 
+                        display: 'flex', alignItems: 'center', gap: 8, 
+                        background: 'none', border: 'none', cursor: 'pointer', padding: '2px 0', textAlign: 'left'
+                      }}
+                    >
+                      <CheckCircleIcon checked={g.is_checked} />
+                      <span style={{
+                        fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
+                        color: g.is_checked ? 'var(--cream-faint)' : 'var(--cream)',
+                        textDecoration: g.is_checked ? 'line-through' : 'none',
+                        letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 100
+                      }}>
+                        {g.item_name}
+                      </span>
+                    </motion.button>
+                  ))
+              }
+            </AnimatePresence>
+          </motion.div>
 
           <button
             onClick={() => navigate('/groceries')}
@@ -329,7 +376,7 @@ export default function Dashboard() {
           onClick={() => navigate('/calendar')}
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.14, ease: [0.23, 1, 0.32, 1] }}
+          transition={{ duration: 0.25, delay: 0.14, ease: [0.23, 1, 0.32, 1] }}
           style={{
             padding: '16px 14px', borderRadius: 20, textAlign: 'left',
             cursor: 'pointer', display: 'flex', flexDirection: 'column',
@@ -364,13 +411,19 @@ export default function Dashboard() {
               </div>
             </>
           ) : (
-            <p style={{
+            <div style={{
               fontFamily: 'var(--font-display)', fontStyle: 'italic',
               fontSize: 'var(--text-lg)', color: 'var(--cream-faint)',
               margin: 0, flex: 1,
             }}>
-              {loading ? '…' : 'Nothing yet.'}
-            </p>
+              <AnimatePresence mode="popLayout">
+                {loading ? (
+                  <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>…</motion.span>
+                ) : (
+                  <motion.span key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>Nothing yet.</motion.span>
+                )}
+              </AnimatePresence>
+            </div>
           )}
         </motion.button>
 

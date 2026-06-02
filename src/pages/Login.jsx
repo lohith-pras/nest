@@ -78,7 +78,7 @@ export default function Login() {
       {/* Masthead */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        borderBottom: '1px solid rgba(255,255,255,0.18)', paddingBottom: 10,
+        borderBottom: '1px solid var(--border-rule)', paddingBottom: 10,
       }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.01em' }}>
           Roomy
@@ -123,7 +123,7 @@ export default function Login() {
 
       {/* Form */}
       <div style={{ marginTop: 32 }}>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', paddingBottom: 8, borderBottom: '1px solid rgba(255,255,255,0.18)', marginBottom: 4 }}>
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.22em', textTransform: 'uppercase', color: 'var(--cream-faint)', paddingBottom: 8, borderBottom: '1px solid var(--border-rule)', marginBottom: 4 }}>
           01 — {mode === 'login' ? 'Sign in' : 'Create account'}
         </div>
 
@@ -147,13 +147,13 @@ export default function Login() {
                   flex: 1, padding: '9px', borderRadius: 999, fontSize: 'var(--text-xs)', fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
                   background: signupType === 'create' ? 'var(--cream)' : 'transparent',
                   color: signupType === 'create' ? 'var(--primary-fg)' : 'var(--cream-faint)',
-                  border: signupType === 'create' ? 'none' : '1px solid rgba(255,255,255,0.22)',
+                  border: signupType === 'create' ? 'none' : '1px solid var(--input-border)',
                 }}>Create Unit</button>
                 <button type="button" onClick={() => setSignupType('join')} style={{
                   flex: 1, padding: '9px', borderRadius: 999, fontSize: 'var(--text-xs)', fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
                   background: signupType === 'join' ? 'var(--cream)' : 'transparent',
                   color: signupType === 'join' ? 'var(--primary-fg)' : 'var(--cream-faint)',
-                  border: signupType === 'join' ? 'none' : '1px solid rgba(255,255,255,0.22)',
+                  border: signupType === 'join' ? 'none' : '1px solid var(--input-border)',
                 }}>Join Unit</button>
               </div>
               {signupType === 'create' ? (
@@ -203,7 +203,7 @@ export default function Login() {
           <div style={{
             marginTop: 'auto', paddingTop: 32,
             display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14,
-            borderTop: '1px solid rgba(255,255,255,0.12)',
+            borderTop: '1px solid var(--border)',
           }}>
             {[
               { k: '01', t: 'Split bills', s: 'Without the math' },
@@ -246,7 +246,7 @@ function EditorialField({ label, value, onChange, type = 'text', placeholder }) 
         style={{
           width: '100%', boxSizing: 'border-box',
           background: 'transparent', border: 'none',
-          borderBottom: `1px solid ${focus ? 'var(--cream)' : 'rgba(255,255,255,0.22)'}`,
+          borderBottom: `1px solid ${focus ? 'var(--cream)' : 'var(--input-border)'}`,
           padding: '10px 0',
           fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)', color: 'var(--cream)',
           outline: 'none', letterSpacing: '-0.01em',

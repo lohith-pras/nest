@@ -93,8 +93,8 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
-      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
+    <motion.div className="modal-overlay" onClick={handleClose} ref={overlayRef} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 24 }}>
           {initialData ? 'Edit expense.' : 'New expense.'}
         </div>
@@ -139,12 +139,18 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
             <button type="button" className="btn-ghost" onClick={handleClose} style={{ flex: 1 }}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={loading || uploading} style={{ flex: 1, justifyContent: 'center' }}>
-              {loading ? '…' : 'Save expense'}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {loading ? (
+                  <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>…</motion.span>
+                ) : (
+                  <motion.span key="save" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>Save expense</motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -299,7 +305,9 @@ export default function Expenses() {
   return (
     <div style={{ paddingTop: 16 }}>
       <SuccessOverlay show={showSuccess} onComplete={() => setShowSuccess(false)} />
-      {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveExpense} loading={saving} initialData={editData} />}
+      <AnimatePresence>
+        {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveExpense} loading={saving} initialData={editData} />}
+      </AnimatePresence>
 
 
       <div style={{ marginTop: 18 }}>
@@ -347,12 +355,13 @@ export default function Expenses() {
         <PlusIcon size={22} stroke={2} />
       </button>
 
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
-        </div>
-      ) : (
-        <div style={{ marginTop: 26 }}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        {loading ? (
+          <motion.div key="spinner" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
+            <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+          </motion.div>
+        ) : (
+          <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ marginTop: 26 }}>
 
           {/* EXPN-03: Monthly summary card */}
           {showMonthlySummary && (
@@ -509,8 +518,9 @@ export default function Expenses() {
               &ldquo;Money rules ruin friendships. Clear receipts save them.&rdquo;
             </div>
           )}
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   )
 }

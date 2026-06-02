@@ -26,7 +26,7 @@ export const AvatarStack = ({ items, size = 26, ring = 'var(--bg)' }) => (
 export const SectionRule = ({ label, right }) => (
   <div style={{
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    borderTop: '1px solid rgba(255,255,255,0.14)',
+    borderTop: '1px solid var(--border-rule)',
     paddingTop: 10,
   }}>
     <div style={{
@@ -47,7 +47,7 @@ export const SectionRule = ({ label, right }) => (
 export const Masthead = ({ title, meta }) => (
   <div style={{
     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-    borderBottom: '1px solid rgba(255,255,255,0.18)',
+    borderBottom: '1px solid var(--border-rule)',
     paddingBottom: 10,
   }}>
     <div style={{

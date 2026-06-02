@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useModalAnimation } from '../hooks/useModalAnimation'
@@ -96,8 +97,8 @@ function TMDBSearchModal({ onClose, onSave, loading }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
-      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
+    <motion.div className="modal-overlay" onClick={handleClose} ref={overlayRef} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
           Search to add.
         </div>
@@ -161,8 +162,8 @@ function TMDBSearchModal({ onClose, onSave, loading }) {
           </div>
         )}
         <button type="button" className="btn-ghost" onClick={handleClose} style={{ marginTop: 20, width: '100%' }}>Cancel</button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -231,8 +232,8 @@ function NominatimSearchModal({ onClose, onSave, loading }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
-      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
+    <motion.div className="modal-overlay" onClick={handleClose} ref={overlayRef} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
           Find a place.
         </div>
@@ -291,8 +292,8 @@ function NominatimSearchModal({ onClose, onSave, loading }) {
           </div>
         )}
         <button type="button" className="btn-ghost" onClick={handleClose} style={{ marginTop: 20, width: '100%' }}>Cancel</button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -318,8 +319,8 @@ function PlaceNotesModal({ onClose, onSave, loading, initialNotes = '' }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
-      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
+    <motion.div className="modal-overlay" onClick={handleClose} ref={overlayRef} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 20 }}>
           Personal notes.
         </div>
@@ -335,8 +336,8 @@ function PlaceNotesModal({ onClose, onSave, loading, initialNotes = '' }) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -548,20 +549,26 @@ export default function Interests() {
 
   return (
     <div style={{ paddingTop: 16 }}>
-      {showModal && tab === 'watchlist' && (
-        <TMDBSearchModal onClose={() => setShowModal(false)} onSave={saveWatchlistItem} loading={adding} />
-      )}
-      {showModal && tab === 'places' && (
-        <NominatimSearchModal onClose={() => setShowModal(false)} onSave={savePlaceItem} loading={adding} />
-      )}
-      {notesItem && (
-        <PlaceNotesModal
-          onClose={() => setNotesItem(null)}
-          onSave={(notes, handleClose) => savePlaceNotes(notesItem.id, notes, handleClose)}
-          loading={savingNotes}
-          initialNotes={notesItem.link || ''}
-        />
-      )}
+      <AnimatePresence>
+        {showModal && tab === 'watchlist' && (
+          <TMDBSearchModal onClose={() => setShowModal(false)} onSave={saveWatchlistItem} loading={adding} />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showModal && tab === 'places' && (
+          <NominatimSearchModal onClose={() => setShowModal(false)} onSave={savePlaceItem} loading={adding} />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {notesItem && (
+          <PlaceNotesModal
+            onClose={() => setNotesItem(null)}
+            onSave={(notes, handleClose) => savePlaceNotes(notesItem.id, notes, handleClose)}
+            loading={savingNotes}
+            initialNotes={notesItem.link || ''}
+          />
+        )}
+      </AnimatePresence>
 
       <Masthead title="Interests" meta="Shared · 2 hosts" />
 
@@ -661,12 +668,13 @@ export default function Interests() {
         ) : null
       })()}
 
-      {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
-          <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
-        </div>
-      ) : (
-        <div style={{ marginTop: 24 }}>
+      <AnimatePresence mode="popLayout" initial={false}>
+        {loading ? (
+          <motion.div key="spinner" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ display: 'flex', justifyContent: 'center', padding: '60px 0' }}>
+            <div className="animate-spin" style={{ width: 28, height: 28, border: '1.5px solid var(--border-rule)', borderTopColor: 'var(--cream)', borderRadius: '50%' }} />
+          </motion.div>
+        ) : (
+          <motion.div key="content" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }} style={{ marginTop: 24 }}>
           <SectionRule label={`01 — ${tab === 'watchlist' ? 'On the watchlist' : 'On the map'}`} />
 
           {filteredPlaces.length === 0 ? (
@@ -739,8 +747,9 @@ export default function Interests() {
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
 
       {/* FAB */}
       <button

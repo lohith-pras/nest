@@ -95,8 +95,8 @@ function AddItemModal({ onClose, onSave, loading, initialData = null }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
-      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
+    <motion.div className="modal-overlay" onClick={handleClose} ref={overlayRef} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 24 }}>
           {initialData ? 'Edit item.' : 'Add to pantry.'}
         </div>
@@ -112,12 +112,18 @@ function AddItemModal({ onClose, onSave, loading, initialData = null }) {
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
             <button type="button" className="btn-ghost" onClick={handleClose} style={{ flex: 1 }}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={loading || !item.trim()} style={{ flex: 1, justifyContent: 'center' }}>
-              {loading ? '…' : initialData ? 'Save' : 'Add'}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {loading ? (
+                  <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>…</motion.span>
+                ) : (
+                  <motion.span key="save" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>{initialData ? 'Save' : 'Add'}</motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -143,8 +149,8 @@ function AddInventoryModal({ onClose, onSave, loading }) {
   }
 
   return (
-    <div className="modal-overlay" onClick={handleClose} ref={overlayRef}>
-      <div className="modal" onClick={e => e.stopPropagation()} ref={panelRef}>
+    <motion.div className="modal-overlay" onClick={handleClose} ref={overlayRef} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }}>
+      <motion.div className="modal" onClick={e => e.stopPropagation()} ref={panelRef} initial={{ opacity: 0, y: 16, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 12, scale: 0.98 }} transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}>
         <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)', marginBottom: 24 }}>
           Add to inventory.
         </div>
@@ -166,12 +172,18 @@ function AddInventoryModal({ onClose, onSave, loading }) {
           <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
             <button type="button" className="btn-ghost" onClick={handleClose} style={{ flex: 1 }}>Cancel</button>
             <button type="submit" className="btn-primary" disabled={loading || !item.trim()} style={{ flex: 1, justifyContent: 'center' }}>
-              {loading ? '…' : 'Add'}
+              <AnimatePresence mode="popLayout" initial={false}>
+                {loading ? (
+                  <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>…</motion.span>
+                ) : (
+                  <motion.span key="save" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>Add</motion.span>
+                )}
+              </AnimatePresence>
             </button>
           </div>
         </form>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   )
 }
 
@@ -315,21 +327,25 @@ export default function Groceries() {
 
   return (
     <div style={{ paddingTop: 16 }}>
-      {showModal && (
-        <AddItemModal
-          onClose={() => { setShowModal(false); setEditData(null) }}
-          onSave={saveItem}
-          loading={adding}
-          initialData={editData}
-        />
-      )}
-      {showInventoryModal && (
-        <AddInventoryModal
-          onClose={() => setShowInventoryModal(false)}
-          onSave={saveInventoryItem}
-          loading={adding}
-        />
-      )}
+      <AnimatePresence>
+        {showModal && (
+          <AddItemModal
+            onClose={() => { setShowModal(false); setEditData(null) }}
+            onSave={saveItem}
+            loading={adding}
+            initialData={editData}
+          />
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {showInventoryModal && (
+          <AddInventoryModal
+            onClose={() => setShowInventoryModal(false)}
+            onSave={saveInventoryItem}
+            loading={adding}
+          />
+        )}
+      </AnimatePresence>
 
       <div style={{ marginTop: 18 }}>
         <Kicker>The pantry</Kicker>
@@ -548,7 +564,14 @@ function GroceryRow({ item, isMe, onToggle, onDelete, onEdit, isLast, isLowStock
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         transition: 'border-color 180ms ease, background 180ms ease', flexShrink: 0,
       }}>
-        {checked && <CheckIcon size={12} stroke={3} />}
+        <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+          <motion.path 
+            d="M4 12.5L9.5 18 20 6"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
+            transition={{ type: 'spring', bounce: 0.4, duration: 0.5 }}
+          />
+        </svg>
       </button>
 
       <div>

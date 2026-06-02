@@ -85,6 +85,13 @@
   --transition-slow: 200ms;
   --transition-theme: 250ms;
   --glass-blur-sm: 8px;
+
+  /* ── Root Gradient (Light) ─── */
+  --root-gradient:
+    radial-gradient(ellipse 70% 50% at 85% 5%,  rgba(154, 129, 116, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 10% 95%, rgba(90,  80,  110, 0.08) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(255, 255, 255, 0.5) 0%, transparent 100%),
+    var(--bg);
 }
 
 /* ── Dark palette ───────────────────────────────────────────── */
@@ -123,6 +130,13 @@
   --glass-nav: rgba(5, 2, 6, 0.75);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-blur: 16px;
+
+  /* ── Root Gradient (Dark) ─── */
+  --root-gradient:
+    radial-gradient(ellipse 70% 50% at 85% 5%,  rgba(154, 129, 116, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 10% 95%, rgba(90,  80,  110, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(28,  22,  30,  0.9)  0%, transparent 100%),
+    #050206;
 }
 
 /* ── Reset & Base ───────────────────────────────────────────── */
@@ -154,12 +168,8 @@ body {
 #root {
   width: 100%;
   min-height: 100vh;
-  /* Warm dark gradient — deep charcoal base with subtle taupe warmth top-right and a hint of muted teal bottom-left */
-  background:
-    radial-gradient(ellipse 70% 50% at 85% 5%,  rgba(154, 129, 116, 0.18) 0%, transparent 60%),
-    radial-gradient(ellipse 60% 45% at 10% 95%, rgba(90,  80,  110, 0.14) 0%, transparent 55%),
-    radial-gradient(ellipse 80% 60% at 50% 50%, rgba(28,  22,  30,  0.9)  0%, transparent 100%),
-    #050206;
+  /* Background gradient adapted by theme */
+  background: var(--root-gradient);
   position: relative;
   overflow-x: hidden;
 }
@@ -221,21 +231,21 @@ input, textarea, select {
 
 /* ── Cards ──────────────────────────────────────────────────── */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-surface);
   backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
   -webkit-backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
-  border: 1px solid rgba(154, 129, 116, 0.15);
+  border: 1px solid var(--glass-border);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--glass-surface);
   backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
   -webkit-backdrop-filter: url(#liquid-glass) brightness(1.15) contrast(1.05);
-  border: 1px solid rgba(154, 129, 116, 0.15);
+  border: 1px solid var(--glass-border);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.25);
   border-radius: var(--radius-lg);
-  transition: transform var(--transition-normal) var(--ease-out);
+  transition: transform var(--transition-normal) var(--ease-out), background-color var(--transition-theme) ease, border-color var(--transition-theme) ease;
 }
 
 .glass-card:active {
@@ -244,10 +254,10 @@ input, textarea, select {
 
 /* ── Bottom Nav ─────────────────────────────────────────────── */
 .bottom-nav {
-  background: rgba(10, 8, 12, 0.7);
+  background: var(--glass-nav);
   backdrop-filter: url(#liquid-glass) brightness(1.1) contrast(1.05);
   -webkit-backdrop-filter: url(#liquid-glass) brightness(1.1) contrast(1.05);
-  border: 1px solid rgba(154, 129, 116, 0.12);
+  border: 1px solid var(--glass-border);
   box-shadow: 0 -2px 20px rgba(0, 0, 0, 0.3);
 }
 
