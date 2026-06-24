@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useModalAnimation } from '../hooks/useModalAnimation'
-import { SectionRule, Kicker, InitialsAvatar, PlusIcon, CheckIcon, XIcon } from '../components/RoomyUI'
+import { SectionRule, Kicker, PlusIcon, XIcon } from '../components/RoomyUI'
 import PillNav from '../components/PillNav'
 
 // ─── Emoji dictionary ────────────────────────────────────────────────────────
@@ -326,7 +326,8 @@ export default function Groceries() {
   const checked = shoppingItems.filter(i => i.is_checked)
 
   return (
-    <div style={{ paddingTop: 16 }}>
+    <div style={{ paddingTop: 16, position: 'relative' }}>
+      <div className="page-content">
       <AnimatePresence>
         {showModal && (
           <AddItemModal
@@ -474,8 +475,13 @@ export default function Groceries() {
           <div style={{
             fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.2em', textTransform: 'uppercase',
             color: 'var(--cream-faint)', marginTop: 28, paddingTop: 18,
-            borderTop: '1px solid var(--border)', textAlign: 'center',
+            borderTop: '1px solid var(--border)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
           }}>
+            <span style={{ position: 'relative', width: 6, height: 6, flexShrink: 0 }}>
+              <span style={{ position: 'absolute', inset: 0, borderRadius: 999, background: 'var(--color-success)' }} />
+              <span style={{ position: 'absolute', inset: 0, borderRadius: 999, background: 'var(--color-success)', animation: 'live-pulse 2s var(--ease-out) infinite' }} />
+            </span>
             Live-synced · shared list
           </div>
         </>
@@ -531,6 +537,7 @@ export default function Groceries() {
       >
         <PlusIcon size={22} stroke={2} />
       </button>
+      </div>
     </div>
   )
 }
@@ -590,11 +597,11 @@ function GroceryRow({ item, isMe, onToggle, onDelete, onEdit, isLast, isLowStock
           </div>
         )}
         {isLowStock && (
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.14em', color: 'var(--accent-soft)' }}>· reorder</span>
+          <span className="badge badge-orange" style={{ marginTop: 4 }}>Reorder</span>
         )}
       </div>
 
-      <div style={{ width: 20, height: 20, borderRadius: 999, background: isMe ? '#3B3B3B' : 'var(--accent)', flexShrink: 0, opacity: isLowStock ? 0 : 1 }} />
+      <div style={{ width: 20, height: 20, borderRadius: 999, background: isMe ? 'var(--color-surface-3)' : 'var(--accent)', flexShrink: 0, opacity: isLowStock ? 0 : 1 }} />
 
       <button onClick={isLowStock ? undefined : onEdit} style={{ color: 'var(--cream-faint)', background: 'none', border: 'none', cursor: isLowStock ? 'default' : 'pointer', padding: 2, flexShrink: 0, opacity: isLowStock ? 0 : 0.7 }}>
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M14 4l6 6L9 21H3v-6L14 4z"/></svg>
@@ -623,8 +630,11 @@ function InventoryRow({ item, isLast, onIncrement, onDecrement, onDelete }) {
           <span style={{ marginRight: 6, fontSize: 'var(--text-base)' }}>{getGroceryEmoji(item.item_name)}</span>
           {item.item_name}
         </div>
-        <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', color: isLow ? 'var(--accent-soft)' : 'var(--cream-faint)', marginTop: 2, letterSpacing: '0.1em' }}>
-          {isLow ? 'Low stock — ' : ''}{count} in stock
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
+          {isLow && <span className="badge badge-orange">Low</span>}
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', color: 'var(--cream-faint)', letterSpacing: '0.1em' }}>
+            {count} in stock
+          </span>
         </div>
       </div>
       <button onClick={onDecrement} disabled={count <= 0}

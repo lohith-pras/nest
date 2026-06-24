@@ -35,7 +35,7 @@ export default function More() {
             {profile?.full_name || 'Loading…'}
           </div>
           <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', marginTop: 3 }}>
-            Roommate
+            {profile?.email || 'Your account'}
           </div>
         </div>
       </div>
@@ -80,7 +80,7 @@ export default function More() {
         fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.2em', textTransform: 'uppercase',
         color: 'var(--cream-faint)', marginTop: 28, textAlign: 'center', paddingBottom: 8,
       }}>
-        Roomy · Issue 47
+        Nest · Shared living
       </div>
     </div>
   )

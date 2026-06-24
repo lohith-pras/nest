@@ -3,7 +3,7 @@
 export const InitialsAvatar = ({ initials = '?', isMe = true, size = 28, ring }) => (
   <div style={{
     width: size, height: size, borderRadius: 999,
-    background: isMe ? '#3B3B3B' : 'var(--accent)',
+    background: isMe ? 'var(--color-surface-3)' : 'var(--accent)',
     color: '#fff',
     display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
     fontFamily: 'var(--font-body)', fontWeight: 600,

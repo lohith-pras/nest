@@ -12,7 +12,6 @@ import Settings from './pages/Settings'
 import More from './pages/More'
 import Landing from './pages/Landing'
 import AmbientBackground from './components/AmbientBackground'
-import LiquidFilterDef from './components/LiquidFilterDef'
 
 function ProtectedRoute({ children }) {
   const { session, loading } = useAuth()
@@ -31,7 +30,6 @@ export default function App() {
   return (
     <>
       <AmbientBackground />
-      <LiquidFilterDef />
       <Routes>
         <Route path="/welcome" element={<Landing />} />
         <Route path="/login" element={<Login />} />
