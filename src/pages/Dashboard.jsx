@@ -40,7 +40,7 @@ function CheckCircleIcon({ checked }) {
         d="M8 12.5l3 3 5-5"
         initial={{ pathLength: 0, opacity: 0 }}
         animate={{ pathLength: checked ? 1 : 0, opacity: checked ? 1 : 0 }}
-        transition={{ type: 'spring', bounce: 0.4, duration: 0.5 }}
+        transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
       />
     </svg>
   )
@@ -70,7 +70,7 @@ function GroceriesModal({ onClose, groceries, onToggle }) {
         initial={{ opacity: 0, y: 16, scale: 0.95 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         exit={{ opacity: 0, y: 12, scale: 0.98 }}
-        transition={{ type: "spring", bounce: 0.4, duration: 0.5 }}
+        transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20, flexShrink: 0 }}>
           <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', letterSpacing: '-0.02em', color: 'var(--cream)' }}>
@@ -166,23 +166,32 @@ export default function Dashboard() {
   const nextEvent = events[0] || null
 
   return (
-    <div style={{ paddingTop: 4, paddingBottom: 24 }}>
+    <div style={{ paddingTop: 4, paddingBottom: 24, position: 'relative' }}>
+
+      <div className="page-content">
 
       <AnimatePresence>
         {showGroceriesModal && (
-          <GroceriesModal 
-            onClose={() => setShowGroceriesModal(false)} 
-            groceries={groceries} 
-            onToggle={toggleGrocery} 
+          <GroceriesModal
+            onClose={() => setShowGroceriesModal(false)}
+            groceries={groceries}
+            onToggle={toggleGrocery}
           />
         )}
       </AnimatePresence>
 
       {/* ── Header row ─────────────────────────────────────────── */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-        <StarIcon />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <StarIcon />
+          <span style={{
+            fontFamily: 'var(--font-display)', fontSize: 'var(--text-xl)',
+            fontWeight: 600, letterSpacing: '-0.03em', color: 'var(--cream)',
+          }}>Nest.</span>
+        </div>
         <button
           onClick={() => navigate('/more')}
+          aria-label="More"
           style={{
             width: 40, height: 40, borderRadius: 999,
             background: 'var(--input-bg)',
@@ -198,14 +207,14 @@ export default function Dashboard() {
       {/* ── Greeting ───────────────────────────────────────────── */}
       <div style={{ marginBottom: 22 }}>
         <p style={{
-          fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
-          color: 'var(--cream-dim)', margin: 0, letterSpacing: '0.01em',
+          fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)',
+          color: 'var(--cream-faint)', margin: 0, letterSpacing: '0.2em', textTransform: 'uppercase',
         }}>
-          Welcome home,
+          Welcome home
         </p>
         <h1 style={{
           fontFamily: 'var(--font-display)', fontSize: 'clamp(40px, 12vw, 56px)',
-          fontWeight: 600, lineHeight: 1, margin: '4px 0 0',
+          fontWeight: 600, lineHeight: 1, margin: '6px 0 0',
           color: 'var(--cream)', letterSpacing: '-0.03em',
         }}>
           {firstName}
@@ -237,24 +246,24 @@ export default function Dashboard() {
           {owedToMe >= 0 ? 'Owed to you' : 'You owe'}
         </p>
 
-        <div style={{
-          fontFamily: 'var(--font-display)', fontSize: 'clamp(44px, 13vw, 60px)',
-          fontWeight: 600, lineHeight: 1, color: 'var(--cream)', letterSpacing: '-0.04em',
-          marginBottom: 6, display: 'flex', alignItems: 'center'
+        <div className="led-numeric" style={{
+          fontSize: 'clamp(46px, 14vw, 64px)',
+          color: 'var(--cream)',
+          marginBottom: 6, display: 'flex', alignItems: 'center',
         }}>
           <AnimatePresence mode="popLayout">
             {loading ? (
               <motion.span key="loading" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.15 }}>—</motion.span>
             ) : (
-              <motion.div 
+              <motion.div
                 key={`${wholeStr}-${centsStr}`}
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                transition={{ type: 'spring', bounce: 0.5, duration: 0.5 }}
+                transition={{ duration: 0.3, ease: [0.23, 1, 0.32, 1] }}
                 style={{ display: 'flex', alignItems: 'baseline' }}
               >
-                €{wholeStr}<span style={{ fontSize: '0.55em', color: 'var(--cream-dim)', verticalAlign: 'super', lineHeight: 0, marginLeft: 2 }}>{centsStr}</span>
+                €{wholeStr}<span style={{ fontSize: '0.5em', color: 'var(--cream-dim)', verticalAlign: 'super', lineHeight: 0, marginLeft: 2 }}>{centsStr}</span>
               </motion.div>
             )}
           </AnimatePresence>
@@ -427,6 +436,7 @@ export default function Dashboard() {
           )}
         </motion.button>
 
+      </div>
       </div>
     </div>
   )

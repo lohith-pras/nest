@@ -3,6 +3,9 @@ import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  // Honor an injected PORT (used by tooling/preview harnesses) without
+  // disturbing the default local dev port.
+  server: process.env.PORT ? { port: Number(process.env.PORT), strictPort: true } : undefined,
   plugins: [
     react(),
     VitePWA({

@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../context/AuthContext'
 import { useModalAnimation } from '../hooks/useModalAnimation'
-import { SectionRule, Kicker, InitialsAvatar, PlusIcon, ArrowRight } from '../components/RoomyUI'
+import { SectionRule, Kicker, InitialsAvatar, PlusIcon } from '../components/RoomyUI'
 import { SuccessOverlay } from '../components/SuccessOverlay'
 import PillNav from '../components/PillNav'
 
@@ -32,19 +32,40 @@ function getExpenseCategory(description) {
 
 // ─── Add / Edit Modal ─────────────────────────────────────────────────────────
 
-function Modal({ onClose, onSave, loading, initialData = null }) {
+function Modal({ onClose, onSave, loading, initialData = null, profiles = {}, myId }) {
   const overlayRef = useRef(null)
   const panelRef = useRef(null)
   const { handleClose } = useModalAnimation(overlayRef, panelRef, onClose)
 
+  const { session } = useAuth()
+  const meId = myId || session?.user?.id
+
+  // Roommate = the other profile in the unit (2-person household)
+  const roommateId = Object.keys(profiles).find(id => id !== meId) || null
+  const roommateName = roommateId ? (profiles[roommateId]?.split(' ')[0] || 'Roommate') : null
+
   const [desc, setDesc] = useState(initialData?.description || '')
   const [amount, setAmount] = useState(initialData?.amount || '')
-  const [splitType, setSplitType] = useState(initialData?.split_amount != null ? 'custom' : '5050')
+  const [paidBy, setPaidBy] = useState(initialData?.paid_by || meId)
+  // splitType: '5050' (each half) | 'payer' (payer covers all) | 'custom'
+  const initialSplitType = initialData
+    ? (initialData.split_amount == null ? '5050' : (initialData.split_amount === 0 ? 'payer' : 'custom'))
+    : '5050'
+  const [splitType, setSplitType] = useState(initialSplitType)
   const [splitAmount, setSplitAmount] = useState(initialData?.split_amount || '')
   const [receiptUrl, setReceiptUrl] = useState(initialData?.receipt_url || '')
   const [uploading, setUploading] = useState(false)
   const fileInputRef = useRef(null)
-  const { session } = useAuth()
+
+  // What the non-payer owes the payer, given the current selections.
+  const amt = parseFloat(amount) || 0
+  const otherOwes = splitType === '5050' ? amt / 2
+    : splitType === 'payer' ? 0
+    : (parseFloat(splitAmount) || 0)
+
+  // Balance impact from my perspective.
+  const paidByMe = paidBy === meId
+  const myDelta = paidByMe ? otherOwes : -otherOwes  // + = I'm owed, − = I owe
 
   async function handleFileUpload(e) {
     const file = e.target.files[0]
@@ -69,11 +90,18 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
   function submit(e) {
     e.preventDefault()
     if (!desc || !amount) return
+    // split_amount = what the non-payer owes the payer.
+    //   '5050'  → null  (each owes amount/2, the app default)
+    //   'payer' → 0     (payer covers everything)
+    //   'custom'→ entered value
+    const split_amount = splitType === '5050' ? null
+      : splitType === 'payer' ? 0
+      : (splitAmount ? parseFloat(splitAmount) : null)
     const payload = {
       description: desc, amount: parseFloat(amount),
-      paid_by: initialData ? initialData.paid_by : session.user.id,
+      paid_by: paidBy || meId,
       status: initialData ? initialData.status : 'pending',
-      split_amount: splitType === 'custom' && splitAmount ? parseFloat(splitAmount) : null,
+      split_amount,
       receipt_url: receiptUrl || null,
     }
     onSave(payload, initialData?.id, handleClose)
@@ -107,23 +135,70 @@ function Modal({ onClose, onSave, loading, initialData = null }) {
             <label style={labelStyle}>Total Amount (€)</label>
             <input style={fieldStyle} type="number" min="0.01" step="0.01" value={amount} onChange={e => setAmount(e.target.value)} placeholder="0.00" required />
           </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            {['5050', 'custom'].map(s => (
-              <button key={s} type="button" onClick={() => setSplitType(s)} style={{
-                flex: 1, padding: '8px', borderRadius: 999, fontSize: 'var(--text-xs)',
-                fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
-                background: splitType === s ? 'var(--cream)' : 'transparent',
-                color: splitType === s ? 'var(--primary-fg)' : 'var(--cream-faint)',
-                border: splitType === s ? 'none' : '1px solid var(--border-rule)',
-              }}>
-                {s === '5050' ? '50 / 50 Split' : 'Custom Split'}
-              </button>
-            ))}
+
+          {/* Paid by — who fronted the money */}
+          {roommateId && (
+            <div>
+              <label style={labelStyle}>Paid by</label>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {[{ id: meId, label: 'You' }, { id: roommateId, label: roommateName }].map(p => (
+                  <button key={p.id} type="button" onClick={() => setPaidBy(p.id)} style={{
+                    flex: 1, padding: '8px', borderRadius: 999, fontSize: 'var(--text-xs)',
+                    fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer',
+                    background: paidBy === p.id ? 'var(--cream)' : 'transparent',
+                    color: paidBy === p.id ? 'var(--primary-fg)' : 'var(--cream-faint)',
+                    border: paidBy === p.id ? 'none' : '1px solid var(--border-rule)',
+                  }}>
+                    {p.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Split type */}
+          <div>
+            <label style={labelStyle}>Split</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              {[
+                { id: '5050', label: '50 / 50' },
+                { id: 'payer', label: paidByMe ? 'You pay all' : `${roommateName || 'They'} pay all` },
+                { id: 'custom', label: 'Custom' },
+              ].map(s => (
+                <button key={s.id} type="button" onClick={() => setSplitType(s.id)} style={{
+                  flex: 1, padding: '8px 6px', borderRadius: 999, fontSize: 'var(--text-xs)',
+                  fontFamily: 'var(--font-body)', fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap',
+                  background: splitType === s.id ? 'var(--cream)' : 'transparent',
+                  color: splitType === s.id ? 'var(--primary-fg)' : 'var(--cream-faint)',
+                  border: splitType === s.id ? 'none' : '1px solid var(--border-rule)',
+                }}>
+                  {s.label}
+                </button>
+              ))}
+            </div>
           </div>
+
           {splitType === 'custom' && (
             <div>
-              <label style={labelStyle}>Amount owed to payer (€)</label>
+              <label style={labelStyle}>{paidByMe ? `${roommateName || 'They'} owe you (€)` : 'You owe (€)'}</label>
               <input style={fieldStyle} type="number" min="0" step="0.01" value={splitAmount} onChange={e => setSplitAmount(e.target.value)} placeholder="0.00" required />
+            </div>
+          )}
+
+          {/* Live balance preview */}
+          {amt > 0 && (
+            <div style={{
+              fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
+              color: myDelta === 0 ? 'var(--cream-faint)' : myDelta > 0 ? 'var(--accent-soft)' : 'var(--cream-dim)',
+              background: 'var(--input-bg)', borderRadius: 'var(--radius-md)',
+              padding: '10px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <span>{myDelta > 0 ? "You'll get back" : myDelta < 0 ? 'You owe' : 'Even split — nothing owed'}</span>
+              {myDelta !== 0 && (
+                <span className="led-numeric" style={{ fontSize: 'var(--text-lg)', color: 'var(--cream)' }}>
+                  €{Math.abs(myDelta).toFixed(2)}
+                </span>
+              )}
             </div>
           )}
           <div>
@@ -281,7 +356,7 @@ export default function Expenses() {
   })
   const prevMonthCats = {}
   prevMonthExpenses.forEach(e => {
-    const { label, emoji } = getExpenseCategory(e.description)
+    const { label } = getExpenseCategory(e.description)
     prevMonthCats[label] = (prevMonthCats[label] || 0) + e.amount
   })
   const topPrevCat = Object.entries(prevMonthCats).sort((a, b) => b[1] - a[1])[0]
@@ -303,33 +378,36 @@ export default function Expenses() {
   const uniqueSpenders = Object.keys(spendingByUser)
 
   return (
-    <div style={{ paddingTop: 16 }}>
+    <div style={{ paddingTop: 16, position: 'relative' }}>
       <SuccessOverlay show={showSuccess} onComplete={() => setShowSuccess(false)} />
-      <AnimatePresence>
-        {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveExpense} loading={saving} initialData={editData} />}
-      </AnimatePresence>
 
+      <div className="page-content">
+      <AnimatePresence>
+        {showModal && <Modal onClose={() => setShowModal(false)} onSave={saveExpense} loading={saving} initialData={editData} profiles={profiles} myId={myId} />}
+      </AnimatePresence>
 
       <div style={{ marginTop: 18 }}>
         <Kicker>The ledger</Kicker>
-        <h1 style={{
-          fontFamily: 'var(--font-display)', fontSize: 'clamp(34px, 10vw, 44px)',
-          lineHeight: 0.95, margin: '8px 0 0', letterSpacing: '-0.025em', color: 'var(--cream)',
+        <div className="led-numeric" style={{
+          fontSize: 'clamp(48px, 15vw, 68px)', margin: '10px 0 0',
+          color: net >= 0 ? 'var(--cream)' : 'var(--accent-soft)',
         }}>
-          {net >= 0 ? "You're " : "You owe "}
-          <span style={{ fontStyle: 'italic', color: 'var(--accent-soft)' }}>
-            {net >= 0 ? 'up' : ''} €{wholeStr}{centsStr}
-          </span>
-          {net >= 0 ? ' ahead.' : '.'}
-        </h1>
+          {net < 0 ? '−' : ''}€{wholeStr}<span style={{ fontSize: '0.5em', color: 'var(--cream-dim)', verticalAlign: 'super', lineHeight: 0, marginLeft: 2 }}>{centsStr}</span>
+        </div>
+        <p style={{
+          fontFamily: 'var(--font-body)', fontSize: 'var(--text-sm)',
+          color: 'var(--cream-dim)', margin: '6px 0 0',
+        }}>
+          {net > 0 ? 'in your favor · settled weekly' : net < 0 ? 'you owe · settled weekly' : 'all square'}
+        </p>
       </div>
 
       <PillNav />
 
       {/* Stat row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 6, marginTop: 22, borderTop: '1px solid var(--border-rule)', paddingTop: 14 }}>
-        <StatCell kicker="Owed to you" amount={`€${owedToMe.toFixed(2)}`} />
-        <StatCell kicker="You owe" amount={`€${iOwe.toFixed(2)}`} />
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginTop: 22 }}>
+        <StatCell kicker="To receive" amount={`€${owedToMe.toFixed(2)}`} />
+        <StatCell kicker="To pay" amount={`€${iOwe.toFixed(2)}`} />
         <StatCell kicker="Pending" amount={String(pending.length)} />
       </div>
 
@@ -424,7 +502,7 @@ export default function Expenses() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                         <div style={{
                           width: 26, height: 26, borderRadius: 999,
-                          background: isMe ? '#3B3B3B' : 'var(--accent)',
+                          background: isMe ? 'var(--color-surface-3)' : 'var(--accent)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontFamily: 'var(--font-body)', fontSize: 'var(--text-overline)', fontWeight: 700, color: 'var(--cream)',
                         }}>{initials}</div>
@@ -521,6 +599,7 @@ export default function Expenses() {
         </motion.div>
       )}
       </AnimatePresence>
+      </div>
     </div>
   )
 }
@@ -529,9 +608,9 @@ export default function Expenses() {
 
 function StatCell({ kicker, amount }) {
   return (
-    <div>
-      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>{kicker}</div>
-      <div style={{ fontFamily: 'var(--font-display)', fontSize: 'var(--text-2xl)', color: 'var(--cream)', lineHeight: 1, marginTop: 4, letterSpacing: '-0.02em' }}>{amount}</div>
+    <div className="glass-card" style={{ padding: '12px 12px 14px', borderRadius: 'var(--radius-md)' }}>
+      <div style={{ fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.16em', textTransform: 'uppercase', color: 'var(--cream-faint)' }}>{kicker}</div>
+      <div className="led-numeric" style={{ fontSize: 'var(--text-xl)', color: 'var(--cream)', marginTop: 6 }}>{amount}</div>
     </div>
   )
 }
@@ -540,9 +619,13 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, isLast 
   const paidByMe = exp.paid_by === myId
   const payer = profiles[exp.paid_by] || 'Someone'
   const payerInitials = payer.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()
-  const each = exp.split_amount != null ? exp.split_amount.toFixed(2) : (exp.amount / 2).toFixed(2)
-  const youGet = paidByMe ? parseFloat(each) : -parseFloat(each)
+  const otherOwes = exp.split_amount != null ? exp.split_amount : exp.amount / 2
+  const youGet = paidByMe ? otherOwes : -otherOwes
   const { emoji } = getExpenseCategory(exp.description)
+  // Human-readable split label
+  const splitLabel = exp.split_amount == null ? 'split 50/50'
+    : exp.split_amount === 0 ? (paidByMe ? 'you covered it' : `${payer.split(' ')[0]} covered it`)
+    : `custom split`
 
   return (
     <motion.div
@@ -571,7 +654,7 @@ function ExpenseRow({ exp, profiles, myId, onMarkPaid, onDelete, onEdit, isLast 
           )}
         </div>
         <div style={{ fontFamily: 'var(--font-body)', fontSize: 'var(--text-xs)', color: 'var(--cream-faint)', marginTop: 3, display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
-          {paidByMe ? 'You paid' : `${payer.split(' ')[0]} paid`} · split 50/50
+          {paidByMe ? 'You paid' : `${payer.split(' ')[0]} paid`} · {splitLabel}
           {exp.status === 'paid' && (
             <span style={{ padding: '1px 6px', borderRadius: 999, background: 'rgba(129,199,132,0.15)', fontFamily: 'var(--font-mono)', fontSize: 'var(--text-overline)', letterSpacing: '0.1em', textTransform: 'uppercase', color: '#81c784' }}>Settled</span>
           )}

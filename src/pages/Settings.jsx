@@ -9,7 +9,7 @@ export default function Settings() {
   const [avatarUrl, setAvatarUrl] = useState('')
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
-  const [isDarkMode, setIsDarkMode] = useState(() => document.documentElement.classList.contains('dark'))
+  const [isDarkMode, setIsDarkMode] = useState(() => !document.documentElement.classList.contains('light'))
 
   useEffect(() => {
     if (profile) {
@@ -19,13 +19,13 @@ export default function Settings() {
   }, [profile])
 
   function toggleDarkMode() {
-    const isDark = document.documentElement.classList.contains('dark')
+    const isDark = !document.documentElement.classList.contains('light')
     if (isDark) {
-      document.documentElement.classList.remove('dark')
+      document.documentElement.classList.add('light')
       localStorage.setItem('theme', 'light')
       setIsDarkMode(false)
     } else {
-      document.documentElement.classList.add('dark')
+      document.documentElement.classList.remove('light')
       localStorage.setItem('theme', 'dark')
       setIsDarkMode(true)
     }
